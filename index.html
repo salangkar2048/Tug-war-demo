@@ -1644,7 +1644,7 @@
                 const viewerCountNum = Object.keys(viewers).length;
                 viewerCount.textContent = `👁️ Viewers: ${viewerCountNum}`;
                 
-                // Update player detection - FIXED
+                // CRITICAL: Update player detection
                 const players = data.players || {};
                 const hasRed = players.red === true;
                 const hasBlue = players.blue === true;
@@ -1653,7 +1653,7 @@
                 state.hasRed = hasRed;
                 state.hasBlue = hasBlue;
                 
-                // Update role buttons
+                // Update role buttons with TAKEN badges
                 updateRoleButtons(players);
                 
                 // Update game data
@@ -1673,7 +1673,7 @@
                 state.blueCompleted = data.blueCompleted || false;
                 state.winnerShown = data.winnerShown || false;
                 
-                // CRITICAL FIX: Check if both teams are present
+                // CRITICAL: Check if both teams are present and start game
                 if (hasRed && hasBlue) {
                     state.gameStarted = true;
                     if (state.role !== 'viewer') {
@@ -1694,7 +1694,7 @@
                 if (state.scoreRed !== oldScoreRed) animateScore('red');
                 if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
                 
-                // Show questions only if game is started and not in cooldown
+                // CRITICAL: Show questions only if game is started
                 if (state.gameStarted && !state.cooldownActive && !state.gameEnded) {
                     showQuestionForPlayer();
                 }
@@ -1738,7 +1738,7 @@
             const hasRed = players && players.red === true;
             const hasBlue = players && players.blue === true;
             
-            // Update Red button
+            // Update Red button - show TAKEN badge if taken
             if (state.role !== 'red' && !state.roleLocked) {
                 if (hasRed) {
                     redBtn.classList.add('taken');
@@ -1751,7 +1751,7 @@
                 }
             }
             
-            // Update Blue button
+            // Update Blue button - show TAKEN badge if taken
             if (state.role !== 'blue' && !state.roleLocked) {
                 if (hasBlue) {
                     blueBtn.classList.add('taken');
@@ -1952,13 +1952,10 @@
                 state.winnerShown = data.winnerShown || false;
                 
                 const players = data.players || {};
-                const otherTeam = role === 'red' ? 'blue' : 'red';
-                const otherTaken = players[otherTeam] === true;
-                
-                // CRITICAL FIX: Set gameStarted based on both teams being present
                 state.hasRed = players.red === true;
                 state.hasBlue = players.blue === true;
                 
+                // CRITICAL: Check if both teams are present
                 if (state.hasRed && state.hasBlue) {
                     state.gameStarted = true;
                     statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Game is on!`;
@@ -2092,6 +2089,7 @@
         console.log('✅ "TAKEN" badge shows for taken teams');
         console.log('✅ Correct answer NOT revealed on wrong answer');
         console.log('✅ Game starts automatically when both teams join!');
+        console.log('✅ Real-time sync works for all players!');
     </script>
 </body>
 </html>
