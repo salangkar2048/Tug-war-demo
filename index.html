@@ -26,7 +26,7 @@
             padding: 16px;
         }
         .container {
-            max-width: 800px;
+            max-width: 850px;
             width: 100%;
             background: #1a2f44;
             border-radius: 40px;
@@ -59,47 +59,47 @@
             margin-bottom: 20px;
             box-shadow: 0 4px 0 #b38f40;
         }
-        .team-select {
+        .role-select {
             display: flex;
-            gap: 16px;
+            gap: 12px;
             justify-content: center;
             margin-bottom: 20px;
             flex-wrap: wrap;
         }
-        .team-btn {
+        .role-btn {
             background: #2c4b66;
             border: 3px solid #3d6485;
             border-radius: 40px;
-            padding: 16px 32px;
-            font-size: 1.2rem;
+            padding: 14px 24px;
+            font-size: 1rem;
             font-weight: 700;
             color: #fff;
             cursor: pointer;
             transition: 0.2s;
             flex: 1;
-            min-width: 120px;
-            max-width: 200px;
+            min-width: 100px;
+            max-width: 180px;
             position: relative;
         }
-        .team-btn:active {
+        .role-btn:active {
             transform: scale(0.96);
         }
-        .team-btn.selected {
+        .role-btn.selected {
             border-color: #f9d976;
             background: #3d6485;
             box-shadow: 0 0 20px #f9d97644;
         }
-        .team-btn:disabled {
+        .role-btn:disabled {
             opacity: 0.5;
             cursor: not-allowed;
             transform: none;
         }
-        .team-btn.taken {
+        .role-btn.taken {
             opacity: 0.3;
             cursor: not-allowed;
             border-color: #c94a4a;
         }
-        .team-btn .taken-badge {
+        .role-btn .taken-badge {
             position: absolute;
             top: -10px;
             right: -10px;
@@ -109,6 +109,15 @@
             padding: 4px 8px;
             font-size: 0.7rem;
             font-weight: 700;
+        }
+        .role-btn.viewer {
+            border-color: #6a8aaa;
+            background: #1a3a55;
+        }
+        .role-btn.viewer.selected {
+            border-color: #6a8aaa;
+            background: #2a5a7a;
+            box-shadow: 0 0 20px #6a8aaa44;
         }
         .game-area {
             display: none;
@@ -130,6 +139,12 @@
             border-radius: 30px;
             min-width: 100px;
         }
+        .team-name.red {
+            border-left: 4px solid #ff4444;
+        }
+        .team-name.blue {
+            border-right: 4px solid #4488ff;
+        }
         .score {
             background: #00000033;
             padding: 8px 24px;
@@ -141,6 +156,8 @@
         .score.pop {
             animation: pop 0.3s ease;
         }
+        .score.red-score { color: #ff6b6b; }
+        .score.blue-score { color: #6baaff; }
         @keyframes pop {
             0% { transform: scale(1); }
             50% { transform: scale(1.3); background: #f9d97633; }
@@ -151,6 +168,7 @@
             border-radius: 60px;
             padding: 16px 10px;
             margin: 16px 0;
+            position: relative;
         }
         canvas {
             width: 100%;
@@ -159,6 +177,15 @@
             border-radius: 30px;
             background: #1d3850;
             touch-action: none;
+            cursor: pointer;
+        }
+        .tug-labels {
+            display: flex;
+            justify-content: space-between;
+            padding: 0 10px;
+            margin-top: -5px;
+            font-size: 0.8rem;
+            opacity: 0.6;
         }
         .question-box {
             background: #0e1f30;
@@ -327,10 +354,15 @@
             margin-top: 10px;
             flex-wrap: wrap;
         }
+        .viewer-count {
+            font-size: 0.8rem;
+            opacity: 0.6;
+            margin-top: 6px;
+        }
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
             .options-grid { grid-template-columns: 1fr; }
-            .team-btn { min-width: 100px; padding: 12px 20px; font-size: 1rem; }
+            .role-btn { min-width: 80px; padding: 10px 16px; font-size: 0.9rem; }
         }
     </style>
 </head>
@@ -348,19 +380,20 @@
         <!-- Fixed PIN Display -->
         <div class="pin-display">🔑 55555</div>
         
-        <!-- Team Selection -->
+        <!-- Role Selection -->
         <div class="join-instruction">
-            👥 Two players needed: One chooses <strong>Team A</strong>, the other chooses <strong>Team B</strong>
+            🎯 Choose your role: <strong>Team Red</strong>, <strong>Team Blue</strong>, or <strong>👁️ Viewer</strong>
         </div>
-        <div class="team-select" id="teamSelect">
-            <button class="team-btn" id="teamAbtn">🟦 Team A</button>
-            <button class="team-btn" id="teamBbtn">🟥 Team B</button>
+        <div class="role-select" id="roleSelect">
+            <button class="role-btn" id="redBtn">🔴 Team Red</button>
+            <button class="role-btn" id="blueBtn">🔵 Team Blue</button>
+            <button class="role-btn viewer" id="viewerBtn">👁️ Viewer</button>
         </div>
 
         <!-- Admin Actions -->
         <div class="admin-actions">
             <button class="btn success" id="forceResetBtn" style="font-size:0.9rem; padding:8px 16px;">
-                🔄 Force Reset (Clear All)
+                🔄 Force Reset
             </button>
             <button class="btn secondary" id="leaveBtn" style="font-size:0.9rem; padding:8px 16px;">
                 🚪 Leave Game
@@ -370,15 +403,20 @@
         <!-- Game Area -->
         <div class="game-area" id="gameArea">
             <div class="team-row">
-                <span class="team-name" id="teamAName">🟦 Team A</span>
-                <span class="score" id="scoreA">0</span>
+                <span class="team-name red" id="redName">🔴 Team Red</span>
+                <span class="score red-score" id="scoreRed">0</span>
                 <span style="font-size:1.8rem;">⚔️</span>
-                <span class="score" id="scoreB">0</span>
-                <span class="team-name" id="teamBName">🟥 Team B</span>
+                <span class="score blue-score" id="scoreBlue">0</span>
+                <span class="team-name blue" id="blueName">🔵 Team Blue</span>
             </div>
 
             <div class="tug-canvas-wrap">
-                <canvas id="tugCanvas" width="600" height="120"></canvas>
+                <canvas id="tugCanvas" width="700" height="140"></canvas>
+                <div class="tug-labels">
+                    <span>🔴 Team Red</span>
+                    <span>⚡ PULL!</span>
+                    <span>🔵 Team Blue</span>
+                </div>
             </div>
 
             <div class="question-box" id="questionDisplay">Waiting for game to start...</div>
@@ -391,9 +429,10 @@
 
             <div class="footer-btns">
                 <button class="btn secondary" id="nextQuestionBtn" style="display:none;">⏩ Next Question</button>
-                <span class="player-badge" id="playerDisplay">👤 Team: —</span>
+                <span class="player-badge" id="playerDisplay">👤 Role: —</span>
             </div>
             <div class="online-status" id="onlineStatus">🔄 Connecting...</div>
+            <div class="viewer-count" id="viewerCount">👁️ Viewers: 0</div>
         </div>
     </div>
 
@@ -448,32 +487,33 @@
         // GAME STATE
         // ============================================
         const state = {
-            playerId: null,
+            role: null, // 'red', 'blue', or 'viewer'
             questions: [],
-            scoreA: 0,
-            scoreB: 0,
-            tugProgress: 50,
-            teamA_questionIdx: 0,
-            teamB_questionIdx: 0,
+            scoreRed: 0,
+            scoreBlue: 0,
+            tugProgress: 50, // 0 = Red wins, 100 = Blue wins
+            red_questionIdx: 0,
+            blue_questionIdx: 0,
             answering: false,
             gameStarted: false,
             connected: false,
             listeners: {},
-            isJoining: false
+            isJoining: false,
+            isViewer: false
         };
 
         // ============================================
         // DOM REFS
         // ============================================
         const $ = id => document.getElementById(id);
-        const teamAbtn = $('teamAbtn');
-        const teamBbtn = $('teamBbtn');
-        const teamSelect = $('teamSelect');
+        const redBtn = $('redBtn');
+        const blueBtn = $('blueBtn');
+        const viewerBtn = $('viewerBtn');
         const gameArea = $('gameArea');
-        const teamAName = $('teamAName');
-        const teamBName = $('teamBName');
-        const scoreA = $('scoreA');
-        const scoreB = $('scoreB');
+        const redName = $('redName');
+        const blueName = $('blueName');
+        const scoreRed = $('scoreRed');
+        const scoreBlue = $('scoreBlue');
         const tugCanvas = $('tugCanvas');
         const ctx = tugCanvas.getContext('2d');
         const questionDisplay = $('questionDisplay');
@@ -485,45 +525,200 @@
         const loadingOverlay = $('loadingOverlay');
         const forceResetBtn = $('forceResetBtn');
         const leaveBtn = $('leaveBtn');
+        const viewerCount = $('viewerCount');
 
         // ============================================
-        // CANVAS DRAWING
+        // CANVAS DRAWING - INTERACTIVE TUG OF WAR
         // ============================================
+        let isDragging = false;
+        let dragProgress = 50;
+
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
+
+            // Background
             const grad = ctx.createLinearGradient(0, 0, w, 0);
-            grad.addColorStop(0, '#2a6f8f');
-            grad.addColorStop(0.5, '#4a8aaa');
-            grad.addColorStop(1, '#2a6f8f');
+            grad.addColorStop(0, '#1a2a3a');
+            grad.addColorStop(0.5, '#2a4a5a');
+            grad.addColorStop(1, '#1a2a3a');
             ctx.fillStyle = grad;
             ctx.beginPath();
-            ctx.roundRect(10, 30, w-20, 50, 25);
+            ctx.roundRect(10, 25, w-20, 70, 35);
             ctx.fill();
 
-            const ropeX = 10 + (progress / 100) * (w - 20 - 40);
-            ctx.fillStyle = '#c9a87c';
+            // Center line
+            ctx.strokeStyle = '#ffffff33';
+            ctx.lineWidth = 2;
+            ctx.setLineDash([8, 8]);
             ctx.beginPath();
-            ctx.roundRect(ropeX, 30, 40, 50, 12);
+            ctx.moveTo(w/2, 20);
+            ctx.lineTo(w/2, 100);
+            ctx.stroke();
+            ctx.setLineDash([]);
+
+            // Ground markers
+            for (let i = 0; i <= 20; i++) {
+                const x = 10 + (i / 20) * (w - 20);
+                ctx.fillStyle = i % 2 === 0 ? '#ffffff22' : '#ffffff11';
+                ctx.fillRect(x-1, 90, 2, 8);
+            }
+
+            // Rope - main body
+            const ropeX = 10 + (progress / 100) * (w - 20 - 60);
+            const ropeWidth = 60;
+            
+            // Rope shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 10;
+            
+            // Rope texture
+            ctx.shadowBlur = 0;
+            const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
+            ropeGrad.addColorStop(0, '#8a7a5a');
+            ropeGrad.addColorStop(0.3, '#c9b89a');
+            ropeGrad.addColorStop(0.5, '#d4c4a4');
+            ropeGrad.addColorStop(0.7, '#c9b89a');
+            ropeGrad.addColorStop(1, '#8a7a5a');
+            ctx.fillStyle = ropeGrad;
+            ctx.beginPath();
+            ctx.roundRect(ropeX, 35, ropeWidth, 50, 15);
             ctx.fill();
-            ctx.fillStyle = '#8b6b40';
-            ctx.font = 'bold 28px sans-serif';
+
+            // Rope texture lines
+            ctx.strokeStyle = '#6a5a3a';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 5; i++) {
+                const x = ropeX + 10 + i * 10;
+                ctx.beginPath();
+                ctx.moveTo(x, 38);
+                ctx.lineTo(x, 82);
+                ctx.stroke();
+            }
+
+            // Rope center knot
+            ctx.fillStyle = '#6a5a3a';
+            ctx.beginPath();
+            ctx.arc(ropeX + ropeWidth/2, 60, 10, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#8a7a5a';
+            ctx.beginPath();
+            ctx.arc(ropeX + ropeWidth/2, 60, 6, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Pull icon
+            ctx.shadowBlur = 0;
+            ctx.font = 'bold 24px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillText('⚡', ropeX+20, 55);
+            ctx.fillStyle = '#f9d976';
+            ctx.fillText('⚡', ropeX + ropeWidth/2, 61);
 
-            ctx.font = 'bold 16px sans-serif';
-            ctx.fillStyle = '#fff';
+            // Team labels with colors
+            ctx.font = 'bold 18px sans-serif';
+            ctx.textBaseline = 'middle';
+            
+            // Red team (left)
             ctx.textAlign = 'left';
-            ctx.fillText('A', 20, 110);
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillText('🔴 TEAM RED', 20, 130);
+            
+            // Blue team (right)
             ctx.textAlign = 'right';
-            ctx.fillText('B', w-20, 110);
+            ctx.fillStyle = '#6baaff';
+            ctx.fillText('🔵 TEAM BLUE', w-20, 130);
 
-            ctx.fillStyle = '#ffffff66';
-            for (let i = 0; i <= 10; i++) {
-                const x = 10 + (i / 10) * (w - 20);
-                ctx.fillRect(x-1, 20, 2, 12);
+            // Progress indicators
+            const redPercent = Math.max(0, 50 - progress);
+            const bluePercent = Math.max(0, progress - 50);
+            
+            ctx.font = 'bold 14px sans-serif';
+            ctx.textAlign = 'left';
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillText(`⬅ ${Math.round(redPercent * 2)}%`, 20, 20);
+            ctx.textAlign = 'right';
+            ctx.fillStyle = '#6baaff';
+            ctx.fillText(`${Math.round(bluePercent * 2)}% ➡`, w-20, 20);
+        }
+
+        // ============================================
+        // CANVAS INTERACTIVITY - DRAG TO PULL
+        // ============================================
+        function setupCanvasInteraction() {
+            const canvas = tugCanvas;
+            
+            function getProgressFromEvent(e) {
+                const rect = canvas.getBoundingClientRect();
+                const scaleX = canvas.width / rect.width;
+                let clientX;
+                
+                if (e.touches) {
+                    clientX = e.touches[0].clientX;
+                } else {
+                    clientX = e.clientX;
+                }
+                
+                const x = (clientX - rect.left) * scaleX;
+                return Math.max(0, Math.min(100, ((x - 10) / (canvas.width - 20 - 60)) * 100));
             }
+
+            function handleStart(e) {
+                if (state.role === 'viewer' || !state.role) return;
+                if (state.isJoining) return;
+                e.preventDefault();
+                isDragging = true;
+                const progress = getProgressFromEvent(e);
+                dragProgress = progress;
+                // Only update if player is on a team
+                if (state.role === 'red') {
+                    // Red pulls left (decrease progress)
+                    const newProgress = Math.max(0, state.tugProgress - (50 - progress) * 0.3);
+                    state.tugProgress = newProgress;
+                    updateUI();
+                    saveGameState();
+                } else if (state.role === 'blue') {
+                    // Blue pulls right (increase progress)
+                    const newProgress = Math.min(100, state.tugProgress + (progress - 50) * 0.3);
+                    state.tugProgress = newProgress;
+                    updateUI();
+                    saveGameState();
+                }
+            }
+
+            function handleMove(e) {
+                if (!isDragging) return;
+                e.preventDefault();
+                const progress = getProgressFromEvent(e);
+                dragProgress = progress;
+                
+                if (state.role === 'red') {
+                    const newProgress = Math.max(0, state.tugProgress - (50 - progress) * 0.3);
+                    state.tugProgress = newProgress;
+                    updateUI();
+                    saveGameState();
+                } else if (state.role === 'blue') {
+                    const newProgress = Math.min(100, state.tugProgress + (progress - 50) * 0.3);
+                    state.tugProgress = newProgress;
+                    updateUI();
+                    saveGameState();
+                }
+            }
+
+            function handleEnd(e) {
+                isDragging = false;
+            }
+
+            // Mouse events
+            canvas.addEventListener('mousedown', handleStart);
+            canvas.addEventListener('mousemove', handleMove);
+            canvas.addEventListener('mouseup', handleEnd);
+            canvas.addEventListener('mouseleave', handleEnd);
+
+            // Touch events
+            canvas.addEventListener('touchstart', handleStart, { passive: false });
+            canvas.addEventListener('touchmove', handleMove, { passive: false });
+            canvas.addEventListener('touchend', handleEnd, { passive: false });
+            canvas.addEventListener('touchcancel', handleEnd, { passive: false });
         }
 
         if (!CanvasRenderingContext2D.prototype.roundRect) {
@@ -548,39 +743,55 @@
         // UPDATE UI
         // ============================================
         function updateUI() {
-            scoreA.textContent = state.scoreA;
-            scoreB.textContent = state.scoreB;
+            scoreRed.textContent = state.scoreRed;
+            scoreBlue.textContent = state.scoreBlue;
             drawTug(state.tugProgress);
             
-            if (state.playerId === 'A') {
-                teamAName.textContent = '🟦 You (A)';
-                teamBName.textContent = '🟥 Opponent (B)';
-                playerDisplay.textContent = '👤 Team: A';
-                teamAbtn.classList.add('selected');
-                teamBbtn.classList.remove('selected');
-                teamAbtn.disabled = true;
-                teamBbtn.disabled = false;
-            } else if (state.playerId === 'B') {
-                teamAName.textContent = '🟦 Opponent (A)';
-                teamBName.textContent = '🟥 You (B)';
-                playerDisplay.textContent = '👤 Team: B';
-                teamBbtn.classList.add('selected');
-                teamAbtn.classList.remove('selected');
-                teamBbtn.disabled = true;
-                teamAbtn.disabled = false;
+            if (state.role === 'red') {
+                redName.textContent = '🔴 You (Red)';
+                blueName.textContent = '🔵 Opponent (Blue)';
+                playerDisplay.textContent = '👤 Role: Red Team';
+                redBtn.classList.add('selected');
+                blueBtn.classList.remove('selected');
+                viewerBtn.classList.remove('selected');
+                redBtn.disabled = true;
+                blueBtn.disabled = false;
+                viewerBtn.disabled = false;
+            } else if (state.role === 'blue') {
+                redName.textContent = '🔴 Opponent (Red)';
+                blueName.textContent = '🔵 You (Blue)';
+                playerDisplay.textContent = '👤 Role: Blue Team';
+                blueBtn.classList.add('selected');
+                redBtn.classList.remove('selected');
+                viewerBtn.classList.remove('selected');
+                blueBtn.disabled = true;
+                redBtn.disabled = false;
+                viewerBtn.disabled = false;
+            } else if (state.role === 'viewer') {
+                redName.textContent = '🔴 Team Red';
+                blueName.textContent = '🔵 Team Blue';
+                playerDisplay.textContent = '👁️ Role: Viewer';
+                viewerBtn.classList.add('selected');
+                redBtn.classList.remove('selected');
+                blueBtn.classList.remove('selected');
+                redBtn.disabled = false;
+                blueBtn.disabled = false;
+                viewerBtn.disabled = true;
             } else {
-                teamAName.textContent = '🟦 Team A';
-                teamBName.textContent = '🟥 Team B';
-                playerDisplay.textContent = '👤 Team: —';
-                teamAbtn.classList.remove('selected');
-                teamBbtn.classList.remove('selected');
-                // Don't enable if taken
-                // Will be handled by updateTeamButtons
+                redName.textContent = '🔴 Team Red';
+                blueName.textContent = '🔵 Team Blue';
+                playerDisplay.textContent = '👤 Role: —';
+                redBtn.classList.remove('selected');
+                blueBtn.classList.remove('selected');
+                viewerBtn.classList.remove('selected');
+                redBtn.disabled = false;
+                blueBtn.disabled = false;
+                viewerBtn.disabled = false;
             }
         }
 
         function animateScore(team) {
-            const el = team === 'A' ? scoreA : scoreB;
+            const el = team === 'red' ? scoreRed : scoreBlue;
             el.classList.remove('pop');
             void el.offsetWidth;
             el.classList.add('pop');
@@ -590,14 +801,20 @@
         // SHOW QUESTION
         // ============================================
         function showQuestionForPlayer() {
-            const pid = state.playerId;
-            if (!pid || !state.gameStarted) {
-                questionDisplay.textContent = pid ? '⏳ Waiting for opponent to join...' : 'Select your team to start!';
+            const role = state.role;
+            if (role === 'viewer') {
+                questionDisplay.textContent = '👁️ Watching the game...';
                 optionsContainer.innerHTML = '';
                 return;
             }
             
-            const idx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+            if (!role || !state.gameStarted) {
+                questionDisplay.textContent = role ? '⏳ Waiting for opponent to join...' : 'Select your role to start!';
+                optionsContainer.innerHTML = '';
+                return;
+            }
+            
+            const idx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
             if (idx >= state.questions.length) {
                 questionDisplay.textContent = '🏆 All questions answered!';
                 optionsContainer.innerHTML = '';
@@ -626,10 +843,10 @@
         // HANDLE ANSWER
         // ============================================
         function handleOptionClick(selectedIdx) {
-            if (state.answering || !state.playerId || !state.gameStarted) return;
-            const pid = state.playerId;
+            if (state.answering || !state.role || !state.gameStarted || state.role === 'viewer') return;
+            const role = state.role;
             
-            const idx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+            const idx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
             if (idx >= state.questions.length) return;
             
             const qData = state.questions[idx];
@@ -645,24 +862,24 @@
 
             if (isCorrect) {
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
-                if (pid === 'A') {
-                    state.scoreA += 1;
-                    state.tugProgress = Math.min(100, state.tugProgress + 2);
-                    state.teamA_questionIdx += 1;
-                    animateScore('A');
+                if (role === 'red') {
+                    state.scoreRed += 1;
+                    state.tugProgress = Math.max(0, state.tugProgress - 5);
+                    state.red_questionIdx += 1;
+                    animateScore('red');
                 } else {
-                    state.scoreB += 1;
-                    state.tugProgress = Math.max(0, state.tugProgress - 2);
-                    state.teamB_questionIdx += 1;
-                    animateScore('B');
+                    state.scoreBlue += 1;
+                    state.tugProgress = Math.min(100, state.tugProgress + 5);
+                    state.blue_questionIdx += 1;
+                    animateScore('blue');
                 }
                 updateUI();
                 saveGameState();
                 nextQuestionBtn.style.display = 'inline-block';
                 
-                const nextIdx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+                const nextIdx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
                 if (nextIdx >= state.questions.length) {
-                    statusMsg.innerHTML = `🎉 Team ${pid} completed all questions!`;
+                    statusMsg.innerHTML = `🎉 ${role === 'red' ? 'Red' : 'Blue'} Team completed all questions!`;
                 }
             } else {
                 statusMsg.innerHTML = '❌ Wrong answer. Try again!';
@@ -688,11 +905,11 @@
         function saveGameState() {
             const gameRef = db.ref(GAME_PATH);
             gameRef.update({
-                scoreA: state.scoreA,
-                scoreB: state.scoreB,
+                scoreRed: state.scoreRed,
+                scoreBlue: state.scoreBlue,
                 tugProgress: state.tugProgress,
-                teamA_questionIdx: state.teamA_questionIdx,
-                teamB_questionIdx: state.teamB_questionIdx,
+                red_questionIdx: state.red_questionIdx,
+                blue_questionIdx: state.blue_questionIdx,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -707,10 +924,7 @@
             state.listeners.game = gameRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) {
-                    // Game doesn't exist - create it
                     initializeGame();
-                    // Reset UI to clean state
-                    resetUIState();
                     return;
                 }
                 
@@ -719,114 +933,117 @@
                 onlineStatus.style.color = '#4caf84';
                 loadingOverlay.classList.add('hidden');
                 
-                // Update team button states
-                updateTeamButtons(data.players);
+                // Update viewer count
+                const viewers = data.viewers || {};
+                const viewerCountNum = Object.keys(viewers).length;
+                viewerCount.textContent = `👁️ Viewers: ${viewerCountNum}`;
+                
+                // Update role button states
+                updateRoleButtons(data.players);
                 
                 // Update game state from Firebase
-                const oldScoreA = state.scoreA;
-                const oldScoreB = state.scoreB;
+                const oldScoreRed = state.scoreRed;
+                const oldScoreBlue = state.scoreBlue;
                 
-                state.scoreA = data.scoreA || 0;
-                state.scoreB = data.scoreB || 0;
+                state.scoreRed = data.scoreRed || 0;
+                state.scoreBlue = data.scoreBlue || 0;
                 state.tugProgress = data.tugProgress || 50;
-                state.teamA_questionIdx = data.teamA_questionIdx || 0;
-                state.teamB_questionIdx = data.teamB_questionIdx || 0;
+                state.red_questionIdx = data.red_questionIdx || 0;
+                state.blue_questionIdx = data.blue_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
                 
-                // Check if both players are here
+                // Check if both teams are here
                 const players = data.players || {};
-                const hasA = players.A === true;
-                const hasB = players.B === true;
+                const hasRed = players.red === true;
+                const hasBlue = players.blue === true;
                 
-                // If both teams are taken but game didn't start, start it
-                if (hasA && hasB) {
+                if (hasRed && hasBlue) {
                     state.gameStarted = true;
-                    statusMsg.innerHTML = '🎮 Both teams ready! Answer to pull!';
-                } else if (hasA || hasB) {
+                    if (state.role !== 'viewer') {
+                        statusMsg.innerHTML = '🎮 Both teams ready! Answer to pull!';
+                    } else {
+                        statusMsg.innerHTML = '👁️ Watching the match!';
+                    }
+                } else if (hasRed || hasBlue) {
                     state.gameStarted = false;
-                    statusMsg.innerHTML = '⏳ Waiting for other player to join...';
+                    statusMsg.innerHTML = '⏳ Waiting for other team to join...';
                 } else {
                     state.gameStarted = false;
-                    statusMsg.innerHTML = '👥 Waiting for players to join...';
+                    statusMsg.innerHTML = '👥 Waiting for teams to join...';
                 }
                 
                 updateUI();
                 
-                if (state.scoreA !== oldScoreA) animateScore('A');
-                if (state.scoreB !== oldScoreB) animateScore('B');
+                if (state.scoreRed !== oldScoreRed) animateScore('red');
+                if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
                 
                 showQuestionForPlayer();
             });
         }
 
-        function updateTeamButtons(players) {
-            const hasA = players && players.A === true;
-            const hasB = players && players.B === true;
+        function updateRoleButtons(players) {
+            const hasRed = players && players.red === true;
+            const hasBlue = players && players.blue === true;
             
-            // Update Team A button
-            if (state.playerId !== 'A') {
-                teamAbtn.classList.toggle('taken', hasA);
-                teamAbtn.disabled = hasA;
-                if (hasA) {
-                    teamAbtn.innerHTML = '🟦 Team A <span class="taken-badge">TAKEN</span>';
+            if (state.role !== 'red') {
+                redBtn.classList.toggle('taken', hasRed);
+                redBtn.disabled = hasRed;
+                if (hasRed) {
+                    redBtn.innerHTML = '🔴 Team Red <span class="taken-badge">TAKEN</span>';
                 } else {
-                    teamAbtn.innerHTML = '🟦 Team A';
+                    redBtn.innerHTML = '🔴 Team Red';
                 }
             }
             
-            // Update Team B button
-            if (state.playerId !== 'B') {
-                teamBbtn.classList.toggle('taken', hasB);
-                teamBbtn.disabled = hasB;
-                if (hasB) {
-                    teamBbtn.innerHTML = '🟥 Team B <span class="taken-badge">TAKEN</span>';
+            if (state.role !== 'blue') {
+                blueBtn.classList.toggle('taken', hasBlue);
+                blueBtn.disabled = hasBlue;
+                if (hasBlue) {
+                    blueBtn.innerHTML = '🔵 Team Blue <span class="taken-badge">TAKEN</span>';
                 } else {
-                    teamBbtn.innerHTML = '🟥 Team B';
+                    blueBtn.innerHTML = '🔵 Team Blue';
                 }
-            }
-            
-            // If both teams are taken and we're not in a team, show message
-            if (hasA && hasB && !state.playerId) {
-                statusMsg.innerHTML = '⚠️ Both teams are taken! Use "Force Reset" to start a new game.';
             }
         }
 
         function resetUIState() {
-            state.playerId = null;
+            state.role = null;
             state.gameStarted = false;
-            state.scoreA = 0;
-            state.scoreB = 0;
+            state.scoreRed = 0;
+            state.scoreBlue = 0;
             state.tugProgress = 50;
-            state.teamA_questionIdx = 0;
-            state.teamB_questionIdx = 0;
+            state.red_questionIdx = 0;
+            state.blue_questionIdx = 0;
             state.answering = false;
             state.isJoining = false;
             
             gameArea.classList.remove('active');
             updateUI();
-            questionDisplay.textContent = 'Select your team to start!';
+            questionDisplay.textContent = 'Select your role to start!';
             optionsContainer.innerHTML = '';
-            statusMsg.innerHTML = '👥 Choose a team above';
+            statusMsg.innerHTML = '👥 Choose a role above';
             nextQuestionBtn.style.display = 'none';
             
-            // Reset button states
-            teamAbtn.classList.remove('selected', 'taken');
-            teamBbtn.classList.remove('selected', 'taken');
-            teamAbtn.innerHTML = '🟦 Team A';
-            teamBbtn.innerHTML = '🟥 Team B';
-            teamAbtn.disabled = false;
-            teamBbtn.disabled = false;
+            redBtn.classList.remove('selected', 'taken');
+            blueBtn.classList.remove('selected', 'taken');
+            viewerBtn.classList.remove('selected');
+            redBtn.innerHTML = '🔴 Team Red';
+            blueBtn.innerHTML = '🔵 Team Blue';
+            redBtn.disabled = false;
+            blueBtn.disabled = false;
+            viewerBtn.disabled = false;
         }
 
         function initializeGame() {
             const gameRef = db.ref(GAME_PATH);
             gameRef.set({
-                players: { A: false, B: false },
-                scoreA: 0,
-                scoreB: 0,
+                players: { red: false, blue: false },
+                viewers: {},
+                scoreRed: 0,
+                scoreBlue: 0,
                 tugProgress: 50,
-                teamA_questionIdx: 0,
-                teamB_questionIdx: 0,
+                red_questionIdx: 0,
+                blue_questionIdx: 0,
                 questions: shuffleArray([...SAMPLE_QUESTIONS]),
                 created: firebase.database.ServerValue.TIMESTAMP
             });
@@ -841,16 +1058,11 @@
         }
 
         // ============================================
-        // 🔥 FIXED TEAM SELECTION USING TRANSACTION
+        // ROLE SELECTION USING TRANSACTION
         // ============================================
-        function selectTeam(team) {
-            if (state.playerId === team) {
-                return;
-            }
-            
-            if (state.isJoining) {
-                return;
-            }
+        function selectRole(role) {
+            if (state.role === role) return;
+            if (state.isJoining) return;
             
             state.isJoining = true;
             statusMsg.innerHTML = '<span class="spinner"></span> Joining...';
@@ -860,23 +1072,33 @@
             gameRef.transaction((currentData) => {
                 if (currentData === null) {
                     return {
-                        players: { A: false, B: false },
-                        scoreA: 0,
-                        scoreB: 0,
+                        players: { red: false, blue: false },
+                        viewers: {},
+                        scoreRed: 0,
+                        scoreBlue: 0,
                         tugProgress: 50,
-                        teamA_questionIdx: 0,
-                        teamB_questionIdx: 0,
+                        red_questionIdx: 0,
+                        blue_questionIdx: 0,
                         questions: shuffleArray([...SAMPLE_QUESTIONS]),
                         created: firebase.database.ServerValue.TIMESTAMP
                     };
                 }
                 
-                const players = currentData.players || {};
-                if (players[team] === true) {
-                    return undefined;
+                if (role === 'viewer') {
+                    // Add viewer
+                    if (!currentData.viewers) currentData.viewers = {};
+                    const viewerId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
+                    currentData.viewers[viewerId] = true;
+                    currentData._viewerId = viewerId;
+                    return currentData;
                 }
                 
-                players[team] = true;
+                const players = currentData.players || {};
+                if (players[role] === true) {
+                    return undefined; // Team taken
+                }
+                
+                players[role] = true;
                 currentData.players = players;
                 
                 return currentData;
@@ -885,39 +1107,60 @@
                 
                 if (error) {
                     console.error('Transaction error:', error);
-                    statusMsg.innerHTML = '❌ Error joining game. Please try again.';
+                    statusMsg.innerHTML = '❌ Error joining. Please try again.';
                     return;
                 }
                 
                 if (!committed) {
-                    alert(`❌ Team ${team} is already taken!\n\nChoose the other team or click "Force Reset".`);
-                    statusMsg.innerHTML = '👥 Team taken. Choose the other team.';
+                    if (role === 'viewer') {
+                        // Viewer already in? Just set state
+                        state.role = 'viewer';
+                        state.isViewer = true;
+                        gameArea.classList.add('active');
+                        updateUI();
+                        showQuestionForPlayer();
+                        statusMsg.innerHTML = '👁️ You are watching the game!';
+                        return;
+                    }
+                    alert(`❌ Team ${role === 'red' ? 'Red' : 'Blue'} is already taken!\n\nChoose the other team or become a viewer.`);
+                    statusMsg.innerHTML = '👥 Team taken. Choose another role.';
                     const data = snapshot ? snapshot.val() : null;
-                    if (data) updateTeamButtons(data.players);
+                    if (data) updateRoleButtons(data.players);
                     return;
                 }
                 
                 const data = snapshot.val();
                 if (!data) return;
                 
-                state.playerId = team;
-                state.scoreA = data.scoreA || 0;
-                state.scoreB = data.scoreB || 0;
+                if (role === 'viewer') {
+                    state.role = 'viewer';
+                    state.isViewer = true;
+                    gameArea.classList.add('active');
+                    updateUI();
+                    showQuestionForPlayer();
+                    statusMsg.innerHTML = '👁️ You are watching the game!';
+                    return;
+                }
+                
+                state.role = role;
+                state.isViewer = false;
+                state.scoreRed = data.scoreRed || 0;
+                state.scoreBlue = data.scoreBlue || 0;
                 state.tugProgress = data.tugProgress || 50;
-                state.teamA_questionIdx = data.teamA_questionIdx || 0;
-                state.teamB_questionIdx = data.teamB_questionIdx || 0;
+                state.red_questionIdx = data.red_questionIdx || 0;
+                state.blue_questionIdx = data.blue_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
                 
                 const players = data.players || {};
-                const otherTeam = team === 'A' ? 'B' : 'A';
+                const otherTeam = role === 'red' ? 'blue' : 'red';
                 const otherTaken = players[otherTeam] === true;
                 
                 if (otherTaken) {
                     state.gameStarted = true;
-                    statusMsg.innerHTML = `🎮 You are Team ${team}! Game is on!`;
+                    statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Game is on!`;
                 } else {
                     state.gameStarted = false;
-                    statusMsg.innerHTML = `🎮 You are Team ${team}! Waiting for opponent...`;
+                    statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Waiting for opponent...`;
                 }
                 
                 gameArea.classList.add('active');
@@ -928,40 +1171,55 @@
         }
 
         // ============================================
-        // 🚪 LEAVE GAME
+        // LEAVE GAME
         // ============================================
         function leaveGame() {
-            if (!state.playerId) {
-                alert('You are not in a game.');
+            if (!state.role) {
+                alert('You are not in the game.');
                 return;
             }
             
-            if (confirm(`Leave the game as Team ${state.playerId}?`)) {
+            if (confirm(`Leave the game as ${state.role === 'viewer' ? 'Viewer' : state.role === 'red' ? 'Red Team' : 'Blue Team'}?`)) {
                 const gameRef = db.ref(GAME_PATH);
-                const playerRef = db.ref(`${GAME_PATH}/players/${state.playerId}`);
-                playerRef.set(false).then(() => {
-                    state.playerId = null;
-                    gameArea.classList.remove('active');
-                    resetUIState();
-                    statusMsg.innerHTML = '👋 You left the game. Choose a team to rejoin.';
-                    updateUI();
-                });
+                
+                if (state.role === 'viewer') {
+                    // Remove viewer - we need to find and remove them
+                    gameRef.once('value', (snapshot) => {
+                        const data = snapshot.val();
+                        if (data && data.viewers) {
+                            // Remove this viewer (cleanup all viewers on leave)
+                            gameRef.child('viewers').set({});
+                        }
+                        state.role = null;
+                        state.isViewer = false;
+                        gameArea.classList.remove('active');
+                        resetUIState();
+                        statusMsg.innerHTML = '👋 You left the game. Choose a role to rejoin.';
+                        updateUI();
+                    });
+                } else {
+                    const playerRef = db.ref(`${GAME_PATH}/players/${state.role}`);
+                    playerRef.set(false).then(() => {
+                        state.role = null;
+                        gameArea.classList.remove('active');
+                        resetUIState();
+                        statusMsg.innerHTML = '👋 You left the game. Choose a role to rejoin.';
+                        updateUI();
+                    });
+                }
             }
         }
 
         // ============================================
-        // 🔄 FORCE RESET
+        // FORCE RESET
         // ============================================
         function forceReset() {
-            if (confirm('⚠️ FORCE RESET: This will clear ALL game data for PIN 55555.\n\nBoth players will need to rejoin.\n\nAre you sure?')) {
+            if (confirm('⚠️ FORCE RESET: This will clear ALL game data for PIN 55555.\n\nAll players will need to rejoin.\n\nAre you sure?')) {
                 const gameRef = db.ref(GAME_PATH);
                 gameRef.remove().then(() => {
-                    // Reset all local state
                     resetUIState();
-                    statusMsg.innerHTML = '✅ Game reset! Both teams are now available.';
-                    // Re-initialize the game
+                    statusMsg.innerHTML = '✅ Game reset! All roles are now available.';
                     initializeGame();
-                    // Update UI
                     updateUI();
                 }).catch((err) => {
                     alert('Error resetting: ' + err.message);
@@ -993,8 +1251,9 @@
         // ============================================
         // EVENT LISTENERS
         // ============================================
-        teamAbtn.addEventListener('click', () => selectTeam('A'));
-        teamBbtn.addEventListener('click', () => selectTeam('B'));
+        redBtn.addEventListener('click', () => selectRole('red'));
+        blueBtn.addEventListener('click', () => selectRole('blue'));
+        viewerBtn.addEventListener('click', () => selectRole('viewer'));
         forceResetBtn.addEventListener('click', forceReset);
         leaveBtn.addEventListener('click', leaveGame);
         nextQuestionBtn.addEventListener('click', () => {
@@ -1006,14 +1265,16 @@
         // INIT
         // ============================================
         drawTug(50);
+        setupCanvasInteraction();
         checkConnection();
         listenToGame();
         
         console.log('🎮 Tug of War loaded! PIN: 55555');
         console.log('📌 Share this page with friends on any device!');
         console.log('🔑 Fixed PIN: 55555');
-        console.log('🔄 Use "Force Reset" if teams are stuck in "TAKEN" state');
-        console.log('🚪 Use "Leave Game" to exit gracefully');
+        console.log('🔴 Team Red vs 🔵 Team Blue');
+        console.log('👁️ Viewers can watch without playing');
+        console.log('🔄 Drag the rope to pull!');
     </script>
 </body>
 </html>
