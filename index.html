@@ -17,7 +17,7 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #f0f4f8;
+            background: #ffffff;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -31,9 +31,10 @@
             background: #ffffff;
             border-radius: 40px;
             padding: 24px 20px 32px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
             text-align: center;
             position: relative;
+            border: 1px solid #e8edf2;
         }
         h1 {
             font-size: 2rem;
@@ -45,9 +46,9 @@
         }
         .sub {
             font-size: 0.9rem;
-            opacity: 0.7;
+            opacity: 0.6;
             margin-bottom: 20px;
-            color: #555;
+            color: #666;
         }
         .pin-display {
             background: #1a2a3a;
@@ -69,8 +70,8 @@
             flex-wrap: wrap;
         }
         .role-btn {
-            background: #e8edf2;
-            border: 3px solid #c0c8d0;
+            background: #f0f4f8;
+            border: 2px solid #d0d8e0;
             border-radius: 40px;
             padding: 14px 24px;
             font-size: 1rem;
@@ -86,11 +87,14 @@
         .role-btn:active {
             transform: scale(0.96);
         }
+        .role-btn:hover {
+            background: #e8edf2;
+        }
         .role-btn.selected {
             border-color: #e63946;
             background: #e63946;
             color: #fff;
-            box-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
+            box-shadow: 0 0 20px rgba(230, 57, 70, 0.2);
             cursor: not-allowed;
             opacity: 0.8;
         }
@@ -116,14 +120,14 @@
             font-weight: 700;
         }
         .role-btn.viewer {
-            border-color: #6a8aaa;
-            background: #d0dce8;
+            border-color: #b0c8d8;
+            background: #f0f4f8;
         }
         .role-btn.viewer.selected {
             border-color: #4a7a9a;
             background: #4a7a9a;
             color: #fff;
-            box-shadow: 0 0 20px rgba(74, 122, 154, 0.3);
+            box-shadow: 0 0 20px rgba(74, 122, 154, 0.2);
         }
         .role-btn.locked {
             cursor: not-allowed;
@@ -145,10 +149,11 @@
             color: #1a2a3a;
         }
         .team-name {
-            background: #e8edf2;
+            background: #f0f4f8;
             padding: 8px 20px;
             border-radius: 30px;
             min-width: 100px;
+            border: 1px solid #e0e8f0;
         }
         .team-name.red {
             border-left: 4px solid #e63946;
@@ -158,17 +163,18 @@
         }
         .team-progress {
             font-size: 0.7rem;
-            opacity: 0.7;
+            opacity: 0.6;
             display: block;
             margin-top: 2px;
         }
         .score {
-            background: #e8edf2;
+            background: #f0f4f8;
             padding: 8px 24px;
             border-radius: 40px;
             font-size: 1.8rem;
             min-width: 70px;
             transition: all 0.3s;
+            border: 1px solid #e0e8f0;
         }
         .score.pop {
             animation: pop 0.3s ease;
@@ -181,18 +187,19 @@
             100% { transform: scale(1); }
         }
         .tug-canvas-wrap {
-            background: #e8edf2;
+            background: #f0f4f8;
             border-radius: 60px;
             padding: 16px 10px;
             margin: 16px 0;
             position: relative;
+            border: 1px solid #e0e8f0;
         }
         canvas {
             width: 100%;
             height: auto;
             display: block;
             border-radius: 30px;
-            background: #d0dce8;
+            background: #e8edf2;
             touch-action: none;
             cursor: default;
         }
@@ -206,7 +213,7 @@
             color: #1a2a3a;
         }
         .question-box {
-            background: #e8edf2;
+            background: #f0f4f8;
             border-radius: 30px;
             padding: 20px 16px;
             margin: 16px 0;
@@ -218,12 +225,13 @@
             line-height: 1.6;
             word-break: break-word;
             color: #1a2a3a;
+            border: 1px solid #e0e8f0;
         }
         .question-counter {
             font-size: 0.8rem;
             opacity: 0.6;
             margin-top: 4px;
-            color: #555;
+            color: #666;
         }
         .options-grid {
             display: grid;
@@ -232,8 +240,8 @@
             margin: 12px 0 18px;
         }
         .option-btn {
-            background: #e8edf2;
-            border: 2px solid #c0c8d0;
+            background: #f0f4f8;
+            border: 2px solid #d0d8e0;
             border-radius: 40px;
             padding: 14px 8px;
             font-size: 1rem;
@@ -246,11 +254,11 @@
             min-height: 60px;
         }
         .option-btn:active {
-            background: #d0d8e0;
+            background: #e0e8f0;
             transform: scale(0.96);
         }
         .option-btn:hover {
-            background: #d8e0e8;
+            background: #e8edf2;
         }
         .option-btn.correct {
             background: #4caf84;
@@ -273,7 +281,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.7);
+            background: rgba(0,0,0,0.75);
             border-radius: 40px;
             display: flex;
             align-items: center;
@@ -290,7 +298,7 @@
         }
         .status-msg {
             font-size: 0.95rem;
-            background: #e8edf2;
+            background: #f0f4f8;
             padding: 12px;
             border-radius: 40px;
             margin: 8px 0;
@@ -300,6 +308,7 @@
             justify-content: center;
             gap: 10px;
             color: #1a2a3a;
+            border: 1px solid #e0e8f0;
         }
         .status-msg .cooldown-timer {
             color: #e63946;
@@ -362,27 +371,30 @@
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .player-badge {
-            background: #e8edf2;
+            background: #f0f4f8;
             padding: 6px 16px;
             border-radius: 40px;
             font-size: 0.9rem;
             display: inline-block;
             color: #1a2a3a;
+            border: 1px solid #e0e8f0;
         }
         .online-status {
             font-size: 0.8rem;
-            opacity: 0.7;
+            opacity: 0.6;
             margin-top: 4px;
-            color: #555;
+            color: #666;
         }
         .join-instruction {
-            background: #e8edf2;
+            background: #f0f4f8;
             padding: 15px 20px;
             border-radius: 30px;
             margin: 10px 0;
             font-size: 0.95rem;
             border-left: 4px solid #e63946;
             color: #1a2a3a;
+            border: 1px solid #e0e8f0;
+            border-left-width: 4px;
         }
         .loading-overlay {
             position: fixed;
@@ -420,7 +432,7 @@
             font-size: 0.8rem;
             opacity: 0.6;
             margin-top: 6px;
-            color: #555;
+            color: #666;
         }
         .role-locked-msg {
             background: #e6394633;
@@ -436,14 +448,14 @@
             display: block;
         }
 
-        /* Winner Celebration Overlay */
+        /* Winner Celebration Overlay - Shows for ALL users */
         .winner-overlay {
             position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(255,255,255,0.92);
+            background: rgba(255,255,255,0.95);
             display: none;
             align-items: center;
             justify-content: center;
@@ -453,6 +465,11 @@
         }
         .winner-overlay.show {
             display: flex;
+            animation: fadeIn 0.5s ease;
+        }
+        @keyframes fadeIn {
+            0% { opacity: 0; }
+            100% { opacity: 1; }
         }
         .winner-box {
             background: #ffffff;
@@ -493,9 +510,10 @@
             font-size: 1.2rem;
         }
         .winner-scores .score-item {
-            background: #e8edf2;
+            background: #f0f4f8;
             padding: 12px 24px;
             border-radius: 30px;
+            border: 1px solid #e0e8f0;
         }
         .winner-scores .score-item .label {
             font-size: 0.8rem;
@@ -590,7 +608,7 @@
         <div style="font-size: 1.2rem; color: #1a2a3a;">Connecting to game...</div>
     </div>
 
-    <!-- Winner Celebration Overlay -->
+    <!-- Winner Celebration Overlay - Shows for EVERYONE -->
     <div class="winner-overlay" id="winnerOverlay">
         <div class="winner-box">
             <div class="winner-emoji" id="winnerEmoji">🏆</div>
@@ -705,7 +723,7 @@
         const db = firebase.database();
 
         // ============================================
-        // SOUND EFFECTS - Using Web Audio API with better initialization
+        // SOUND EFFECTS
         // ============================================
         class SoundManager {
             constructor() {
@@ -723,11 +741,9 @@
                         this.gainNode.gain.value = 0.5;
                         this.gainNode.connect(this.audioContext.destination);
                         this.initialized = true;
-                        console.log('🎵 Audio context initialized');
                     }
                     if (this.audioContext && this.audioContext.state === 'suspended') {
                         this.audioContext.resume();
-                        console.log('🎵 Audio context resumed');
                     }
                 } catch (e) {
                     console.warn('Web Audio not supported:', e);
@@ -746,10 +762,7 @@
             playTone(frequency, duration, type = 'sine', volume = 0.3) {
                 if (!this.enabled) return;
                 this.init();
-                if (!this.ensureContext()) {
-                    console.warn('Audio context not ready');
-                    return;
-                }
+                if (!this.ensureContext()) return;
                 try {
                     const oscillator = this.audioContext.createOscillator();
                     const gain = this.audioContext.createGain();
@@ -761,27 +774,22 @@
                     gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
                     oscillator.start(this.audioContext.currentTime);
                     oscillator.stop(this.audioContext.currentTime + duration);
-                } catch (e) {
-                    console.warn('Error playing tone:', e);
-                }
+                } catch (e) { /* ignore */ }
             }
 
             playCompetition() {
-                console.log('🔊 Playing competition sound');
                 this.playTone(800, 0.1, 'square', 0.2);
                 setTimeout(() => this.playTone(1000, 0.1, 'square', 0.2), 150);
                 setTimeout(() => this.playTone(1200, 0.15, 'square', 0.25), 300);
             }
 
             playCorrect() {
-                console.log('🔊 Playing correct sound');
                 this.playTone(523, 0.15, 'sine', 0.3);
                 setTimeout(() => this.playTone(659, 0.15, 'sine', 0.3), 150);
                 setTimeout(() => this.playTone(784, 0.2, 'sine', 0.35), 300);
             }
 
             playWrong() {
-                console.log('🔊 Playing wrong sound');
                 this.playTone(200, 0.4, 'sawtooth', 0.2);
                 setTimeout(() => this.playTone(150, 0.3, 'sawtooth', 0.2), 200);
             }
@@ -791,7 +799,6 @@
             }
 
             playWinner(team) {
-                console.log('🔊 Playing winner sound');
                 const notes = [523, 587, 659, 784, 880, 988, 1047];
                 notes.forEach((freq, i) => {
                     setTimeout(() => {
@@ -811,7 +818,6 @@
                 this.enabled = !this.enabled;
                 if (this.enabled) {
                     this.init();
-                    // Play test sound
                     this.playTone(800, 0.1, 'sine', 0.2);
                 }
                 return this.enabled;
@@ -820,27 +826,20 @@
 
         const sound = new SoundManager();
 
-        // ============================================
-        // SOUND TOGGLE
-        // ============================================
+        // Sound toggle
         const soundToggle = document.getElementById('soundToggle');
         soundToggle.addEventListener('click', () => {
             const enabled = sound.toggle();
             soundToggle.textContent = enabled ? '🔊' : '🔇';
-            console.log('🔊 Sound toggled:', enabled ? 'ON' : 'OFF');
         });
 
-        // Initialize sound on any user interaction
+        // Initialize sound on interaction
         function initSoundOnInteraction() {
             sound.init();
-            console.log('🎵 Sound initialized by user interaction');
-            // Play a test sound
             sound.playTone(600, 0.1, 'sine', 0.15);
         }
-
         document.addEventListener('click', initSoundOnInteraction, { once: true });
         document.addEventListener('touchstart', initSoundOnInteraction, { once: true });
-        document.addEventListener('keydown', initSoundOnInteraction, { once: true });
 
         // ============================================
         // SAMPLE QUESTIONS (20+)
@@ -940,17 +939,17 @@
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            // Sky gradient - lighter for white background
+            // Sky gradient - light for white background
             const skyGrad = ctx.createLinearGradient(0, 0, 0, h-35);
-            skyGrad.addColorStop(0, '#b8c8d8');
-            skyGrad.addColorStop(0.4, '#c8d8e8');
-            skyGrad.addColorStop(0.7, '#d8e8f0');
-            skyGrad.addColorStop(1, '#e8f0f8');
+            skyGrad.addColorStop(0, '#d0dce8');
+            skyGrad.addColorStop(0.4, '#dce8f0');
+            skyGrad.addColorStop(0.7, '#e8f0f8');
+            skyGrad.addColorStop(1, '#f0f4f8');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, w, h-35);
 
             // Clouds
-            ctx.fillStyle = '#ffffff88';
+            ctx.fillStyle = '#ffffffaa';
             for (let i = 0; i < 5; i++) {
                 const x = (i * 150 + 20) % w;
                 const y = 20 + (i * 13) % 40;
@@ -973,7 +972,7 @@
             ctx.fillStyle = groundGrad;
             ctx.fillRect(0, h-35, w, 35);
 
-            // Grass detail
+            // Grass
             ctx.strokeStyle = '#6a8a5a';
             ctx.lineWidth = 1.5;
             for (let i = 0; i < w; i += 5) {
@@ -1003,7 +1002,7 @@
             const ropeHeight = 55;
 
             // Rope shadow
-            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.shadowBlur = 15;
             ctx.shadowOffsetY = 4;
             
@@ -1052,7 +1051,7 @@
 
             // Rope center knot
             ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.fillStyle = '#8a7a5a';
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 14, 0, Math.PI * 2);
@@ -1083,13 +1082,13 @@
             ctx.fillStyle = '#e6394688';
             ctx.fillText('⚡', ropeX + ropeWidth/2, ropeY + ropeHeight/2 + 1);
 
-            // TEAM CHARACTERS
+            // TEAM CHARACTERS - Simplified for performance
             const redX = Math.max(40, ropeX - 65);
             const charY = h - 45;
             
             // RED TEAM
             ctx.shadowBlur = 8;
-            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
             ctx.shadowOffsetY = 3;
             
             ctx.fillStyle = '#e63946';
@@ -1144,12 +1143,7 @@
             ctx.moveTo(redX + 12, charY - 76);
             ctx.lineTo(redX + 3, charY - 74);
             ctx.stroke();
-            ctx.strokeStyle = '#8a4a3a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(redX, charY - 62, 6, 0.1, Math.PI - 0.1);
-            ctx.stroke();
-            
+
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#f5d0b8';
             ctx.lineWidth = 10;
@@ -1171,15 +1165,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#e8c0a8';
-            for (let i = -2; i <= 2; i++) {
-                ctx.beginPath();
-                ctx.arc(ropeX + 5 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(ropeX + 15 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
             
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#1a2a3a';
@@ -1201,15 +1186,12 @@
             ctx.beginPath();
             ctx.roundRect(redX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
-            ctx.fillStyle = '#e63946';
-            ctx.fillRect(redX - 20, charY + 8, 6, 4);
-            ctx.fillRect(redX + 12, charY + 8, 6, 4);
 
             // BLUE TEAM
             const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             
             ctx.shadowBlur = 8;
-            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowColor = 'rgba(0,0,0,0.1)';
             ctx.shadowOffsetY = 3;
             ctx.fillStyle = '#2a6fdb';
             ctx.beginPath();
@@ -1263,12 +1245,7 @@
             ctx.moveTo(blueX + 12, charY - 76);
             ctx.lineTo(blueX + 3, charY - 74);
             ctx.stroke();
-            ctx.strokeStyle = '#8a4a3a';
-            ctx.lineWidth = 2;
-            ctx.beginPath();
-            ctx.arc(blueX, charY - 62, 6, 0.1, Math.PI - 0.1);
-            ctx.stroke();
-            
+
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#f5d0b8';
             ctx.lineWidth = 10;
@@ -1290,15 +1267,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth - 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#e8c0a8';
-            for (let i = -2; i <= 2; i++) {
-                ctx.beginPath();
-                ctx.arc(ropeX + ropeWidth - 5 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-                ctx.beginPath();
-                ctx.arc(ropeX + ropeWidth - 15 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
-                ctx.fill();
-            }
             
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#1a2a3a';
@@ -1320,9 +1288,6 @@
             ctx.beginPath();
             ctx.roundRect(blueX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
-            ctx.fillStyle = '#2a6fdb';
-            ctx.fillRect(blueX - 20, charY + 8, 6, 4);
-            ctx.fillRect(blueX + 12, charY + 8, 6, 4);
 
             // Team labels
             ctx.shadowBlur = 0;
@@ -1371,7 +1336,7 @@
         }
 
         // ============================================
-        // WINNER CELEBRATION
+        // WINNER CELEBRATION - SHOWS FOR EVERYONE
         // ============================================
         function showWinner(winner) {
             if (state.gameEnded) return;
@@ -1386,10 +1351,15 @@
             finalScoreRed.textContent = state.scoreRed;
             finalScoreBlue.textContent = state.scoreBlue;
             
-            // Disable all game interactions
+            // Disable all game interactions for everyone
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
             clearCooldown();
             
+            // Save game ended state to Firebase so all devices show winner
+            saveGameState();
+            
+            // Show winner overlay on all devices
             winnerOverlay.classList.add('show');
             launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
             
@@ -1436,23 +1406,19 @@
         }
 
         // ============================================
-        // COOLDOWN SYSTEM - FIXED
+        // COOLDOWN SYSTEM
         // ============================================
         function startCooldown() {
             if (state.cooldownActive) return;
             
-            console.log('⏳ Starting cooldown');
             state.cooldownActive = true;
             let secondsLeft = state.cooldownSeconds;
             
-            // Disable all option buttons and show overlay
             const btns = document.querySelectorAll('.option-btn');
             btns.forEach(btn => {
                 btn.disabled = true;
-                // Remove any existing overlay
                 const oldOverlay = btn.querySelector('.cooldown-overlay');
                 if (oldOverlay) oldOverlay.remove();
-                // Create new overlay
                 const overlay = document.createElement('div');
                 overlay.className = 'cooldown-overlay';
                 overlay.textContent = secondsLeft;
@@ -1460,8 +1426,6 @@
             });
             
             statusMsg.innerHTML = `⏳ Wrong! Wait <span class="cooldown-timer">${secondsLeft}s</span> before trying again...`;
-            
-            // Play initial tick
             sound.playTick();
             
             state.cooldownTimer = setInterval(() => {
@@ -1479,7 +1443,6 @@
                     state.cooldownTimer = null;
                     state.cooldownActive = false;
                     
-                    // Re-enable buttons and remove overlays
                     document.querySelectorAll('.option-btn').forEach(btn => {
                         btn.disabled = false;
                         const overlay = btn.querySelector('.cooldown-overlay');
@@ -1487,7 +1450,6 @@
                     });
                     
                     statusMsg.innerHTML = '📝 Try again!';
-                    console.log('⏳ Cooldown ended');
                 }
             }, 1000);
         }
@@ -1641,10 +1603,9 @@
         }
 
         // ============================================
-        // HANDLE ANSWER - FIXED COOLDOWN
+        // HANDLE ANSWER
         // ============================================
         function handleOptionClick(selectedIdx) {
-            // Check if in cooldown
             if (state.cooldownActive) {
                 statusMsg.innerHTML = `⏳ Please wait for cooldown to end!`;
                 return;
@@ -1668,10 +1629,7 @@
             });
 
             if (isCorrect) {
-                // Play correct sound
                 sound.playCorrect();
-                console.log('✅ Correct answer!');
-                
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
                 if (role === 'red') {
                     state.scoreRed += 1;
@@ -1694,23 +1652,17 @@
                 if (nextIdx >= state.totalQuestions) {
                     statusMsg.innerHTML = `🎉 ${role === 'red' ? 'Red' : 'Blue'} Team completed all questions!`;
                 } else {
-                    // Show next question after delay
                     setTimeout(() => {
-                        // Clear any cooldown that might be active
                         clearCooldown();
                         showQuestionForPlayer();
                         nextQuestionBtn.style.display = 'none';
                     }, 800);
                 }
             } else {
-                // WRONG ANSWER - Start 10-second cooldown                sound.playWrong();
-                console.log('❌ Wrong answer! Starting 10s cooldown');
+                sound.playWrong();
                 statusMsg.innerHTML = '❌ Wrong answer!';
-                
-                // Start cooldown - this will disable buttons and show timer
                 startCooldown();
                 
-                // Reset answering state after buttons are locked
                 setTimeout(() => {
                     state.answering = false;
                     btns.forEach((b) => {
@@ -1809,9 +1761,21 @@
                     showQuestionForPlayer();
                 }
                 
+                // If game ended in Firebase, show winner on all devices
                 if (state.gameEnded && !winnerOverlay.classList.contains('show')) {
                     const winner = state.tugProgress >= 100 ? 'blue' : 'red';
-                    showWinner(winner);
+                    // Reconstruct winner display
+                    state.gameEnded = true;
+                    const isRedWin = winner === 'red';
+                    winnerEmoji.textContent = isRedWin ? '🔴🏆' : '🔵🏆';
+                    winnerTitle.textContent = isRedWin ? '🎉 RED TEAM WINS! 🎉' : '🎉 BLUE TEAM WINS! 🎉';
+                    winnerTitle.className = 'winner-title ' + (isRedWin ? 'red-win' : 'blue-win');
+                    finalScoreRed.textContent = state.scoreRed;
+                    finalScoreBlue.textContent = state.scoreBlue;
+                    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                    document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
+                    winnerOverlay.classList.add('show');
+                    launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
                 }
             });
         }
@@ -2150,8 +2114,8 @@
         console.log('👁️ Viewers can watch without playing');
         console.log('⏳ 10-second cooldown on WRONG answers!');
         console.log('🔊 Sound effects: Competition, Correct, Wrong, Winner!');
-        console.log('💡 Click anywhere to enable sound!');
         console.log('📱 White background for better visibility!');
+        console.log('🏆 Winner screen shows for ALL players and viewers!');
     </script>
 </body>
 </html>
