@@ -33,6 +33,7 @@
             padding: 24px 20px 32px;
             box-shadow: 0 20px 40px rgba(0,0,0,0.6);
             text-align: center;
+            position: relative;
         }
         h1 {
             font-size: 2rem;
@@ -223,6 +224,7 @@
             cursor: pointer;
             transition: 0.15s;
             touch-action: manipulation;
+            position: relative;
         }
         .option-btn:active {
             background: #3d6485;
@@ -241,6 +243,22 @@
             transform: none;
             cursor: not-allowed;
         }
+        .option-btn .cooldown-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.5);
+            border-radius: 40px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            font-weight: 900;
+            color: #f9d976;
+            pointer-events: none;
+        }
         .status-msg {
             font-size: 0.95rem;
             background: #0e1f30;
@@ -252,6 +270,11 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+        }
+        .status-msg .cooldown-timer {
+            color: #f9d976;
+            font-weight: 900;
+            font-size: 1.2rem;
         }
         .footer-btns {
             display: flex;
@@ -377,10 +400,124 @@
         .role-locked-msg.show {
             display: block;
         }
+
+        /* Winner Celebration Overlay */
+        .winner-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.85);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            flex-direction: column;
+            padding: 20px;
+        }
+        .winner-overlay.show {
+            display: flex;
+        }
+        .winner-box {
+            background: #1a2f44;
+            border-radius: 50px;
+            padding: 40px 50px;
+            max-width: 500px;
+            width: 100%;
+            text-align: center;
+            animation: celebrateIn 0.6s ease;
+            border: 3px solid #f9d976;
+            box-shadow: 0 0 60px rgba(249, 217, 118, 0.3);
+        }
+        @keyframes celebrateIn {
+            0% { transform: scale(0.5); opacity: 0; }
+            70% { transform: scale(1.05); }
+            100% { transform: scale(1); opacity: 1; }
+        }
+        .winner-emoji {
+            font-size: 4rem;
+            animation: bounce 0.8s ease infinite;
+        }
+        @keyframes bounce {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-20px); }
+        }
+        .winner-title {
+            font-size: 2.2rem;
+            font-weight: 900;
+            margin: 10px 0;
+        }
+        .winner-title.red-win { color: #ff6b6b; }
+        .winner-title.blue-win { color: #6baaff; }
+        .winner-scores {
+            display: flex;
+            justify-content: center;
+            gap: 40px;
+            margin: 20px 0;
+            font-size: 1.2rem;
+        }
+        .winner-scores .score-item {
+            background: #0e1f30;
+            padding: 12px 24px;
+            border-radius: 30px;
+        }
+        .winner-scores .score-item .label {
+            font-size: 0.8rem;
+            opacity: 0.7;
+        }
+        .winner-scores .score-item .value {
+            font-size: 2rem;
+            font-weight: 900;
+        }
+        .winner-scores .score-item .value.red-score { color: #ff6b6b; }
+        .winner-scores .score-item .value.blue-score { color: #6baaff; }
+        .winner-btn {
+            background: #f9d976;
+            border: none;
+            border-radius: 40px;
+            padding: 14px 40px;
+            font-weight: 700;
+            font-size: 1.1rem;
+            color: #0b1a2f;
+            cursor: pointer;
+            transition: 0.2s;
+            box-shadow: 0 4px 0 #b38f40;
+            margin-top: 10px;
+        }
+        .winner-btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .confetti-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 1001;
+            overflow: hidden;
+        }
+        .confetti-piece {
+            position: absolute;
+            width: 12px;
+            height: 12px;
+            top: -20px;
+            animation: confettiFall linear forwards;
+        }
+        @keyframes confettiFall {
+            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
+            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
+        }
+
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
             .options-grid { grid-template-columns: 1fr; }
             .role-btn { min-width: 80px; padding: 10px 16px; font-size: 0.9rem; }
+            .winner-box { padding: 30px 20px; }
+            .winner-scores { gap: 20px; flex-wrap: wrap; }
+            .winner-title { font-size: 1.6rem; }
         }
     </style>
 </head>
@@ -390,6 +527,27 @@
         <div class="loading-spinner"></div>
         <div style="font-size: 1.2rem;">Connecting to game...</div>
     </div>
+
+    <!-- Winner Celebration Overlay -->
+    <div class="winner-overlay" id="winnerOverlay">
+        <div class="winner-box">
+            <div class="winner-emoji" id="winnerEmoji">🏆</div>
+            <div class="winner-title" id="winnerTitle">🎉 RED TEAM WINS! 🎉</div>
+            <div class="winner-scores">
+                <div class="score-item">
+                    <div class="label">🔴 Team Red</div>
+                    <div class="value red-score" id="finalScoreRed">0</div>
+                </div>
+                <div class="score-item">
+                    <div class="label">🔵 Team Blue</div>
+                    <div class="value blue-score" id="finalScoreBlue">0</div>
+                </div>
+            </div>
+            <button class="winner-btn" onclick="closeWinner()">👏 Awesome! Continue</button>
+        </div>
+    </div>
+
+    <div class="confetti-container" id="confettiContainer"></div>
 
     <div class="container">
         <h1>⚡ TUG OF WAR</h1>
@@ -509,11 +667,11 @@
         // GAME STATE
         // ============================================
         const state = {
-            role: null, // 'red', 'blue', or 'viewer'
+            role: null,
             questions: [],
             scoreRed: 0,
             scoreBlue: 0,
-            tugProgress: 50, // 0 = Red wins, 100 = Blue wins
+            tugProgress: 50,
             red_questionIdx: 0,
             blue_questionIdx: 0,
             answering: false,
@@ -522,7 +680,12 @@
             listeners: {},
             isJoining: false,
             isViewer: false,
-            roleLocked: false // Prevents role changes mid-game
+            roleLocked: false,
+            gameEnded: false,
+            // Cooldown state
+            cooldownActive: false,
+            cooldownTimer: null,
+            cooldownSeconds: 5
         };
 
         // ============================================
@@ -550,9 +713,15 @@
         const leaveBtn = $('leaveBtn');
         const viewerCount = $('viewerCount');
         const roleLockedMsg = $('roleLockedMsg');
+        const winnerOverlay = $('winnerOverlay');
+        const winnerEmoji = $('winnerEmoji');
+        const winnerTitle = $('winnerTitle');
+        const finalScoreRed = $('finalScoreRed');
+        const finalScoreBlue = $('finalScoreBlue');
+        const confettiContainer = $('confettiContainer');
 
         // ============================================
-        // CANVAS DRAWING - REAL ROPE + CHARACTERS
+        // CANVAS DRAWING - SINGLE THICK ROPE + CHARACTERS
         // ============================================
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
@@ -610,48 +779,46 @@
             ctx.fillRect(w/2 - 1, h-35, 2, 8);
 
             // ============================================
-            // REAL ROPE - WOVEN TEXTURE
+            // SINGLE THICK ROPE
             // ============================================
-            const ropeX = 10 + (progress / 100) * (w - 20 - 60);
-            const ropeWidth = 60;
+            const ropeX = 10 + (progress / 100) * (w - 20 - 40);
+            const ropeWidth = 40;
             const ropeY = 45;
             const ropeHeight = 55;
 
             // Rope shadow
             ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.shadowOffsetY = 5;
             
-            // Rope body with gradient
+            // Main rope body - thick single rope
             const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
             ropeGrad.addColorStop(0, '#5a4a2a');
-            ropeGrad.addColorStop(0.15, '#8a7a5a');
-            ropeGrad.addColorStop(0.3, '#b8a88a');
+            ropeGrad.addColorStop(0.2, '#8a7a5a');
+            ropeGrad.addColorStop(0.4, '#b8a88a');
             ropeGrad.addColorStop(0.5, '#c8b89a');
-            ropeGrad.addColorStop(0.7, '#b8a88a');
-            ropeGrad.addColorStop(0.85, '#8a7a5a');
+            ropeGrad.addColorStop(0.6, '#b8a88a');
+            ropeGrad.addColorStop(0.8, '#8a7a5a');
             ropeGrad.addColorStop(1, '#5a4a2a');
             ctx.fillStyle = ropeGrad;
-            ctx.shadowBlur = 15;
+            ctx.shadowBlur = 20;
             ctx.beginPath();
-            ctx.roundRect(ropeX, ropeY, ropeWidth, ropeHeight, 8);
+            ctx.roundRect(ropeX, ropeY, ropeWidth, ropeHeight, 10);
             ctx.fill();
 
-            // Woven rope texture - diagonal lines
+            // Rope texture - diagonal lines (woven look)
             ctx.shadowBlur = 0;
             ctx.strokeStyle = '#6a5a3a';
             ctx.lineWidth = 1.5;
-            for (let i = 0; i < ropeWidth + 10; i += 8) {
+            for (let i = 0; i < ropeWidth + 10; i += 6) {
                 const x = ropeX + i;
-                // Diagonal lines going right
                 ctx.beginPath();
-                ctx.moveTo(x, ropeY);
-                ctx.lineTo(x + 12, ropeY + ropeHeight);
+                ctx.moveTo(x, ropeY + 2);
+                ctx.lineTo(x + 8, ropeY + ropeHeight - 2);
                 ctx.stroke();
-                // Diagonal lines going left
                 ctx.beginPath();
-                ctx.moveTo(x + 4, ropeY);
-                ctx.lineTo(x - 8, ropeY + ropeHeight);
+                ctx.moveTo(x + 4, ropeY + 2);
+                ctx.lineTo(x - 4, ropeY + ropeHeight - 2);
                 ctx.stroke();
             }
 
@@ -662,9 +829,13 @@
             ctx.moveTo(ropeX + 5, ropeY + 5);
             ctx.lineTo(ropeX + ropeWidth - 5, ropeY + 5);
             ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(ropeX + 5, ropeY + ropeHeight - 5);
+            ctx.lineTo(ropeX + ropeWidth - 5, ropeY + ropeHeight - 5);
+            ctx.stroke();
 
             // Rope center knot
-            ctx.shadowBlur = 10;
+            ctx.shadowBlur = 15;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.fillStyle = '#6a5a3a';
             ctx.beginPath();
@@ -675,7 +846,7 @@
             ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 9, 0, Math.PI * 2);
             ctx.fill();
             
-            // Rope knot detail
+            // Knot wrapping lines
             ctx.shadowBlur = 0;
             ctx.strokeStyle = '#5a4a2a';
             ctx.lineWidth = 2;
@@ -689,59 +860,52 @@
                 ctx.stroke();
             }
 
+            // Pull arrow indicator
+            ctx.shadowBlur = 0;
+            ctx.font = 'bold 20px sans-serif';
+            ctx.textAlign = 'center';
+            ctx.textBaseline = 'middle';
+            ctx.fillStyle = '#f9d97688';
+            ctx.fillText('⚡', ropeX + ropeWidth/2, ropeY + ropeHeight/2 + 1);
+
             // ============================================
             // TEAM CHARACTERS
             // ============================================
-            
-            // ---- RED TEAM CHARACTER (left) ----
             const redX = Math.max(40, ropeX - 65);
             const charY = h - 45;
             
-            // Body
+            // RED TEAM CHARACTER
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowOffsetY = 3;
             
-            // Torso - red
             ctx.fillStyle = '#cc2222';
             ctx.beginPath();
             ctx.roundRect(redX - 22, charY - 55, 44, 50, 12);
             ctx.fill();
-            
-            // Chest detail
             ctx.fillStyle = '#dd3333';
             ctx.beginPath();
             ctx.roundRect(redX - 16, charY - 45, 32, 30, 8);
             ctx.fill();
-            
-            // Belt
             ctx.fillStyle = '#4a3a2a';
             ctx.fillRect(redX - 20, charY - 15, 40, 6);
             ctx.fillStyle = '#f9d976';
             ctx.fillRect(redX - 6, charY - 15, 12, 6);
             
-            // Head
             ctx.shadowBlur = 8;
             ctx.fillStyle = '#ffcc99';
             ctx.beginPath();
             ctx.arc(redX, charY - 68, 20, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Helmet
             ctx.fillStyle = '#cc2222';
             ctx.beginPath();
             ctx.arc(redX, charY - 76, 22, Math.PI, 0);
             ctx.fill();
-            
-            // Helmet stripe
             ctx.fillStyle = '#ffdd44';
             ctx.fillRect(redX - 14, charY - 80, 28, 5);
-            
-            // Helmet visor
             ctx.fillStyle = '#4a8aaa';
             ctx.fillRect(redX - 12, charY - 72, 24, 4);
             
-            // Eyes - determined look
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#222';
             ctx.beginPath();
@@ -750,8 +914,6 @@
             ctx.beginPath();
             ctx.arc(redX + 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Eye shine
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(redX - 5, charY - 72, 1.5, 0, Math.PI * 2);
@@ -759,8 +921,6 @@
             ctx.beginPath();
             ctx.arc(redX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Angry eyebrows
             ctx.strokeStyle = '#4a2a1a';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -771,31 +931,25 @@
             ctx.moveTo(redX + 12, charY - 76);
             ctx.lineTo(redX + 3, charY - 74);
             ctx.stroke();
-            
-            // Mouth - determined grin
             ctx.strokeStyle = '#8a4a3a';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.arc(redX, charY - 62, 6, 0.1, Math.PI - 0.1);
             ctx.stroke();
             
-            // Arms pulling rope
             ctx.shadowBlur = 5;
             ctx.strokeStyle = '#ffcc99';
             ctx.lineWidth = 10;
             ctx.lineCap = 'round';
-            // Left arm
             ctx.beginPath();
             ctx.moveTo(redX - 20, charY - 38);
             ctx.lineTo(ropeX + 5, ropeY + 15);
             ctx.stroke();
-            // Right arm
             ctx.beginPath();
             ctx.moveTo(redX + 20, charY - 38);
             ctx.lineTo(ropeX + 15, ropeY + 15);
             ctx.stroke();
             
-            // Hands gripping rope
             ctx.fillStyle = '#ffcc99';
             ctx.shadowBlur = 3;
             ctx.beginPath();
@@ -804,8 +958,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Fingers
             ctx.fillStyle = '#eebb88';
             for (let i = -2; i <= 2; i++) {
                 ctx.beginPath();
@@ -816,23 +968,18 @@
                 ctx.fill();
             }
             
-            // Legs
             ctx.shadowBlur = 5;
             ctx.strokeStyle = '#1a2a3a';
             ctx.lineWidth = 12;
             ctx.lineCap = 'butt';
-            // Left leg
             ctx.beginPath();
             ctx.moveTo(redX - 10, charY - 5);
             ctx.lineTo(redX - 16, charY + 8);
             ctx.stroke();
-            // Right leg
             ctx.beginPath();
             ctx.moveTo(redX + 10, charY - 5);
             ctx.lineTo(redX + 16, charY + 8);
             ctx.stroke();
-            
-            // Shoes
             ctx.fillStyle = '#1a2a3a';
             ctx.shadowBlur = 3;
             ctx.beginPath();
@@ -841,16 +988,13 @@
             ctx.beginPath();
             ctx.roundRect(redX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
-            
-            // Shoe detail - red stripe
             ctx.fillStyle = '#cc2222';
             ctx.fillRect(redX - 20, charY + 8, 6, 4);
             ctx.fillRect(redX + 12, charY + 8, 6, 4);
 
-            // ---- BLUE TEAM CHARACTER (right) ----
+            // BLUE TEAM CHARACTER
             const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             
-            // Body - blue
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.shadowOffsetY = 3;
@@ -858,41 +1002,29 @@
             ctx.beginPath();
             ctx.roundRect(blueX - 22, charY - 55, 44, 50, 12);
             ctx.fill();
-            
-            // Chest detail
             ctx.fillStyle = '#3377ee';
             ctx.beginPath();
             ctx.roundRect(blueX - 16, charY - 45, 32, 30, 8);
             ctx.fill();
-            
-            // Belt
             ctx.fillStyle = '#4a3a2a';
             ctx.fillRect(blueX - 20, charY - 15, 40, 6);
             ctx.fillStyle = '#f9d976';
             ctx.fillRect(blueX - 6, charY - 15, 12, 6);
             
-            // Head
             ctx.shadowBlur = 8;
             ctx.fillStyle = '#ffcc99';
             ctx.beginPath();
             ctx.arc(blueX, charY - 68, 20, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Helmet
             ctx.fillStyle = '#2266dd';
             ctx.beginPath();
             ctx.arc(blueX, charY - 76, 22, Math.PI, 0);
             ctx.fill();
-            
-            // Helmet stripe
             ctx.fillStyle = '#ffdd44';
             ctx.fillRect(blueX - 14, charY - 80, 28, 5);
-            
-            // Helmet visor
             ctx.fillStyle = '#4a8aaa';
             ctx.fillRect(blueX - 12, charY - 72, 24, 4);
             
-            // Eyes - determined look
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#222';
             ctx.beginPath();
@@ -901,8 +1033,6 @@
             ctx.beginPath();
             ctx.arc(blueX + 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Eye shine
             ctx.fillStyle = '#fff';
             ctx.beginPath();
             ctx.arc(blueX - 5, charY - 72, 1.5, 0, Math.PI * 2);
@@ -910,8 +1040,6 @@
             ctx.beginPath();
             ctx.arc(blueX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Angry eyebrows
             ctx.strokeStyle = '#4a2a1a';
             ctx.lineWidth = 2.5;
             ctx.beginPath();
@@ -922,31 +1050,25 @@
             ctx.moveTo(blueX + 12, charY - 76);
             ctx.lineTo(blueX + 3, charY - 74);
             ctx.stroke();
-            
-            // Mouth - determined grin
             ctx.strokeStyle = '#8a4a3a';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.arc(blueX, charY - 62, 6, 0.1, Math.PI - 0.1);
             ctx.stroke();
             
-            // Arms pulling rope
             ctx.shadowBlur = 5;
             ctx.strokeStyle = '#ffcc99';
             ctx.lineWidth = 10;
             ctx.lineCap = 'round';
-            // Left arm
             ctx.beginPath();
             ctx.moveTo(blueX - 20, charY - 38);
             ctx.lineTo(ropeX + ropeWidth - 5, ropeY + 15);
             ctx.stroke();
-            // Right arm
             ctx.beginPath();
             ctx.moveTo(blueX + 20, charY - 38);
             ctx.lineTo(ropeX + ropeWidth - 15, ropeY + 15);
             ctx.stroke();
             
-            // Hands gripping rope
             ctx.fillStyle = '#ffcc99';
             ctx.shadowBlur = 3;
             ctx.beginPath();
@@ -955,8 +1077,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth - 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            
-            // Fingers
             ctx.fillStyle = '#eebb88';
             for (let i = -2; i <= 2; i++) {
                 ctx.beginPath();
@@ -967,23 +1087,18 @@
                 ctx.fill();
             }
             
-            // Legs
             ctx.shadowBlur = 5;
             ctx.strokeStyle = '#1a2a3a';
             ctx.lineWidth = 12;
             ctx.lineCap = 'butt';
-            // Left leg
             ctx.beginPath();
             ctx.moveTo(blueX - 10, charY - 5);
             ctx.lineTo(blueX - 16, charY + 8);
             ctx.stroke();
-            // Right leg
             ctx.beginPath();
             ctx.moveTo(blueX + 10, charY - 5);
             ctx.lineTo(blueX + 16, charY + 8);
             ctx.stroke();
-            
-            // Shoes
             ctx.fillStyle = '#1a2a3a';
             ctx.shadowBlur = 3;
             ctx.beginPath();
@@ -992,53 +1107,21 @@
             ctx.beginPath();
             ctx.roundRect(blueX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
-            
-            // Shoe detail - blue stripe
             ctx.fillStyle = '#2266dd';
             ctx.fillRect(blueX - 20, charY + 8, 6, 4);
             ctx.fillRect(blueX + 12, charY + 8, 6, 4);
 
-            // ============================================
-            // TEAM LABELS ABOVE CHARACTERS
-            // ============================================
+            // Team labels
             ctx.shadowBlur = 0;
             ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            
-            // Red team label
             ctx.fillStyle = '#ff6b6b';
             ctx.fillText('🔴 TEAM RED', redX, charY - 95);
-            
-            // Blue team label
             ctx.fillStyle = '#6baaff';
             ctx.fillText('🔵 TEAM BLUE', blueX, charY - 95);
 
-            // ============================================
-            // WINNER INDICATOR
-            // ============================================
-            if (progress >= 100) {
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = 'rgba(107, 170, 255, 0.5)';
-                ctx.fillStyle = '#6baaff';
-                ctx.font = 'bold 32px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('🏆 BLUE TEAM WINS! 🏆', w/2, 25);
-            } else if (progress <= 0) {
-                ctx.shadowBlur = 20;
-                ctx.shadowColor = 'rgba(255, 107, 107, 0.5)';
-                ctx.fillStyle = '#ff6b6b';
-                ctx.font = 'bold 32px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('🏆 RED TEAM WINS! 🏆', w/2, 25);
-            }
-
-            // ============================================
-            // PROGRESS BAR
-            // ============================================
-            ctx.shadowBlur = 0;
+            // Progress bar
             const barY = 12;
             const barW = w - 40;
             const barX = 20;
@@ -1047,7 +1130,6 @@
             ctx.roundRect(barX, barY, barW, 10, 5);
             ctx.fill();
             
-            // Red progress
             if (progress < 50) {
                 ctx.fillStyle = '#ff6b6b';
                 const redW = (barW * (50 - progress) / 50);
@@ -1055,8 +1137,6 @@
                 ctx.roundRect(barX + barW/2 - redW, barY, redW, 10, 5);
                 ctx.fill();
             }
-            
-            // Blue progress
             if (progress > 50) {
                 ctx.fillStyle = '#6baaff';
                 const blueW = (barW * (progress - 50) / 50);
@@ -1065,7 +1145,6 @@
                 ctx.fill();
             }
             
-            // Center marker
             ctx.fillStyle = '#ffffff';
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(255,255,255,0.3)';
@@ -1078,22 +1157,131 @@
             ctx.fill();
         }
 
-        if (!CanvasRenderingContext2D.prototype.roundRect) {
-            CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
-                if (r > w/2) r = w/2;
-                if (r > h/2) r = h/2;
-                this.moveTo(x+r, y);
-                this.lineTo(x+w-r, y);
-                this.quadraticCurveTo(x+w, y, x+w, y+r);
-                this.lineTo(x+w, y+h-r);
-                this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
-                this.lineTo(x+r, y+h);
-                this.quadraticCurveTo(x, y+h, x, y+r);
-                this.lineTo(x, y+r);
-                this.quadraticCurveTo(x, y, x+r, y);
-                this.closePath();
-                return this;
-            };
+        // ============================================
+        // WINNER CELEBRATION
+        // ============================================
+        function showWinner(winner) {
+            if (state.gameEnded) return;
+            state.gameEnded = true;
+            
+            const isRedWin = winner === 'red';
+            winnerEmoji.textContent = isRedWin ? '🔴🏆' : '🔵🏆';
+            winnerTitle.textContent = isRedWin ? '🎉 RED TEAM WINS! 🎉' : '🎉 BLUE TEAM WINS! 🎉';
+            winnerTitle.className = 'winner-title ' + (isRedWin ? 'red-win' : 'blue-win');
+            finalScoreRed.textContent = state.scoreRed;
+            finalScoreBlue.textContent = state.scoreBlue;
+            
+            winnerOverlay.classList.add('show');
+            launchConfetti(isRedWin ? '#ff6b6b' : '#6baaff');
+        }
+
+        function closeWinner() {
+            winnerOverlay.classList.remove('show');
+            confettiContainer.innerHTML = '';
+        }
+
+        function launchConfetti(primaryColor) {
+            const colors = [primaryColor, '#f9d976', '#ffffff', '#ff6b6b', '#6baaff', '#4caf84', '#ff9800'];
+            const container = confettiContainer;
+            container.innerHTML = '';
+            
+            for (let i = 0; i < 120; i++) {
+                const piece = document.createElement('div');
+                piece.className = 'confetti-piece';
+                const color = colors[Math.floor(Math.random() * colors.length)];
+                const size = 6 + Math.random() * 10;
+                const left = Math.random() * 100;
+                const duration = 2 + Math.random() * 3;
+                const delay = Math.random() * 2;
+                const shape = Math.random() > 0.5 ? '50%' : '2px';
+                
+                piece.style.cssText = `
+                    left: ${left}%;
+                    width: ${size}px;
+                    height: ${size * (0.5 + Math.random())}px;
+                    background: ${color};
+                    border-radius: ${shape};
+                    animation-duration: ${duration}s;
+                    animation-delay: ${delay}s;
+                    transform: rotate(${Math.random() * 360}deg);
+                `;
+                container.appendChild(piece);
+            }
+            
+            setTimeout(() => {
+                container.innerHTML = '';
+            }, 6000);
+        }
+
+        // ============================================
+        // COOLDOWN SYSTEM
+        // ============================================
+        function startCooldown() {
+            if (state.cooldownActive) return;
+            
+            state.cooldownActive = true;
+            let secondsLeft = state.cooldownSeconds;
+            
+            // Disable all option buttons
+            document.querySelectorAll('.option-btn').forEach(btn => {
+                btn.disabled = true;
+            });
+            
+            // Show cooldown on status
+            statusMsg.innerHTML = `⏳ Wrong! Wait <span class="cooldown-timer">${secondsLeft}s</span> before trying again...`;
+            
+            // Create cooldown overlay on options
+            const btns = document.querySelectorAll('.option-btn');
+            btns.forEach(btn => {
+                const overlay = document.createElement('div');
+                overlay.className = 'cooldown-overlay';
+                overlay.id = 'cooldownOverlay';
+                overlay.textContent = secondsLeft;
+                btn.appendChild(overlay);
+            });
+            
+            state.cooldownTimer = setInterval(() => {
+                secondsLeft--;
+                statusMsg.innerHTML = `⏳ Wrong! Wait <span class="cooldown-timer">${secondsLeft}s</span> before trying again...`;
+                
+                // Update overlay text
+                document.querySelectorAll('.cooldown-overlay').forEach(el => {
+                    el.textContent = secondsLeft;
+                });
+                
+                if (secondsLeft <= 0) {
+                    clearInterval(state.cooldownTimer);
+                    state.cooldownActive = false;
+                    
+                    // Re-enable option buttons
+                    document.querySelectorAll('.option-btn').forEach(btn => {
+                        btn.disabled = false;
+                        // Remove cooldown overlay
+                        const overlay = btn.querySelector('.cooldown-overlay');
+                        if (overlay) overlay.remove();
+                    });
+                    
+                    statusMsg.innerHTML = '📝 Try again!';
+                }
+            }, 1000);
+        }
+
+        function clearCooldown() {
+            if (state.cooldownTimer) {
+                clearInterval(state.cooldownTimer);
+                state.cooldownTimer = null;
+            }
+            state.cooldownActive = false;
+            
+            // Remove all cooldown overlays
+            document.querySelectorAll('.cooldown-overlay').forEach(el => el.remove());
+            
+            // Re-enable buttons if not answering
+            if (!state.answering) {
+                document.querySelectorAll('.option-btn').forEach(btn => {
+                    btn.disabled = false;
+                });
+            }
         }
 
         // ============================================
@@ -1104,7 +1292,6 @@
             scoreBlue.textContent = state.scoreBlue;
             drawTug(state.tugProgress);
             
-            // Update role buttons based on locked state
             if (state.roleLocked) {
                 roleLockedMsg.classList.add('show');
                 redBtn.classList.add('locked');
@@ -1148,6 +1335,13 @@
                 redBtn.classList.remove('selected');
                 blueBtn.classList.remove('selected');
                 viewerBtn.classList.remove('selected');
+            }
+            
+            // Check for winner
+            if (state.tugProgress >= 100 && !state.gameEnded) {
+                showWinner('blue');
+            } else if (state.tugProgress <= 0 && !state.gameEnded) {
+                showWinner('red');
             }
         }
 
@@ -1201,10 +1395,16 @@
         }
 
         // ============================================
-        // HANDLE ANSWER
+        // HANDLE ANSWER - WITH COOLDOWN
         // ============================================
         function handleOptionClick(selectedIdx) {
-            if (state.answering || !state.role || !state.gameStarted || state.role === 'viewer') return;
+            // Check if in cooldown
+            if (state.cooldownActive) {
+                statusMsg.innerHTML = `⏳ Please wait for cooldown to end!`;
+                return;
+            }
+            
+            if (state.answering || !state.role || !state.gameStarted || state.role === 'viewer' || state.gameEnded) return;
             const role = state.role;
             
             const idx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
@@ -1222,6 +1422,7 @@
             });
 
             if (isCorrect) {
+                // CORRECT ANSWER - No cooldown, move to next question
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
                 if (role === 'red') {
                     state.scoreRed += 1;
@@ -1236,24 +1437,34 @@
                 }
                 updateUI();
                 saveGameState();
+                
+                // Move to next question immediately
+                state.answering = false;
                 nextQuestionBtn.style.display = 'inline-block';
                 
                 const nextIdx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
                 if (nextIdx >= state.questions.length) {
                     statusMsg.innerHTML = `🎉 ${role === 'red' ? 'Red' : 'Blue'} Team completed all questions!`;
+                } else {
+                    // Show next question automatically
+                    setTimeout(() => {
+                        showQuestionForPlayer();
+                        nextQuestionBtn.style.display = 'none';
+                    }, 800);
                 }
             } else {
-                statusMsg.innerHTML = '❌ Wrong answer. Try again!';
+                // WRONG ANSWER - Start 5-second cooldown
+                statusMsg.innerHTML = '❌ Wrong answer!';
+                startCooldown();
+                
+                // Reset answering state after cooldown starts
                 setTimeout(() => {
-                    if (state.gameStarted) {
-                        document.querySelectorAll('.option-btn').forEach(b => {
-                            b.disabled = false;
-                            b.classList.remove('correct', 'wrong');
-                        });
-                        state.answering = false;
-                        statusMsg.innerHTML = '📝 Try again!';
-                    }
-                }, 1200);
+                    state.answering = false;
+                    // Clear wrong styling but keep cooldown running
+                    btns.forEach((b) => {
+                        b.classList.remove('wrong');
+                    });
+                }, 500);
             }
             updateUI();
         }
@@ -1271,6 +1482,7 @@
                 tugProgress: state.tugProgress,
                 red_questionIdx: state.red_questionIdx,
                 blue_questionIdx: state.blue_questionIdx,
+                gameEnded: state.gameEnded,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1309,6 +1521,7 @@
                 state.red_questionIdx = data.red_questionIdx || 0;
                 state.blue_questionIdx = data.blue_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
+                state.gameEnded = data.gameEnded || false;
                 
                 const players = data.players || {};
                 const hasRed = players.red === true;
@@ -1334,7 +1547,15 @@
                 if (state.scoreRed !== oldScoreRed) animateScore('red');
                 if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
                 
-                showQuestionForPlayer();
+                // Don't show question if cooldown is active
+                if (!state.cooldownActive) {
+                    showQuestionForPlayer();
+                }
+                
+                if (state.gameEnded) {
+                    const winner = state.tugProgress >= 100 ? 'blue' : 'red';
+                    showWinner(winner);
+                }
             });
         }
 
@@ -1374,6 +1595,10 @@
             state.answering = false;
             state.isJoining = false;
             state.roleLocked = false;
+            state.gameEnded = false;
+            
+            // Clear cooldown
+            clearCooldown();
             
             gameArea.classList.remove('active');
             updateUI();
@@ -1391,6 +1616,8 @@
             blueBtn.disabled = false;
             viewerBtn.disabled = false;
             roleLockedMsg.classList.remove('show');
+            
+            closeWinner();
         }
 
         function initializeGame() {
@@ -1404,6 +1631,7 @@
                 red_questionIdx: 0,
                 blue_questionIdx: 0,
                 questions: shuffleArray([...SAMPLE_QUESTIONS]),
+                gameEnded: false,
                 created: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1417,7 +1645,7 @@
         }
 
         // ============================================
-        // ROLE SELECTION - LOCKED ONCE CHOSEN
+        // ROLE SELECTION
         // ============================================
         function selectRole(role) {
             if (state.role === role) return;
@@ -1443,6 +1671,7 @@
                         red_questionIdx: 0,
                         blue_questionIdx: 0,
                         questions: shuffleArray([...SAMPLE_QUESTIONS]),
+                        gameEnded: false,
                         created: firebase.database.ServerValue.TIMESTAMP
                     };
                 }
@@ -1514,6 +1743,7 @@
                 state.red_questionIdx = data.red_questionIdx || 0;
                 state.blue_questionIdx = data.blue_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
+                state.gameEnded = data.gameEnded || false;
                 
                 const players = data.players || {};
                 const otherTeam = role === 'red' ? 'blue' : 'red';
@@ -1535,7 +1765,7 @@
         }
 
         // ============================================
-        // LEAVE GAME - UNLOCKS ROLE
+        // LEAVE GAME
         // ============================================
         function leaveGame() {
             if (!state.role) {
@@ -1555,6 +1785,7 @@
                         state.role = null;
                         state.isViewer = false;
                         state.roleLocked = false;
+                        clearCooldown();
                         gameArea.classList.remove('active');
                         resetUIState();
                         statusMsg.innerHTML = '👋 You left the game. Choose a role to rejoin.';
@@ -1565,6 +1796,7 @@
                     playerRef.set(false).then(() => {
                         state.role = null;
                         state.roleLocked = false;
+                        clearCooldown();
                         gameArea.classList.remove('active');
                         resetUIState();
                         statusMsg.innerHTML = '👋 You left the game. Choose a role to rejoin.';
@@ -1581,6 +1813,7 @@
             if (confirm('⚠️ FORCE RESET: This will clear ALL game data for PIN 55555.\n\nAll players will need to rejoin.\n\nAre you sure?')) {
                 const gameRef = db.ref(GAME_PATH);
                 gameRef.remove().then(() => {
+                    clearCooldown();
                     resetUIState();
                     statusMsg.innerHTML = '✅ Game reset! All roles are now available.';
                     initializeGame();
@@ -1636,7 +1869,11 @@
         console.log('🔒 Roles are LOCKED once chosen!');
         console.log('🔴 Team Red vs 🔵 Team Blue');
         console.log('👁️ Viewers can watch without playing');
-        console.log('✅ Real rope with woven texture!');
+        console.log('✅ Single thick rope with woven texture!');
+        console.log('🏆 Winner celebration with final scores!');
+        console.log('⏳ 5-second cooldown on WRONG answers!');
+        console.log('🚀 Correct answers = instant next question!');
     </script>
 </body>
+</html>
 </html>
