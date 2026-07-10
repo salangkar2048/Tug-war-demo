@@ -608,7 +608,7 @@
                     <div class="value blue-score" id="finalScoreBlue">0</div>
                 </div>
             </div>
-            <button class="winner-btn" onclick="closeWinner()">👏 Awesome! Continue</button>
+            <button class="winner-btn" id="winnerContinueBtn">👏 Awesome! Continue</button>
         </div>
     </div>
 
@@ -850,7 +850,8 @@
             blueCompleted: false,
             winnerShown: false,
             hasRed: false,
-            hasBlue: false
+            hasBlue: false,
+            winner: null
         };
 
         // ============================================
@@ -887,6 +888,7 @@
         const finalScoreRed = $('finalScoreRed');
         const finalScoreBlue = $('finalScoreBlue');
         const confettiContainer = $('confettiContainer');
+        const winnerContinueBtn = $('winnerContinueBtn');
 
         // ============================================
         // CANVAS DRAWING
@@ -1258,6 +1260,7 @@
             if (state.gameEnded || state.winnerShown) return;
             state.gameEnded = true;
             state.winnerShown = true;
+            state.winner = winner;
             
             sound.playWinner();
             
@@ -1268,12 +1271,15 @@
             finalScoreRed.textContent = state.scoreRed;
             finalScoreBlue.textContent = state.scoreBlue;
             
+            // Disable all game interactions
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
             clearCooldown();
             
+            // Save to Firebase
             saveGameState();
             
+            // Show winner overlay
             winnerOverlay.classList.add('show');
             launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
             
@@ -1281,9 +1287,12 @@
             setTimeout(() => sound.playWinner(), 2000);
         }
 
-        function closeWinner() {
+        function closeWinnerAndReset() {
             winnerOverlay.classList.remove('show');
             confettiContainer.innerHTML = '';
+            
+            // Reset the game
+            resetGame();
         }
 
         function launchConfetti(primaryColor) {
@@ -1317,6 +1326,61 @@
             setTimeout(() => {
                 container.innerHTML = '';
             }, 6000);
+        }
+
+        // ============================================
+        // RESET GAME
+        // ============================================
+        function resetGame() {
+            // Clear Firebase game data
+            const gameRef = db.ref(GAME_PATH);
+            gameRef.remove().then(() => {
+                // Reset all state
+                clearCooldown();
+                resetUIState();
+                statusMsg.innerHTML = '✅ Game reset! Starting new game...';
+                
+                // Re-initialize the game
+                initializeGame();
+                
+                // Close winner overlay if open
+                winnerOverlay.classList.remove('show');
+                confettiContainer.innerHTML = '';
+                
+                // Reset role buttons to available
+                redBtn.classList.remove('selected', 'taken', 'locked');
+                blueBtn.classList.remove('selected', 'taken', 'locked');
+                viewerBtn.classList.remove('selected', 'locked');
+                redBtn.innerHTML = '🔴 Team Red';
+                blueBtn.innerHTML = '🔵 Team Blue';
+                redBtn.disabled = false;
+                blueBtn.disabled = false;
+                viewerBtn.disabled = false;
+                
+                // Reset game area
+                gameArea.classList.remove('active');
+                questionDisplay.textContent = 'Select your role to start!';
+                questionCounter.textContent = '';
+                optionsContainer.innerHTML = '';
+                
+                // Reset state
+                state.role = null;
+                state.gameStarted = false;
+                state.gameEnded = false;
+                state.winnerShown = false;
+                state.redCompleted = false;
+                state.blueCompleted = false;
+                state.hasRed = false;
+                state.hasBlue = false;
+                state.winner = null;
+                
+                updateUI();
+                
+                console.log('🔄 Game reset successfully!');
+            }).catch((err) => {
+                console.error('Error resetting game:', err);
+                alert('Error resetting game. Please use "Force Reset" button.');
+            });
         }
 
         // ============================================
@@ -1442,7 +1506,7 @@
                 viewerBtn.classList.remove('selected');
             }
             
-            // Check for winner
+            // Check for winner - only if game not ended
             if (!state.gameEnded) {
                 const totalQ = state.totalQuestions;
                 if (state.red_questionIdx >= totalQ && !state.redCompleted) {
@@ -1600,7 +1664,7 @@
         }
 
         // ============================================
-        // FIREBASE OPERATIONS - FIXED
+        // FIREBASE OPERATIONS
         // ============================================
         const GAME_PATH = 'games/55555';
 
@@ -1616,6 +1680,7 @@
                 redCompleted: state.redCompleted,
                 blueCompleted: state.blueCompleted,
                 winnerShown: state.winnerShown,
+                winner: state.winner,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1644,12 +1709,11 @@
                 const viewerCountNum = Object.keys(viewers).length;
                 viewerCount.textContent = `👁️ Viewers: ${viewerCountNum}`;
                 
-                // CRITICAL: Update player detection
+                // Update player detection
                 const players = data.players || {};
                 const hasRed = players.red === true;
                 const hasBlue = players.blue === true;
                 
-                // Store in state
                 state.hasRed = hasRed;
                 state.hasBlue = hasBlue;
                 
@@ -1672,8 +1736,9 @@
                 state.redCompleted = data.redCompleted || false;
                 state.blueCompleted = data.blueCompleted || false;
                 state.winnerShown = data.winnerShown || false;
+                state.winner = data.winner || null;
                 
-                // CRITICAL: Check if both teams are present and start game
+                // Check if both teams are present
                 if (hasRed && hasBlue) {
                     state.gameStarted = true;
                     if (state.role !== 'viewer') {
@@ -1694,41 +1759,47 @@
                 if (state.scoreRed !== oldScoreRed) animateScore('red');
                 if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
                 
-                // CRITICAL: Show questions only if game is started
+                // Show questions only if game is started
                 if (state.gameStarted && !state.cooldownActive && !state.gameEnded) {
                     showQuestionForPlayer();
                 }
                 
-                // Sync winner across all devices
+                // CRITICAL: Sync winner across ALL devices
                 if (state.gameEnded && !state.winnerShown) {
-                    let winner = 'red';
-                    if (state.blueCompleted && !state.redCompleted) {
-                        winner = 'blue';
-                    } else if (state.redCompleted && !state.blueCompleted) {
-                        winner = 'red';
-                    } else if (state.redCompleted && state.blueCompleted) {
-                        if (state.scoreBlue > state.scoreRed) winner = 'blue';
-                        else if (state.scoreRed > state.scoreBlue) winner = 'red';
-                        else winner = 'tie';
+                    // If winner is already determined from Firebase, use it
+                    if (state.winner) {
+                        showWinner(state.winner);
                     } else {
-                        winner = state.tugProgress >= 100 ? 'blue' : 'red';
-                    }
-                    
-                    if (winner === 'tie') {
-                        state.winnerShown = true;
-                        sound.playWinner();
-                        winnerEmoji.textContent = '🤝';
-                        winnerTitle.textContent = "🤝 IT'S A TIE! 🤝";
-                        winnerTitle.className = 'winner-title';
-                        finalScoreRed.textContent = state.scoreRed;
-                        finalScoreBlue.textContent = state.scoreBlue;
-                        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-                        document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
-                        winnerOverlay.classList.add('show');
-                        launchConfetti('#f9d976');
-                        db.ref(GAME_PATH).update({ winnerShown: true });
-                    } else {
-                        showWinner(winner);
+                        // Determine winner
+                        let winner = 'red';
+                        if (state.blueCompleted && !state.redCompleted) {
+                            winner = 'blue';
+                        } else if (state.redCompleted && !state.blueCompleted) {
+                            winner = 'red';
+                        } else if (state.redCompleted && state.blueCompleted) {
+                            if (state.scoreBlue > state.scoreRed) winner = 'blue';
+                            else if (state.scoreRed > state.scoreBlue) winner = 'red';
+                            else winner = 'tie';
+                        } else {
+                            winner = state.tugProgress >= 100 ? 'blue' : 'red';
+                        }
+                        
+                        if (winner === 'tie') {
+                            state.winnerShown = true;
+                            sound.playWinner();
+                            winnerEmoji.textContent = '🤝';
+                            winnerTitle.textContent = "🤝 IT'S A TIE! 🤝";
+                            winnerTitle.className = 'winner-title';
+                            finalScoreRed.textContent = state.scoreRed;
+                            finalScoreBlue.textContent = state.scoreBlue;
+                            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                            document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
+                            winnerOverlay.classList.add('show');
+                            launchConfetti('#f9d976');
+                            db.ref(GAME_PATH).update({ winnerShown: true, winner: 'tie' });
+                        } else {
+                            showWinner(winner);
+                        }
                     }
                 }
             });
@@ -1738,7 +1809,7 @@
             const hasRed = players && players.red === true;
             const hasBlue = players && players.blue === true;
             
-            // Update Red button - show TAKEN badge if taken
+            // Update Red button
             if (state.role !== 'red' && !state.roleLocked) {
                 if (hasRed) {
                     redBtn.classList.add('taken');
@@ -1751,7 +1822,7 @@
                 }
             }
             
-            // Update Blue button - show TAKEN badge if taken
+            // Update Blue button
             if (state.role !== 'blue' && !state.roleLocked) {
                 if (hasBlue) {
                     blueBtn.classList.add('taken');
@@ -1784,6 +1855,7 @@
             state.winnerShown = false;
             state.hasRed = false;
             state.hasBlue = false;
+            state.winner = null;
             
             clearCooldown();
             
@@ -1805,7 +1877,8 @@
             viewerBtn.disabled = false;
             roleLockedMsg.classList.remove('show');
             
-            closeWinner();
+            winnerOverlay.classList.remove('show');
+            confettiContainer.innerHTML = '';
         }
 
         function initializeGame() {
@@ -1827,6 +1900,7 @@
                 redCompleted: false,
                 blueCompleted: false,
                 winnerShown: false,
+                winner: null,
                 created: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1871,6 +1945,7 @@
                         redCompleted: false,
                         blueCompleted: false,
                         winnerShown: false,
+                        winner: null,
                         created: firebase.database.ServerValue.TIMESTAMP
                     };
                 }
@@ -1950,12 +2025,12 @@
                 state.redCompleted = data.redCompleted || false;
                 state.blueCompleted = data.blueCompleted || false;
                 state.winnerShown = data.winnerShown || false;
+                state.winner = data.winner || null;
                 
                 const players = data.players || {};
                 state.hasRed = players.red === true;
                 state.hasBlue = players.blue === true;
                 
-                // CRITICAL: Check if both teams are present
                 if (state.hasRed && state.hasBlue) {
                     state.gameStarted = true;
                     statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Game is on!`;
@@ -1968,9 +2043,13 @@
                 gameArea.classList.add('active');
                 updateUI();
                 
-                // Show questions immediately if both teams are present
                 if (state.gameStarted) {
                     showQuestionForPlayer();
+                }
+                
+                // If game already ended on Firebase, sync winner
+                if (state.gameEnded && !state.winnerShown) {
+                    showWinner(state.winner || 'red');
                 }
                 
                 saveGameState();
@@ -2071,6 +2150,9 @@
             showQuestionForPlayer();
             nextQuestionBtn.style.display = 'none';
         });
+        
+        // Winner Continue button - resets the game for ALL players
+        winnerContinueBtn.addEventListener('click', closeWinnerAndReset);
 
         // ============================================
         // INIT
@@ -2089,7 +2171,8 @@
         console.log('✅ "TAKEN" badge shows for taken teams');
         console.log('✅ Correct answer NOT revealed on wrong answer');
         console.log('✅ Game starts automatically when both teams join!');
-        console.log('✅ Real-time sync works for all players!');
+        console.log('✅ Winner screen shows for ALL players and viewers!');
+        console.log('✅ "Awesome! Continue" resets the game for everyone!');
     </script>
 </body>
 </html>
