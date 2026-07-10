@@ -88,6 +88,8 @@
             border-color: #f9d976;
             background: #3d6485;
             box-shadow: 0 0 20px #f9d97644;
+            cursor: not-allowed;
+            opacity: 0.8;
         }
         .role-btn:disabled {
             opacity: 0.5;
@@ -118,6 +120,10 @@
             border-color: #6a8aaa;
             background: #2a5a7a;
             box-shadow: 0 0 20px #6a8aaa44;
+        }
+        .role-btn.locked {
+            cursor: not-allowed;
+            opacity: 0.7;
         }
         .game-area {
             display: none;
@@ -359,6 +365,18 @@
             opacity: 0.6;
             margin-top: 6px;
         }
+        .role-locked-msg {
+            background: #c94a4a33;
+            border: 1px solid #c94a4a;
+            border-radius: 20px;
+            padding: 8px 16px;
+            font-size: 0.85rem;
+            margin-top: 10px;
+            display: none;
+        }
+        .role-locked-msg.show {
+            display: block;
+        }
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
             .options-grid { grid-template-columns: 1fr; }
@@ -390,6 +408,10 @@
             <button class="role-btn viewer" id="viewerBtn">👁️ Viewer</button>
         </div>
 
+        <div class="role-locked-msg" id="roleLockedMsg">
+            🔒 Your role is locked for this game. Use "Force Reset" to start a new game.
+        </div>
+
         <!-- Admin Actions -->
         <div class="admin-actions">
             <button class="btn success" id="forceResetBtn" style="font-size:0.9rem; padding:8px 16px;">
@@ -411,7 +433,7 @@
             </div>
 
             <div class="tug-canvas-wrap">
-                <canvas id="tugCanvas" width="700" height="160"></canvas>
+                <canvas id="tugCanvas" width="700" height="180"></canvas>
                 <div class="tug-labels">
                     <span>🔴 Team Red</span>
                     <span>⚡ PULL!</span>
@@ -499,7 +521,8 @@
             connected: false,
             listeners: {},
             isJoining: false,
-            isViewer: false
+            isViewer: false,
+            roleLocked: false // Prevents role changes mid-game
         };
 
         // ============================================
@@ -526,341 +549,532 @@
         const forceResetBtn = $('forceResetBtn');
         const leaveBtn = $('leaveBtn');
         const viewerCount = $('viewerCount');
+        const roleLockedMsg = $('roleLockedMsg');
 
         // ============================================
-        // CANVAS DRAWING - TEAM CHARACTERS PULLING
+        // CANVAS DRAWING - REAL ROPE + CHARACTERS
         // ============================================
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            // Ground
-            const groundGrad = ctx.createLinearGradient(0, h-30, 0, h);
-            groundGrad.addColorStop(0, '#2a4a3a');
-            groundGrad.addColorStop(1, '#1a2a1a');
-            ctx.fillStyle = groundGrad;
-            ctx.fillRect(0, h-30, w, 30);
-
             // Sky gradient
-            const skyGrad = ctx.createLinearGradient(0, 0, 0, h-30);
-            skyGrad.addColorStop(0, '#1a2a4a');
-            skyGrad.addColorStop(0.5, '#2a4a6a');
-            skyGrad.addColorStop(1, '#3a5a7a');
+            const skyGrad = ctx.createLinearGradient(0, 0, 0, h-35);
+            skyGrad.addColorStop(0, '#1a2a5a');
+            skyGrad.addColorStop(0.4, '#2a4a7a');
+            skyGrad.addColorStop(0.7, '#4a7a9a');
+            skyGrad.addColorStop(1, '#6a9aaa');
             ctx.fillStyle = skyGrad;
-            ctx.fillRect(0, 0, w, h-30);
+            ctx.fillRect(0, 0, w, h-35);
 
             // Stars
-            ctx.fillStyle = '#ffffff44';
-            for (let i = 0; i < 30; i++) {
+            ctx.fillStyle = '#ffffff66';
+            for (let i = 0; i < 40; i++) {
                 const x = (i * 37 + 13) % w;
-                const y = (i * 23 + 7) % (h-40);
+                const y = (i * 23 + 7) % (h-50);
+                const size = 0.5 + (i % 3) * 0.5;
                 ctx.beginPath();
-                ctx.arc(x, y, 1 + (i % 2), 0, Math.PI * 2);
+                ctx.arc(x, y, size, 0, Math.PI * 2);
                 ctx.fill();
             }
 
-            // Ground line
-            ctx.strokeStyle = '#4a6a4a';
-            ctx.lineWidth = 3;
-            ctx.beginPath();
-            ctx.moveTo(0, h-30);
-            ctx.lineTo(w, h-30);
-            ctx.stroke();
+            // Ground
+            const groundGrad = ctx.createLinearGradient(0, h-35, 0, h);
+            groundGrad.addColorStop(0, '#3a6a3a');
+            groundGrad.addColorStop(0.3, '#2a5a2a');
+            groundGrad.addColorStop(1, '#1a3a1a');
+            ctx.fillStyle = groundGrad;
+            ctx.fillRect(0, h-35, w, 35);
 
-            // Rope - main body
-            const ropeX = 10 + (progress / 100) * (w - 20 - 80);
-            const ropeWidth = 80;
-            
-            // Rope shadow
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.shadowBlur = 10;
-            ctx.shadowBlur = 0;
-            
-            // Rope texture
-            const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
-            ropeGrad.addColorStop(0, '#6a5a3a');
-            ropeGrad.addColorStop(0.2, '#b8a88a');
-            ropeGrad.addColorStop(0.5, '#d4c4a4');
-            ropeGrad.addColorStop(0.8, '#b8a88a');
-            ropeGrad.addColorStop(1, '#6a5a3a');
-            ctx.fillStyle = ropeGrad;
-            ctx.beginPath();
-            ctx.roundRect(ropeX, 45, ropeWidth, 40, 10);
-            ctx.fill();
-
-            // Rope texture lines
-            ctx.strokeStyle = '#5a4a2a';
-            ctx.lineWidth = 2;
-            for (let i = 0; i < 6; i++) {
-                const x = ropeX + 10 + i * 12;
+            // Grass detail
+            ctx.strokeStyle = '#4a8a4a';
+            ctx.lineWidth = 1;
+            for (let i = 0; i < w; i += 6) {
+                const height = 3 + (i % 5);
                 ctx.beginPath();
-                ctx.moveTo(x, 48);
-                ctx.lineTo(x, 82);
+                ctx.moveTo(i, h-35);
+                ctx.lineTo(i + 1, h-35 - height);
                 ctx.stroke();
             }
 
-            // Center knot
-            ctx.shadowBlur = 0;
-            ctx.fillStyle = '#4a3a1a';
+            // Ground line
+            ctx.strokeStyle = '#5a8a5a';
+            ctx.lineWidth = 2;
             ctx.beginPath();
-            ctx.arc(ropeX + ropeWidth/2, 65, 12, 0, Math.PI * 2);
+            ctx.moveTo(0, h-35);
+            ctx.lineTo(w, h-35);
+            ctx.stroke();
+
+            // Center marker on ground
+            ctx.fillStyle = '#ffffff22';
+            ctx.fillRect(w/2 - 1, h-35, 2, 8);
+
+            // ============================================
+            // REAL ROPE - WOVEN TEXTURE
+            // ============================================
+            const ropeX = 10 + (progress / 100) * (w - 20 - 60);
+            const ropeWidth = 60;
+            const ropeY = 45;
+            const ropeHeight = 55;
+
+            // Rope shadow
+            ctx.shadowColor = 'rgba(0,0,0,0.4)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 5;
+            
+            // Rope body with gradient
+            const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
+            ropeGrad.addColorStop(0, '#5a4a2a');
+            ropeGrad.addColorStop(0.15, '#8a7a5a');
+            ropeGrad.addColorStop(0.3, '#b8a88a');
+            ropeGrad.addColorStop(0.5, '#c8b89a');
+            ropeGrad.addColorStop(0.7, '#b8a88a');
+            ropeGrad.addColorStop(0.85, '#8a7a5a');
+            ropeGrad.addColorStop(1, '#5a4a2a');
+            ctx.fillStyle = ropeGrad;
+            ctx.shadowBlur = 15;
+            ctx.beginPath();
+            ctx.roundRect(ropeX, ropeY, ropeWidth, ropeHeight, 8);
             ctx.fill();
+
+            // Woven rope texture - diagonal lines
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#6a5a3a';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < ropeWidth + 10; i += 8) {
+                const x = ropeX + i;
+                // Diagonal lines going right
+                ctx.beginPath();
+                ctx.moveTo(x, ropeY);
+                ctx.lineTo(x + 12, ropeY + ropeHeight);
+                ctx.stroke();
+                // Diagonal lines going left
+                ctx.beginPath();
+                ctx.moveTo(x + 4, ropeY);
+                ctx.lineTo(x - 8, ropeY + ropeHeight);
+                ctx.stroke();
+            }
+
+            // Rope edge highlights
+            ctx.strokeStyle = '#c8b89a55';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(ropeX + 5, ropeY + 5);
+            ctx.lineTo(ropeX + ropeWidth - 5, ropeY + 5);
+            ctx.stroke();
+
+            // Rope center knot
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
             ctx.fillStyle = '#6a5a3a';
             ctx.beginPath();
-            ctx.arc(ropeX + ropeWidth/2, 65, 8, 0, Math.PI * 2);
+            ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 14, 0, Math.PI * 2);
             ctx.fill();
+            ctx.fillStyle = '#8a7a5a';
+            ctx.beginPath();
+            ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 9, 0, Math.PI * 2);
+            ctx.fill();
+            
+            // Rope knot detail
+            ctx.shadowBlur = 0;
+            ctx.strokeStyle = '#5a4a2a';
+            ctx.lineWidth = 2;
+            for (let i = 0; i < 8; i++) {
+                const angle = (i / 8) * Math.PI * 2;
+                const x = ropeX + ropeWidth/2 + Math.cos(angle) * 11;
+                const y = ropeY + ropeHeight/2 + Math.sin(angle) * 11;
+                ctx.beginPath();
+                ctx.moveTo(ropeX + ropeWidth/2, ropeY + ropeHeight/2);
+                ctx.lineTo(x, y);
+                ctx.stroke();
+            }
 
             // ============================================
-            // 🔴 RED TEAM CHARACTER (left side)
+            // TEAM CHARACTERS
             // ============================================
-            const redX = Math.max(30, ropeX - 60);
-            const redY = h - 50;
             
-            // Body - red
-            ctx.shadowBlur = 0;
+            // ---- RED TEAM CHARACTER (left) ----
+            const redX = Math.max(40, ropeX - 65);
+            const charY = h - 45;
+            
+            // Body
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowOffsetY = 3;
+            
+            // Torso - red
             ctx.fillStyle = '#cc2222';
             ctx.beginPath();
-            ctx.roundRect(redX - 20, redY - 50, 40, 55, 15);
+            ctx.roundRect(redX - 22, charY - 55, 44, 50, 12);
             ctx.fill();
             
-            // Body detail - darker red
-            ctx.fillStyle = '#aa1111';
+            // Chest detail
+            ctx.fillStyle = '#dd3333';
             ctx.beginPath();
-            ctx.roundRect(redX - 15, redY - 40, 30, 35, 10);
+            ctx.roundRect(redX - 16, charY - 45, 32, 30, 8);
             ctx.fill();
+            
+            // Belt
+            ctx.fillStyle = '#4a3a2a';
+            ctx.fillRect(redX - 20, charY - 15, 40, 6);
+            ctx.fillStyle = '#f9d976';
+            ctx.fillRect(redX - 6, charY - 15, 12, 6);
             
             // Head
+            ctx.shadowBlur = 8;
             ctx.fillStyle = '#ffcc99';
             ctx.beginPath();
-            ctx.arc(redX, redY - 60, 18, 0, Math.PI * 2);
+            ctx.arc(redX, charY - 68, 20, 0, Math.PI * 2);
             ctx.fill();
             
             // Helmet
             ctx.fillStyle = '#cc2222';
             ctx.beginPath();
-            ctx.arc(redX, redY - 68, 20, Math.PI, 0);
+            ctx.arc(redX, charY - 76, 22, Math.PI, 0);
             ctx.fill();
             
             // Helmet stripe
             ctx.fillStyle = '#ffdd44';
-            ctx.fillRect(redX - 12, redY - 72, 24, 4);
+            ctx.fillRect(redX - 14, charY - 80, 28, 5);
             
-            // Eyes
+            // Helmet visor
+            ctx.fillStyle = '#4a8aaa';
+            ctx.fillRect(redX - 12, charY - 72, 24, 4);
+            
+            // Eyes - determined look
+            ctx.shadowBlur = 0;
             ctx.fillStyle = '#222';
             ctx.beginPath();
-            ctx.arc(redX - 6, redY - 62, 3, 0, Math.PI * 2);
+            ctx.arc(redX - 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(redX + 6, redY - 62, 3, 0, Math.PI * 2);
+            ctx.arc(redX + 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
             
             // Eye shine
             ctx.fillStyle = '#fff';
             ctx.beginPath();
-            ctx.arc(redX - 5, redY - 63, 1.5, 0, Math.PI * 2);
+            ctx.arc(redX - 5, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(redX + 7, redY - 63, 1.5, 0, Math.PI * 2);
+            ctx.arc(redX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
             
+            // Angry eyebrows
+            ctx.strokeStyle = '#4a2a1a';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(redX - 12, charY - 76);
+            ctx.lineTo(redX - 3, charY - 74);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(redX + 12, charY - 76);
+            ctx.lineTo(redX + 3, charY - 74);
+            ctx.stroke();
+            
+            // Mouth - determined grin
+            ctx.strokeStyle = '#8a4a3a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(redX, charY - 62, 6, 0.1, Math.PI - 0.1);
+            ctx.stroke();
+            
             // Arms pulling rope
+            ctx.shadowBlur = 5;
             ctx.strokeStyle = '#ffcc99';
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
             // Left arm
             ctx.beginPath();
-            ctx.moveTo(redX - 15, redY - 35);
-            ctx.lineTo(ropeX + 5, 55);
+            ctx.moveTo(redX - 20, charY - 38);
+            ctx.lineTo(ropeX + 5, ropeY + 15);
             ctx.stroke();
             // Right arm
             ctx.beginPath();
-            ctx.moveTo(redX + 15, redY - 35);
-            ctx.lineTo(ropeX + 15, 55);
+            ctx.moveTo(redX + 20, charY - 38);
+            ctx.lineTo(ropeX + 15, ropeY + 15);
             ctx.stroke();
             
-            // Hands
+            // Hands gripping rope
             ctx.fillStyle = '#ffcc99';
+            ctx.shadowBlur = 3;
             ctx.beginPath();
-            ctx.arc(ropeX + 5, 55, 6, 0, Math.PI * 2);
+            ctx.arc(ropeX + 5, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(ropeX + 15, 55, 6, 0, Math.PI * 2);
+            ctx.arc(ropeX + 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
+            
+            // Fingers
+            ctx.fillStyle = '#eebb88';
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.arc(ropeX + 5 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ropeX + 15 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
             
             // Legs
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 10;
+            ctx.shadowBlur = 5;
+            ctx.strokeStyle = '#1a2a3a';
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'butt';
+            // Left leg
             ctx.beginPath();
-            ctx.moveTo(redX - 8, redY - 5);
-            ctx.lineTo(redX - 12, redY + 5);
+            ctx.moveTo(redX - 10, charY - 5);
+            ctx.lineTo(redX - 16, charY + 8);
             ctx.stroke();
+            // Right leg
             ctx.beginPath();
-            ctx.moveTo(redX + 8, redY - 5);
-            ctx.lineTo(redX + 12, redY + 5);
+            ctx.moveTo(redX + 10, charY - 5);
+            ctx.lineTo(redX + 16, charY + 8);
             ctx.stroke();
             
             // Shoes
-            ctx.fillStyle = '#222';
+            ctx.fillStyle = '#1a2a3a';
+            ctx.shadowBlur = 3;
             ctx.beginPath();
-            ctx.roundRect(redX - 16, redY + 3, 12, 6, 3);
+            ctx.roundRect(redX - 22, charY + 6, 14, 8, 4);
             ctx.fill();
             ctx.beginPath();
-            ctx.roundRect(redX + 4, redY + 3, 12, 6, 3);
+            ctx.roundRect(redX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
             
-            // Team label
-            ctx.fillStyle = '#ff6b6b';
-            ctx.font = 'bold 14px sans-serif';
-            ctx.textAlign = 'center';
-            ctx.textBaseline = 'bottom';
-            ctx.fillText('🔴 RED', redX, redY - 85);
+            // Shoe detail - red stripe
+            ctx.fillStyle = '#cc2222';
+            ctx.fillRect(redX - 20, charY + 8, 6, 4);
+            ctx.fillRect(redX + 12, charY + 8, 6, 4);
 
-            // ============================================
-            // 🔵 BLUE TEAM CHARACTER (right side)
-            // ============================================
-            const blueX = Math.min(w - 30, ropeX + ropeWidth + 60);
-            const blueY = h - 50;
+            // ---- BLUE TEAM CHARACTER (right) ----
+            const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             
             // Body - blue
-            ctx.shadowBlur = 0;
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowOffsetY = 3;
             ctx.fillStyle = '#2266dd';
             ctx.beginPath();
-            ctx.roundRect(blueX - 20, blueY - 50, 40, 55, 15);
+            ctx.roundRect(blueX - 22, charY - 55, 44, 50, 12);
             ctx.fill();
             
-            // Body detail - darker blue
-            ctx.fillStyle = '#1144aa';
+            // Chest detail
+            ctx.fillStyle = '#3377ee';
             ctx.beginPath();
-            ctx.roundRect(blueX - 15, blueY - 40, 30, 35, 10);
+            ctx.roundRect(blueX - 16, charY - 45, 32, 30, 8);
             ctx.fill();
+            
+            // Belt
+            ctx.fillStyle = '#4a3a2a';
+            ctx.fillRect(blueX - 20, charY - 15, 40, 6);
+            ctx.fillStyle = '#f9d976';
+            ctx.fillRect(blueX - 6, charY - 15, 12, 6);
             
             // Head
+            ctx.shadowBlur = 8;
             ctx.fillStyle = '#ffcc99';
             ctx.beginPath();
-            ctx.arc(blueX, blueY - 60, 18, 0, Math.PI * 2);
+            ctx.arc(blueX, charY - 68, 20, 0, Math.PI * 2);
             ctx.fill();
             
             // Helmet
             ctx.fillStyle = '#2266dd';
             ctx.beginPath();
-            ctx.arc(blueX, blueY - 68, 20, Math.PI, 0);
+            ctx.arc(blueX, charY - 76, 22, Math.PI, 0);
             ctx.fill();
             
             // Helmet stripe
             ctx.fillStyle = '#ffdd44';
-            ctx.fillRect(blueX - 12, blueY - 72, 24, 4);
+            ctx.fillRect(blueX - 14, charY - 80, 28, 5);
             
-            // Eyes
+            // Helmet visor
+            ctx.fillStyle = '#4a8aaa';
+            ctx.fillRect(blueX - 12, charY - 72, 24, 4);
+            
+            // Eyes - determined look
+            ctx.shadowBlur = 0;
             ctx.fillStyle = '#222';
             ctx.beginPath();
-            ctx.arc(blueX - 6, blueY - 62, 3, 0, Math.PI * 2);
+            ctx.arc(blueX - 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(blueX + 6, blueY - 62, 3, 0, Math.PI * 2);
+            ctx.arc(blueX + 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
             
             // Eye shine
             ctx.fillStyle = '#fff';
             ctx.beginPath();
-            ctx.arc(blueX - 5, blueY - 63, 1.5, 0, Math.PI * 2);
+            ctx.arc(blueX - 5, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(blueX + 7, blueY - 63, 1.5, 0, Math.PI * 2);
+            ctx.arc(blueX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
             
+            // Angry eyebrows
+            ctx.strokeStyle = '#4a2a1a';
+            ctx.lineWidth = 2.5;
+            ctx.beginPath();
+            ctx.moveTo(blueX - 12, charY - 76);
+            ctx.lineTo(blueX - 3, charY - 74);
+            ctx.stroke();
+            ctx.beginPath();
+            ctx.moveTo(blueX + 12, charY - 76);
+            ctx.lineTo(blueX + 3, charY - 74);
+            ctx.stroke();
+            
+            // Mouth - determined grin
+            ctx.strokeStyle = '#8a4a3a';
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.arc(blueX, charY - 62, 6, 0.1, Math.PI - 0.1);
+            ctx.stroke();
+            
             // Arms pulling rope
+            ctx.shadowBlur = 5;
             ctx.strokeStyle = '#ffcc99';
-            ctx.lineWidth = 8;
+            ctx.lineWidth = 10;
+            ctx.lineCap = 'round';
             // Left arm
             ctx.beginPath();
-            ctx.moveTo(blueX - 15, blueY - 35);
-            ctx.lineTo(ropeX + ropeWidth - 5, 55);
+            ctx.moveTo(blueX - 20, charY - 38);
+            ctx.lineTo(ropeX + ropeWidth - 5, ropeY + 15);
             ctx.stroke();
             // Right arm
             ctx.beginPath();
-            ctx.moveTo(blueX + 15, blueY - 35);
-            ctx.lineTo(ropeX + ropeWidth - 15, 55);
+            ctx.moveTo(blueX + 20, charY - 38);
+            ctx.lineTo(ropeX + ropeWidth - 15, ropeY + 15);
             ctx.stroke();
             
-            // Hands
+            // Hands gripping rope
             ctx.fillStyle = '#ffcc99';
+            ctx.shadowBlur = 3;
             ctx.beginPath();
-            ctx.arc(ropeX + ropeWidth - 5, 55, 6, 0, Math.PI * 2);
+            ctx.arc(ropeX + ropeWidth - 5, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
             ctx.beginPath();
-            ctx.arc(ropeX + ropeWidth - 15, 55, 6, 0, Math.PI * 2);
+            ctx.arc(ropeX + ropeWidth - 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
+            
+            // Fingers
+            ctx.fillStyle = '#eebb88';
+            for (let i = -2; i <= 2; i++) {
+                ctx.beginPath();
+                ctx.arc(ropeX + ropeWidth - 5 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(ropeX + ropeWidth - 15 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
+                ctx.fill();
+            }
             
             // Legs
-            ctx.strokeStyle = '#222';
-            ctx.lineWidth = 10;
+            ctx.shadowBlur = 5;
+            ctx.strokeStyle = '#1a2a3a';
+            ctx.lineWidth = 12;
+            ctx.lineCap = 'butt';
+            // Left leg
             ctx.beginPath();
-            ctx.moveTo(blueX - 8, blueY - 5);
-            ctx.lineTo(blueX - 12, blueY + 5);
+            ctx.moveTo(blueX - 10, charY - 5);
+            ctx.lineTo(blueX - 16, charY + 8);
             ctx.stroke();
+            // Right leg
             ctx.beginPath();
-            ctx.moveTo(blueX + 8, blueY - 5);
-            ctx.lineTo(blueX + 12, blueY + 5);
+            ctx.moveTo(blueX + 10, charY - 5);
+            ctx.lineTo(blueX + 16, charY + 8);
             ctx.stroke();
             
             // Shoes
-            ctx.fillStyle = '#222';
+            ctx.fillStyle = '#1a2a3a';
+            ctx.shadowBlur = 3;
             ctx.beginPath();
-            ctx.roundRect(blueX - 16, blueY + 3, 12, 6, 3);
+            ctx.roundRect(blueX - 22, charY + 6, 14, 8, 4);
             ctx.fill();
             ctx.beginPath();
-            ctx.roundRect(blueX + 4, blueY + 3, 12, 6, 3);
+            ctx.roundRect(blueX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
             
-            // Team label
-            ctx.fillStyle = '#6baaff';
-            ctx.font = 'bold 14px sans-serif';
+            // Shoe detail - blue stripe
+            ctx.fillStyle = '#2266dd';
+            ctx.fillRect(blueX - 20, charY + 8, 6, 4);
+            ctx.fillRect(blueX + 12, charY + 8, 6, 4);
+
+            // ============================================
+            // TEAM LABELS ABOVE CHARACTERS
+            // ============================================
+            ctx.shadowBlur = 0;
+            ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillText('🔵 BLUE', blueX, blueY - 85);
+            
+            // Red team label
+            ctx.fillStyle = '#ff6b6b';
+            ctx.fillText('🔴 TEAM RED', redX, charY - 95);
+            
+            // Blue team label
+            ctx.fillStyle = '#6baaff';
+            ctx.fillText('🔵 TEAM BLUE', blueX, charY - 95);
 
             // ============================================
             // WINNER INDICATOR
             // ============================================
             if (progress >= 100) {
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(107, 170, 255, 0.5)';
                 ctx.fillStyle = '#6baaff';
-                ctx.font = 'bold 28px sans-serif';
+                ctx.font = 'bold 32px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('🏆 BLUE TEAM WINS! 🏆', w/2, 30);
+                ctx.fillText('🏆 BLUE TEAM WINS! 🏆', w/2, 25);
             } else if (progress <= 0) {
+                ctx.shadowBlur = 20;
+                ctx.shadowColor = 'rgba(255, 107, 107, 0.5)';
                 ctx.fillStyle = '#ff6b6b';
-                ctx.font = 'bold 28px sans-serif';
+                ctx.font = 'bold 32px sans-serif';
                 ctx.textAlign = 'center';
                 ctx.textBaseline = 'middle';
-                ctx.fillText('🏆 RED TEAM WINS! 🏆', w/2, 30);
+                ctx.fillText('🏆 RED TEAM WINS! 🏆', w/2, 25);
             }
 
-            // Progress bar
-            const barY = 15;
+            // ============================================
+            // PROGRESS BAR
+            // ============================================
+            ctx.shadowBlur = 0;
+            const barY = 12;
             const barW = w - 40;
             const barX = 20;
-            ctx.fillStyle = '#00000044';
+            ctx.fillStyle = '#00000066';
             ctx.beginPath();
-            ctx.roundRect(barX, barY, barW, 8, 4);
+            ctx.roundRect(barX, barY, barW, 10, 5);
             ctx.fill();
             
             // Red progress
-            ctx.fillStyle = '#ff6b6b';
-            ctx.beginPath();
-            ctx.roundRect(barX, barY, (barW * (50 - Math.min(50, progress)) / 50), 8, 4);
-            ctx.fill();
+            if (progress < 50) {
+                ctx.fillStyle = '#ff6b6b';
+                const redW = (barW * (50 - progress) / 50);
+                ctx.beginPath();
+                ctx.roundRect(barX + barW/2 - redW, barY, redW, 10, 5);
+                ctx.fill();
+            }
             
             // Blue progress
-            ctx.fillStyle = '#6baaff';
-            const blueBarWidth = (barW * Math.max(0, progress - 50) / 50);
-            ctx.beginPath();
-            ctx.roundRect(barX + barW/2, barY, blueBarWidth, 8, 4);
-            ctx.fill();
+            if (progress > 50) {
+                ctx.fillStyle = '#6baaff';
+                const blueW = (barW * (progress - 50) / 50);
+                ctx.beginPath();
+                ctx.roundRect(barX + barW/2, barY, blueW, 10, 5);
+                ctx.fill();
+            }
             
             // Center marker
-            ctx.fillStyle = '#ffffff88';
+            ctx.fillStyle = '#ffffff';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(255,255,255,0.3)';
             ctx.beginPath();
-            ctx.arc(barX + barW/2, barY + 4, 6, 0, Math.PI * 2);
+            ctx.arc(barX + barW/2, barY + 5, 7, 0, Math.PI * 2);
+            ctx.fill();
+            ctx.fillStyle = '#f9d976';
+            ctx.beginPath();
+            ctx.arc(barX + barW/2, barY + 5, 4, 0, Math.PI * 2);
             ctx.fill();
         }
 
@@ -890,36 +1104,43 @@
             scoreBlue.textContent = state.scoreBlue;
             drawTug(state.tugProgress);
             
+            // Update role buttons based on locked state
+            if (state.roleLocked) {
+                roleLockedMsg.classList.add('show');
+                redBtn.classList.add('locked');
+                blueBtn.classList.add('locked');
+                viewerBtn.classList.add('locked');
+                redBtn.disabled = true;
+                blueBtn.disabled = true;
+                viewerBtn.disabled = true;
+            } else {
+                roleLockedMsg.classList.remove('show');
+                redBtn.classList.remove('locked');
+                blueBtn.classList.remove('locked');
+                viewerBtn.classList.remove('locked');
+            }
+            
             if (state.role === 'red') {
                 redName.textContent = '🔴 You (Red)';
                 blueName.textContent = '🔵 Opponent (Blue)';
-                playerDisplay.textContent = '👤 Role: Red Team';
+                playerDisplay.textContent = '👤 Role: Red Team 🔒';
                 redBtn.classList.add('selected');
                 blueBtn.classList.remove('selected');
                 viewerBtn.classList.remove('selected');
-                redBtn.disabled = true;
-                blueBtn.disabled = false;
-                viewerBtn.disabled = false;
             } else if (state.role === 'blue') {
                 redName.textContent = '🔴 Opponent (Red)';
                 blueName.textContent = '🔵 You (Blue)';
-                playerDisplay.textContent = '👤 Role: Blue Team';
+                playerDisplay.textContent = '👤 Role: Blue Team 🔒';
                 blueBtn.classList.add('selected');
                 redBtn.classList.remove('selected');
                 viewerBtn.classList.remove('selected');
-                blueBtn.disabled = true;
-                redBtn.disabled = false;
-                viewerBtn.disabled = false;
             } else if (state.role === 'viewer') {
                 redName.textContent = '🔴 Team Red';
                 blueName.textContent = '🔵 Team Blue';
-                playerDisplay.textContent = '👁️ Role: Viewer';
+                playerDisplay.textContent = '👁️ Role: Viewer 🔒';
                 viewerBtn.classList.add('selected');
                 redBtn.classList.remove('selected');
                 blueBtn.classList.remove('selected');
-                redBtn.disabled = false;
-                blueBtn.disabled = false;
-                viewerBtn.disabled = true;
             } else {
                 redName.textContent = '🔴 Team Red';
                 blueName.textContent = '🔵 Team Blue';
@@ -927,9 +1148,6 @@
                 redBtn.classList.remove('selected');
                 blueBtn.classList.remove('selected');
                 viewerBtn.classList.remove('selected');
-                redBtn.disabled = false;
-                blueBtn.disabled = false;
-                viewerBtn.disabled = false;
             }
         }
 
@@ -983,7 +1201,7 @@
         }
 
         // ============================================
-        // HANDLE ANSWER - ROPE MOVES ONLY ON CORRECT
+        // HANDLE ANSWER
         // ============================================
         function handleOptionClick(selectedIdx) {
             if (state.answering || !state.role || !state.gameStarted || state.role === 'viewer') return;
@@ -1076,15 +1294,12 @@
                 onlineStatus.style.color = '#4caf84';
                 loadingOverlay.classList.add('hidden');
                 
-                // Update viewer count
                 const viewers = data.viewers || {};
                 const viewerCountNum = Object.keys(viewers).length;
                 viewerCount.textContent = `👁️ Viewers: ${viewerCountNum}`;
                 
-                // Update role button states
                 updateRoleButtons(data.players);
                 
-                // Update game state from Firebase
                 const oldScoreRed = state.scoreRed;
                 const oldScoreBlue = state.scoreBlue;
                 
@@ -1095,7 +1310,6 @@
                 state.blue_questionIdx = data.blue_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
                 
-                // Check if both teams are here
                 const players = data.players || {};
                 const hasRed = players.red === true;
                 const hasBlue = players.blue === true;
@@ -1128,7 +1342,7 @@
             const hasRed = players && players.red === true;
             const hasBlue = players && players.blue === true;
             
-            if (state.role !== 'red') {
+            if (state.role !== 'red' && !state.roleLocked) {
                 redBtn.classList.toggle('taken', hasRed);
                 redBtn.disabled = hasRed;
                 if (hasRed) {
@@ -1138,7 +1352,7 @@
                 }
             }
             
-            if (state.role !== 'blue') {
+            if (state.role !== 'blue' && !state.roleLocked) {
                 blueBtn.classList.toggle('taken', hasBlue);
                 blueBtn.disabled = hasBlue;
                 if (hasBlue) {
@@ -1159,6 +1373,7 @@
             state.blue_questionIdx = 0;
             state.answering = false;
             state.isJoining = false;
+            state.roleLocked = false;
             
             gameArea.classList.remove('active');
             updateUI();
@@ -1167,14 +1382,15 @@
             statusMsg.innerHTML = '👥 Choose a role above';
             nextQuestionBtn.style.display = 'none';
             
-            redBtn.classList.remove('selected', 'taken');
-            blueBtn.classList.remove('selected', 'taken');
-            viewerBtn.classList.remove('selected');
+            redBtn.classList.remove('selected', 'taken', 'locked');
+            blueBtn.classList.remove('selected', 'taken', 'locked');
+            viewerBtn.classList.remove('selected', 'locked');
             redBtn.innerHTML = '🔴 Team Red';
             blueBtn.innerHTML = '🔵 Team Blue';
             redBtn.disabled = false;
             blueBtn.disabled = false;
             viewerBtn.disabled = false;
+            roleLockedMsg.classList.remove('show');
         }
 
         function initializeGame() {
@@ -1201,11 +1417,15 @@
         }
 
         // ============================================
-        // ROLE SELECTION USING TRANSACTION
+        // ROLE SELECTION - LOCKED ONCE CHOSEN
         // ============================================
         function selectRole(role) {
             if (state.role === role) return;
             if (state.isJoining) return;
+            if (state.roleLocked) {
+                alert('🔒 Your role is locked for this game. Use "Force Reset" to start a new game.');
+                return;
+            }
             
             state.isJoining = true;
             statusMsg.innerHTML = '<span class="spinner"></span> Joining...';
@@ -1257,6 +1477,7 @@
                     if (role === 'viewer') {
                         state.role = 'viewer';
                         state.isViewer = true;
+                        state.roleLocked = true;
                         gameArea.classList.add('active');
                         updateUI();
                         showQuestionForPlayer();
@@ -1276,6 +1497,7 @@
                 if (role === 'viewer') {
                     state.role = 'viewer';
                     state.isViewer = true;
+                    state.roleLocked = true;
                     gameArea.classList.add('active');
                     updateUI();
                     showQuestionForPlayer();
@@ -1285,6 +1507,7 @@
                 
                 state.role = role;
                 state.isViewer = false;
+                state.roleLocked = true;
                 state.scoreRed = data.scoreRed || 0;
                 state.scoreBlue = data.scoreBlue || 0;
                 state.tugProgress = data.tugProgress || 50;
@@ -1312,7 +1535,7 @@
         }
 
         // ============================================
-        // LEAVE GAME
+        // LEAVE GAME - UNLOCKS ROLE
         // ============================================
         function leaveGame() {
             if (!state.role) {
@@ -1320,7 +1543,7 @@
                 return;
             }
             
-            if (confirm(`Leave the game as ${state.role === 'viewer' ? 'Viewer' : state.role === 'red' ? 'Red Team' : 'Blue Team'}?`)) {
+            if (confirm(`Leave the game as ${state.role === 'viewer' ? 'Viewer' : state.role === 'red' ? 'Red Team' : 'Blue Team'}?\n\nYour role will be unlocked for others.`)) {
                 const gameRef = db.ref(GAME_PATH);
                 
                 if (state.role === 'viewer') {
@@ -1331,6 +1554,7 @@
                         }
                         state.role = null;
                         state.isViewer = false;
+                        state.roleLocked = false;
                         gameArea.classList.remove('active');
                         resetUIState();
                         statusMsg.innerHTML = '👋 You left the game. Choose a role to rejoin.';
@@ -1340,6 +1564,7 @@
                     const playerRef = db.ref(`${GAME_PATH}/players/${state.role}`);
                     playerRef.set(false).then(() => {
                         state.role = null;
+                        state.roleLocked = false;
                         gameArea.classList.remove('active');
                         resetUIState();
                         statusMsg.innerHTML = '👋 You left the game. Choose a role to rejoin.';
@@ -1408,11 +1633,10 @@
         listenToGame();
         
         console.log('🎮 Tug of War loaded! PIN: 55555');
-        console.log('📌 Share this page with friends on any device!');
-        console.log('🔑 Fixed PIN: 55555');
+        console.log('🔒 Roles are LOCKED once chosen!');
         console.log('🔴 Team Red vs 🔵 Team Blue');
         console.log('👁️ Viewers can watch without playing');
-        console.log('✅ Rope moves ONLY on correct answers!');
+        console.log('✅ Real rope with woven texture!');
     </script>
 </body>
 </html>
