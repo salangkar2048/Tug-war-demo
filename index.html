@@ -17,7 +17,7 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #ffffff;
+            background: #f5f7fa;
             min-height: 100vh;
             display: flex;
             align-items: center;
@@ -31,7 +31,7 @@
             background: #ffffff;
             border-radius: 40px;
             padding: 24px 20px 32px;
-            box-shadow: 0 4px 20px rgba(0,0,0,0.08);
+            box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             text-align: center;
             position: relative;
             border: 1px solid #e8edf2;
@@ -84,17 +84,13 @@
             max-width: 180px;
             position: relative;
         }
-        .role-btn:active {
-            transform: scale(0.96);
-        }
-        .role-btn:hover {
-            background: #e8edf2;
-        }
+        .role-btn:active { transform: scale(0.96); }
+        .role-btn:hover { background: #e8edf2; }
         .role-btn.selected {
             border-color: #e63946;
             background: #e63946;
             color: #fff;
-            box-shadow: 0 0 20px rgba(230, 57, 70, 0.2);
+            box-shadow: 0 0 20px rgba(230,57,70,0.2);
             cursor: not-allowed;
             opacity: 0.8;
         }
@@ -127,7 +123,7 @@
             border-color: #4a7a9a;
             background: #4a7a9a;
             color: #fff;
-            box-shadow: 0 0 20px rgba(74, 122, 154, 0.2);
+            box-shadow: 0 0 20px rgba(74,122,154,0.2);
         }
         .role-btn.locked {
             cursor: not-allowed;
@@ -136,9 +132,7 @@
         .game-area {
             display: none;
         }
-        .game-area.active {
-            display: block;
-        }
+        .game-area.active { display: block; }
         .team-row {
             display: flex;
             justify-content: space-between;
@@ -155,12 +149,8 @@
             min-width: 100px;
             border: 1px solid #e0e8f0;
         }
-        .team-name.red {
-            border-left: 4px solid #e63946;
-        }
-        .team-name.blue {
-            border-right: 4px solid #2a6fdb;
-        }
+        .team-name.red { border-left: 4px solid #e63946; }
+        .team-name.blue { border-right: 4px solid #2a6fdb; }
         .team-progress {
             font-size: 0.7rem;
             opacity: 0.6;
@@ -253,13 +243,8 @@
             position: relative;
             min-height: 60px;
         }
-        .option-btn:active {
-            background: #e0e8f0;
-            transform: scale(0.96);
-        }
-        .option-btn:hover {
-            background: #e8edf2;
-        }
+        .option-btn:active { background: #e0e8f0; transform: scale(0.96); }
+        .option-btn:hover { background: #e8edf2; }
         .option-btn.correct {
             background: #4caf84;
             border-color: #2e7d5e;
@@ -410,9 +395,7 @@
             flex-direction: column;
             gap: 20px;
         }
-        .loading-overlay.hidden {
-            display: none;
-        }
+        .loading-overlay.hidden { display: none; }
         .loading-spinner {
             width: 50px;
             height: 50px;
@@ -444,9 +427,7 @@
             display: none;
             color: #1a2a3a;
         }
-        .role-locked-msg.show {
-            display: block;
-        }
+        .role-locked-msg.show { display: block; }
 
         /* Winner Celebration Overlay - Shows for ALL users */
         .winner-overlay {
@@ -480,7 +461,7 @@
             text-align: center;
             animation: celebrateIn 0.6s ease;
             border: 3px solid #f9d976;
-            box-shadow: 0 0 60px rgba(249, 217, 118, 0.3);
+            box-shadow: 0 0 60px rgba(249,217,118,0.3);
         }
         @keyframes celebrateIn {
             0% { transform: scale(0.5); opacity: 0; }
@@ -492,7 +473,7 @@
             animation: bounce 0.8s ease infinite;
         }
         @keyframes bounce {
-            0%, 100% { transform: translateY(0); }
+            0%,100% { transform: translateY(0); }
             50% { transform: translateY(-20px); }
         }
         .winner-title {
@@ -583,9 +564,7 @@
             transition: 0.2s;
             color: #fff;
         }
-        .sound-toggle:hover {
-            transform: scale(1.1);
-        }
+        .sound-toggle:hover { transform: scale(1.1); }
 
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
@@ -605,7 +584,7 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
-        <div style="font-size: 1.2rem; color: #1a2a3a;">Connecting to game...</div>
+        <div style="font-size:1.2rem; color:#1a2a3a;">Connecting to game...</div>
     </div>
 
     <!-- Winner Celebration Overlay - Shows for EVERYONE -->
@@ -633,10 +612,8 @@
         <h1>⚡ TUG OF WAR</h1>
         <div class="sub">🌐 live multiplayer · any device</div>
         
-        <!-- Fixed PIN Display -->
         <div class="pin-display">🔑 55555</div>
         
-        <!-- Role Selection -->
         <div class="join-instruction">
             🎯 Choose your role: <strong>Team Red</strong>, <strong>Team Blue</strong>, or <strong>👁️ Viewer</strong>
         </div>
@@ -650,7 +627,6 @@
             🔒 Your role is locked for this game. Use "Force Reset" to start a new game.
         </div>
 
-        <!-- Admin Actions -->
         <div class="admin-actions">
             <button class="btn success" id="forceResetBtn" style="font-size:0.9rem; padding:8px 16px;">
                 🔄 Force Reset
@@ -660,7 +636,6 @@
             </button>
         </div>
 
-        <!-- Game Area -->
         <div class="game-area" id="gameArea">
             <div class="team-row">
                 <span class="team-name red" id="redName">
@@ -718,62 +693,44 @@
   appId: "1:431145733371:web:d3a00ea82b75393d57b45e"
 };
 
-        // Initialize Firebase
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
         // ============================================
-        // SOUND EFFECTS
+        // SOUND MANAGER
         // ============================================
         class SoundManager {
             constructor() {
                 this.enabled = true;
                 this.audioContext = null;
-                this.initialized = false;
-                this.gainNode = null;
             }
 
             init() {
                 try {
                     if (!this.audioContext) {
                         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
-                        this.gainNode = this.audioContext.createGain();
-                        this.gainNode.gain.value = 0.5;
-                        this.gainNode.connect(this.audioContext.destination);
-                        this.initialized = true;
                     }
                     if (this.audioContext && this.audioContext.state === 'suspended') {
                         this.audioContext.resume();
                     }
-                } catch (e) {
-                    console.warn('Web Audio not supported:', e);
-                }
+                } catch (e) { /* ignore */ }
             }
 
-            ensureContext() {
-                this.init();
-                if (!this.audioContext) return false;
-                if (this.audioContext.state === 'suspended') {
-                    this.audioContext.resume();
-                }
-                return this.audioContext.state === 'running';
-            }
-
-            playTone(frequency, duration, type = 'sine', volume = 0.3) {
+            playTone(freq, dur, type = 'sine', vol = 0.3) {
                 if (!this.enabled) return;
                 this.init();
-                if (!this.ensureContext()) return;
+                if (!this.audioContext) return;
                 try {
-                    const oscillator = this.audioContext.createOscillator();
+                    const osc = this.audioContext.createOscillator();
                     const gain = this.audioContext.createGain();
-                    oscillator.connect(gain);
-                    gain.connect(this.gainNode || this.audioContext.destination);
-                    oscillator.type = type;
-                    oscillator.frequency.value = frequency;
-                    gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
-                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
-                    oscillator.start(this.audioContext.currentTime);
-                    oscillator.stop(this.audioContext.currentTime + duration);
+                    osc.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    osc.type = type;
+                    osc.frequency.value = freq;
+                    gain.gain.setValueAtTime(vol, this.audioContext.currentTime);
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + dur);
+                    osc.start(this.audioContext.currentTime);
+                    osc.stop(this.audioContext.currentTime + dur);
                 } catch (e) { /* ignore */ }
             }
 
@@ -798,16 +755,12 @@
                 this.playTone(600, 0.05, 'sine', 0.1);
             }
 
-            playWinner(team) {
-                const notes = [523, 587, 659, 784, 880, 988, 1047];
+            playWinner() {
+                const notes = [523,587,659,784,880,988,1047];
                 notes.forEach((freq, i) => {
-                    setTimeout(() => {
-                        this.playTone(freq, 0.15, 'square', 0.25);
-                    }, i * 100);
+                    setTimeout(() => this.playTone(freq, 0.15, 'square', 0.25), i * 100);
                 });
-                setTimeout(() => {
-                    this.playTone(1047, 0.3, 'square', 0.3);
-                }, 800);
+                setTimeout(() => this.playTone(1047, 0.3, 'square', 0.3), 800);
                 setTimeout(() => {
                     this.playTone(880, 0.2, 'square', 0.25);
                     setTimeout(() => this.playTone(1047, 0.3, 'square', 0.3), 150);
@@ -826,23 +779,17 @@
 
         const sound = new SoundManager();
 
-        // Sound toggle
         const soundToggle = document.getElementById('soundToggle');
         soundToggle.addEventListener('click', () => {
             const enabled = sound.toggle();
             soundToggle.textContent = enabled ? '🔊' : '🔇';
         });
 
-        // Initialize sound on interaction
-        function initSoundOnInteraction() {
-            sound.init();
-            sound.playTone(600, 0.1, 'sine', 0.15);
-        }
-        document.addEventListener('click', initSoundOnInteraction, { once: true });
-        document.addEventListener('touchstart', initSoundOnInteraction, { once: true });
+        document.addEventListener('click', () => sound.init(), { once: true });
+        document.addEventListener('touchstart', () => sound.init(), { once: true });
 
         // ============================================
-        // SAMPLE QUESTIONS (20+)
+        // SAMPLE QUESTIONS
         // ============================================
         const SAMPLE_QUESTIONS = [
             { q: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], correct: 0 },
@@ -894,7 +841,8 @@
             cooldownTimer: null,
             cooldownSeconds: 10,
             redCompleted: false,
-            blueCompleted: false
+            blueCompleted: false,
+            winnerShown: false // NEW: prevent duplicate winner shows
         };
 
         // ============================================
@@ -933,13 +881,12 @@
         const confettiContainer = $('confettiContainer');
 
         // ============================================
-        // CANVAS DRAWING
+        // CANVAS DRAWING (simplified)
         // ============================================
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            // Sky gradient - light for white background
             const skyGrad = ctx.createLinearGradient(0, 0, 0, h-35);
             skyGrad.addColorStop(0, '#d0dce8');
             skyGrad.addColorStop(0.4, '#dce8f0');
@@ -948,7 +895,6 @@
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, w, h-35);
 
-            // Clouds
             ctx.fillStyle = '#ffffffaa';
             for (let i = 0; i < 5; i++) {
                 const x = (i * 150 + 20) % w;
@@ -964,7 +910,6 @@
                 ctx.fill();
             }
 
-            // Ground
             const groundGrad = ctx.createLinearGradient(0, h-35, 0, h);
             groundGrad.addColorStop(0, '#8aaa7a');
             groundGrad.addColorStop(0.3, '#7a9a6a');
@@ -972,7 +917,6 @@
             ctx.fillStyle = groundGrad;
             ctx.fillRect(0, h-35, w, 35);
 
-            // Grass
             ctx.strokeStyle = '#6a8a5a';
             ctx.lineWidth = 1.5;
             for (let i = 0; i < w; i += 5) {
@@ -983,7 +927,6 @@
                 ctx.stroke();
             }
 
-            // Ground line
             ctx.strokeStyle = '#5a7a4a';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -991,7 +934,6 @@
             ctx.lineTo(w, h-35);
             ctx.stroke();
 
-            // Center marker
             ctx.fillStyle = '#5a7a4a66';
             ctx.fillRect(w/2 - 1, h-35, 2, 8);
 
@@ -1001,12 +943,10 @@
             const ropeY = 45;
             const ropeHeight = 55;
 
-            // Rope shadow
             ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.shadowBlur = 15;
             ctx.shadowOffsetY = 4;
             
-            // Main rope body
             const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
             ropeGrad.addColorStop(0, '#8a7a5a');
             ropeGrad.addColorStop(0.2, '#b8a88a');
@@ -1021,7 +961,6 @@
             ctx.roundRect(ropeX, ropeY, ropeWidth, ropeHeight, 10);
             ctx.fill();
 
-            // Rope texture
             ctx.shadowBlur = 0;
             ctx.strokeStyle = '#7a6a4a';
             ctx.lineWidth = 1.5;
@@ -1037,7 +976,6 @@
                 ctx.stroke();
             }
 
-            // Rope edge highlights
             ctx.strokeStyle = '#e0d4b466';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -1049,7 +987,6 @@
             ctx.lineTo(ropeX + ropeWidth - 5, ropeY + ropeHeight - 5);
             ctx.stroke();
 
-            // Rope center knot
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.fillStyle = '#8a7a5a';
@@ -1074,7 +1011,6 @@
                 ctx.stroke();
             }
 
-            // Pull arrow
             ctx.shadowBlur = 0;
             ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
@@ -1082,15 +1018,15 @@
             ctx.fillStyle = '#e6394688';
             ctx.fillText('⚡', ropeX + ropeWidth/2, ropeY + ropeHeight/2 + 1);
 
-            // TEAM CHARACTERS - Simplified for performance
+            // Team characters - simplified for performance
             const redX = Math.max(40, ropeX - 65);
+            const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             const charY = h - 45;
-            
-            // RED TEAM
+
+            // Red team
             ctx.shadowBlur = 8;
             ctx.shadowColor = 'rgba(0,0,0,0.1)';
             ctx.shadowOffsetY = 3;
-            
             ctx.fillStyle = '#e63946';
             ctx.beginPath();
             ctx.roundRect(redX - 22, charY - 55, 44, 50, 12);
@@ -1133,16 +1069,6 @@
             ctx.beginPath();
             ctx.arc(redX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = '#4a2a1a';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(redX - 12, charY - 76);
-            ctx.lineTo(redX - 3, charY - 74);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(redX + 12, charY - 76);
-            ctx.lineTo(redX + 3, charY - 74);
-            ctx.stroke();
 
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#f5d0b8';
@@ -1187,9 +1113,7 @@
             ctx.roundRect(redX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
 
-            // BLUE TEAM
-            const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
-            
+            // Blue team
             ctx.shadowBlur = 8;
             ctx.shadowColor = 'rgba(0,0,0,0.1)';
             ctx.shadowOffsetY = 3;
@@ -1235,16 +1159,6 @@
             ctx.beginPath();
             ctx.arc(blueX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
-            ctx.strokeStyle = '#4a2a1a';
-            ctx.lineWidth = 2.5;
-            ctx.beginPath();
-            ctx.moveTo(blueX - 12, charY - 76);
-            ctx.lineTo(blueX - 3, charY - 74);
-            ctx.stroke();
-            ctx.beginPath();
-            ctx.moveTo(blueX + 12, charY - 76);
-            ctx.lineTo(blueX + 3, charY - 74);
-            ctx.stroke();
 
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#f5d0b8';
@@ -1300,9 +1214,7 @@
             ctx.fillText('🔵 TEAM BLUE', blueX, charY - 95);
 
             // Progress bar
-            const barY = 12;
-            const barW = w - 40;
-            const barX = 20;
+            const barY = 12, barW = w - 40, barX = 20;
             ctx.fillStyle = '#1a2a3a44';
             ctx.beginPath();
             ctx.roundRect(barX, barY, barW, 10, 5);
@@ -1336,13 +1248,14 @@
         }
 
         // ============================================
-        // WINNER CELEBRATION - SHOWS FOR EVERYONE
+        // WINNER CELEBRATION - FIXED FOR ALL DEVICES
         // ============================================
         function showWinner(winner) {
-            if (state.gameEnded) return;
+            if (state.gameEnded || state.winnerShown) return;
             state.gameEnded = true;
+            state.winnerShown = true;
             
-            sound.playWinner(winner);
+            sound.playWinner();
             
             const isRedWin = winner === 'red';
             winnerEmoji.textContent = isRedWin ? '🔴🏆' : '🔵🏆';
@@ -1351,20 +1264,20 @@
             finalScoreRed.textContent = state.scoreRed;
             finalScoreBlue.textContent = state.scoreBlue;
             
-            // Disable all game interactions for everyone
+            // Disable ALL interactions
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
             clearCooldown();
             
-            // Save game ended state to Firebase so all devices show winner
+            // CRITICAL: Save game ended state to Firebase
             saveGameState();
             
-            // Show winner overlay on all devices
+            // Show winner overlay
             winnerOverlay.classList.add('show');
             launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
             
-            setTimeout(() => sound.playWinner(winner), 1000);
-            setTimeout(() => sound.playWinner(winner), 2000);
+            setTimeout(() => sound.playWinner(), 1000);
+            setTimeout(() => sound.playWinner(), 2000);
         }
 
         function closeWinner() {
@@ -1528,14 +1441,16 @@
                 viewerBtn.classList.remove('selected');
             }
             
-            // Check for winner
+            // Check for winner - only if not already ended
             const totalQ = state.totalQuestions;
-            if (state.red_questionIdx >= totalQ && !state.redCompleted && !state.gameEnded) {
-                state.redCompleted = true;
-                showWinner('red');
-            } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted && !state.gameEnded) {
-                state.blueCompleted = true;
-                showWinner('blue');
+            if (!state.gameEnded) {
+                if (state.red_questionIdx >= totalQ && !state.redCompleted) {
+                    state.redCompleted = true;
+                    showWinner('red');
+                } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted) {
+                    state.blueCompleted = true;
+                    showWinner('blue');
+                }
             }
         }
 
@@ -1689,6 +1604,7 @@
                 gameEnded: state.gameEnded,
                 redCompleted: state.redCompleted,
                 blueCompleted: state.blueCompleted,
+                winnerShown: state.winnerShown,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1732,6 +1648,7 @@
                 state.gameEnded = data.gameEnded || false;
                 state.redCompleted = data.redCompleted || false;
                 state.blueCompleted = data.blueCompleted || false;
+                state.winnerShown = data.winnerShown || false;
                 
                 const players = data.players || {};
                 const hasRed = players.red === true;
@@ -1761,21 +1678,42 @@
                     showQuestionForPlayer();
                 }
                 
-                // If game ended in Firebase, show winner on all devices
-                if (state.gameEnded && !winnerOverlay.classList.contains('show')) {
-                    const winner = state.tugProgress >= 100 ? 'blue' : 'red';
-                    // Reconstruct winner display
-                    state.gameEnded = true;
-                    const isRedWin = winner === 'red';
-                    winnerEmoji.textContent = isRedWin ? '🔴🏆' : '🔵🏆';
-                    winnerTitle.textContent = isRedWin ? '🎉 RED TEAM WINS! 🎉' : '🎉 BLUE TEAM WINS! 🎉';
-                    winnerTitle.className = 'winner-title ' + (isRedWin ? 'red-win' : 'blue-win');
-                    finalScoreRed.textContent = state.scoreRed;
-                    finalScoreBlue.textContent = state.scoreBlue;
-                    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-                    document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
-                    winnerOverlay.classList.add('show');
-                    launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
+                // CRITICAL FIX: If game ended in Firebase, show winner on ALL devices
+                if (state.gameEnded && !state.winnerShown) {
+                    // Determine winner based on who completed first or score
+                    let winner = 'red';
+                    if (state.blueCompleted && !state.redCompleted) {
+                        winner = 'blue';
+                    } else if (state.redCompleted && !state.blueCompleted) {
+                        winner = 'red';
+                    } else if (state.redCompleted && state.blueCompleted) {
+                        // Both completed - compare scores
+                        if (state.scoreBlue > state.scoreRed) winner = 'blue';
+                        else if (state.scoreRed > state.scoreBlue) winner = 'red';
+                        else winner = 'tie';
+                    } else {
+                        // Fallback: check tug progress
+                        winner = state.tugProgress >= 100 ? 'blue' : 'red';
+                    }
+                    
+                    if (winner === 'tie') {
+                        // Tie celebration
+                        state.winnerShown = true;
+                        sound.playWinner();
+                        winnerEmoji.textContent = '🤝';
+                        winnerTitle.textContent = "🤝 IT'S A TIE! 🤝";
+                        winnerTitle.className = 'winner-title';
+                        finalScoreRed.textContent = state.scoreRed;
+                        finalScoreBlue.textContent = state.scoreBlue;
+                        document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                        document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
+                        winnerOverlay.classList.add('show');
+                        launchConfetti('#f9d976');
+                        // Save that winner was shown
+                        db.ref(GAME_PATH).update({ winnerShown: true });
+                    } else {
+                        showWinner(winner);
+                    }
                 }
             });
         }
@@ -1821,6 +1759,7 @@
             state.blueCompleted = false;
             state.totalQuestions = 0;
             state.pullPercentage = 0;
+            state.winnerShown = false;
             
             clearCooldown();
             
@@ -1863,6 +1802,7 @@
                 gameEnded: false,
                 redCompleted: false,
                 blueCompleted: false,
+                winnerShown: false,
                 created: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1906,6 +1846,7 @@
                         gameEnded: false,
                         redCompleted: false,
                         blueCompleted: false,
+                        winnerShown: false,
                         created: firebase.database.ServerValue.TIMESTAMP
                     };
                 }
@@ -1984,6 +1925,7 @@
                 state.gameEnded = data.gameEnded || false;
                 state.redCompleted = data.redCompleted || false;
                 state.blueCompleted = data.blueCompleted || false;
+                state.winnerShown = data.winnerShown || false;
                 
                 const players = data.players || {};
                 const otherTeam = role === 'red' ? 'blue' : 'red';
@@ -2115,7 +2057,7 @@
         console.log('⏳ 10-second cooldown on WRONG answers!');
         console.log('🔊 Sound effects: Competition, Correct, Wrong, Winner!');
         console.log('📱 White background for better visibility!');
-        console.log('🏆 Winner screen shows for ALL players and viewers!');
+        console.log('🏆 Winner screen shows for ALL players and viewers via Firebase sync!');
     </script>
 </body>
 </html>
