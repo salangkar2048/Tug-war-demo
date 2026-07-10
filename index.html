@@ -103,6 +103,7 @@
             opacity: 0.3;
             cursor: not-allowed;
             border-color: #c94a4a;
+            background: #f0f0f0;
         }
         .role-btn .taken-badge {
             position: absolute;
@@ -114,6 +115,12 @@
             padding: 4px 8px;
             font-size: 0.7rem;
             font-weight: 700;
+            animation: badgePop 0.3s ease;
+        }
+        @keyframes badgePop {
+            0% { transform: scale(0); }
+            70% { transform: scale(1.2); }
+            100% { transform: scale(1); }
         }
         .role-btn.viewer {
             border-color: #b0c8d8;
@@ -253,6 +260,11 @@
         .option-btn.wrong {
             background: #e63946;
             border-color: #b71c1c;
+            color: #fff;
+        }
+        .option-btn.reveal-correct {
+            background: #4caf84;
+            border-color: #2e7d5e;
             color: #fff;
         }
         .option-btn:disabled {
@@ -429,7 +441,7 @@
         }
         .role-locked-msg.show { display: block; }
 
-        /* Winner Celebration Overlay - Shows for ALL users */
+        /* Winner Celebration Overlay */
         .winner-overlay {
             position: fixed;
             top: 0;
@@ -545,7 +557,6 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
-        /* Sound toggle button */
         .sound-toggle {
             position: fixed;
             bottom: 20px;
@@ -587,7 +598,7 @@
         <div style="font-size:1.2rem; color:#1a2a3a;">Connecting to game...</div>
     </div>
 
-    <!-- Winner Celebration Overlay - Shows for EVERYONE -->
+    <!-- Winner Celebration Overlay -->
     <div class="winner-overlay" id="winnerOverlay">
         <div class="winner-box">
             <div class="winner-emoji" id="winnerEmoji">🏆</div>
@@ -842,7 +853,7 @@
             cooldownSeconds: 10,
             redCompleted: false,
             blueCompleted: false,
-            winnerShown: false // NEW: prevent duplicate winner shows
+            winnerShown: false
         };
 
         // ============================================
@@ -937,7 +948,6 @@
             ctx.fillStyle = '#5a7a4a66';
             ctx.fillRect(w/2 - 1, h-35, 2, 8);
 
-            // Rope
             const ropeX = 10 + (progress / 100) * (w - 20 - 40);
             const ropeWidth = 40;
             const ropeY = 45;
@@ -1018,7 +1028,6 @@
             ctx.fillStyle = '#e6394688';
             ctx.fillText('⚡', ropeX + ropeWidth/2, ropeY + ropeHeight/2 + 1);
 
-            // Team characters - simplified for performance
             const redX = Math.max(40, ropeX - 65);
             const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             const charY = h - 45;
@@ -1203,7 +1212,6 @@
             ctx.roundRect(blueX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
 
-            // Team labels
             ctx.shadowBlur = 0;
             ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
@@ -1213,7 +1221,6 @@
             ctx.fillStyle = '#2a6fdb';
             ctx.fillText('🔵 TEAM BLUE', blueX, charY - 95);
 
-            // Progress bar
             const barY = 12, barW = w - 40, barX = 20;
             ctx.fillStyle = '#1a2a3a44';
             ctx.beginPath();
@@ -1248,7 +1255,7 @@
         }
 
         // ============================================
-        // WINNER CELEBRATION - FIXED FOR ALL DEVICES
+        // WINNER CELEBRATION
         // ============================================
         function showWinner(winner) {
             if (state.gameEnded || state.winnerShown) return;
@@ -1264,15 +1271,12 @@
             finalScoreRed.textContent = state.scoreRed;
             finalScoreBlue.textContent = state.scoreBlue;
             
-            // Disable ALL interactions
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
             document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
             clearCooldown();
             
-            // CRITICAL: Save game ended state to Firebase
             saveGameState();
             
-            // Show winner overlay
             winnerOverlay.classList.add('show');
             launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
             
@@ -1441,9 +1445,8 @@
                 viewerBtn.classList.remove('selected');
             }
             
-            // Check for winner - only if not already ended
-            const totalQ = state.totalQuestions;
             if (!state.gameEnded) {
+                const totalQ = state.totalQuestions;
                 if (state.red_questionIdx >= totalQ && !state.redCompleted) {
                     state.redCompleted = true;
                     showWinner('red');
@@ -1518,7 +1521,7 @@
         }
 
         // ============================================
-        // HANDLE ANSWER
+        // HANDLE ANSWER - FIXED: No green hint on wrong answer
         // ============================================
         function handleOptionClick(selectedIdx) {
             if (state.cooldownActive) {
@@ -1537,15 +1540,18 @@
             state.answering = true;
 
             const btns = document.querySelectorAll('.option-btn');
-            btns.forEach((b, i) => {
-                b.disabled = true;
-                if (i === qData.correct) b.classList.add('correct');
-                else if (i === selectedIdx && !isCorrect) b.classList.add('wrong');
-            });
-
+            
             if (isCorrect) {
+                // CORRECT: Show green on selected only
                 sound.playCorrect();
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
+                btns.forEach((b, i) => {
+                    b.disabled = true;
+                    if (i === selectedIdx) {
+                        b.classList.add('correct');
+                    }
+                });
+                
                 if (role === 'red') {
                     state.scoreRed += 1;
                     state.tugProgress = Math.max(0, state.tugProgress - state.pullPercentage);
@@ -1574,14 +1580,26 @@
                     }, 800);
                 }
             } else {
+                // WRONG: Only show red on selected, NO green reveal
                 sound.playWrong();
                 statusMsg.innerHTML = '❌ Wrong answer!';
+                btns.forEach((b, i) => {
+                    b.disabled = true;
+                    if (i === selectedIdx) {
+                        b.classList.add('wrong');
+                    }
+                    // DO NOT show correct answer in green
+                });
+                
+                // Start cooldown
                 startCooldown();
                 
                 setTimeout(() => {
                     state.answering = false;
                     btns.forEach((b) => {
                         b.classList.remove('wrong');
+                        // Also remove any lingering classes
+                        b.classList.remove('correct');
                     });
                 }, 500);
             }
@@ -1605,6 +1623,10 @@
                 redCompleted: state.redCompleted,
                 blueCompleted: state.blueCompleted,
                 winnerShown: state.winnerShown,
+                players: {
+                    red: state.role === 'red' || false,
+                    blue: state.role === 'blue' || false
+                },
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1678,26 +1700,22 @@
                     showQuestionForPlayer();
                 }
                 
-                // CRITICAL FIX: If game ended in Firebase, show winner on ALL devices
+                // Sync winner across all devices
                 if (state.gameEnded && !state.winnerShown) {
-                    // Determine winner based on who completed first or score
                     let winner = 'red';
                     if (state.blueCompleted && !state.redCompleted) {
                         winner = 'blue';
                     } else if (state.redCompleted && !state.blueCompleted) {
                         winner = 'red';
                     } else if (state.redCompleted && state.blueCompleted) {
-                        // Both completed - compare scores
                         if (state.scoreBlue > state.scoreRed) winner = 'blue';
                         else if (state.scoreRed > state.scoreBlue) winner = 'red';
                         else winner = 'tie';
                     } else {
-                        // Fallback: check tug progress
                         winner = state.tugProgress >= 100 ? 'blue' : 'red';
                     }
                     
                     if (winner === 'tie') {
-                        // Tie celebration
                         state.winnerShown = true;
                         sound.playWinner();
                         winnerEmoji.textContent = '🤝';
@@ -1709,7 +1727,6 @@
                         document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
                         winnerOverlay.classList.add('show');
                         launchConfetti('#f9d976');
-                        // Save that winner was shown
                         db.ref(GAME_PATH).update({ winnerShown: true });
                     } else {
                         showWinner(winner);
@@ -1722,22 +1739,28 @@
             const hasRed = players && players.red === true;
             const hasBlue = players && players.blue === true;
             
+            // Update Red button - show TAKEN badge
             if (state.role !== 'red' && !state.roleLocked) {
-                redBtn.classList.toggle('taken', hasRed);
-                redBtn.disabled = hasRed;
                 if (hasRed) {
+                    redBtn.classList.add('taken');
+                    redBtn.disabled = true;
                     redBtn.innerHTML = '🔴 Team Red <span class="taken-badge">TAKEN</span>';
                 } else {
+                    redBtn.classList.remove('taken');
+                    redBtn.disabled = false;
                     redBtn.innerHTML = '🔴 Team Red';
                 }
             }
             
+            // Update Blue button - show TAKEN badge
             if (state.role !== 'blue' && !state.roleLocked) {
-                blueBtn.classList.toggle('taken', hasBlue);
-                blueBtn.disabled = hasBlue;
                 if (hasBlue) {
+                    blueBtn.classList.add('taken');
+                    blueBtn.disabled = true;
                     blueBtn.innerHTML = '🔵 Team Blue <span class="taken-badge">TAKEN</span>';
                 } else {
+                    blueBtn.classList.remove('taken');
+                    blueBtn.disabled = false;
                     blueBtn.innerHTML = '🔵 Team Blue';
                 }
             }
@@ -2056,8 +2079,8 @@
         console.log('👁️ Viewers can watch without playing');
         console.log('⏳ 10-second cooldown on WRONG answers!');
         console.log('🔊 Sound effects: Competition, Correct, Wrong, Winner!');
-        console.log('📱 White background for better visibility!');
-        console.log('🏆 Winner screen shows for ALL players and viewers via Firebase sync!');
+        console.log('✅ "TAKEN" badge shows for taken teams');
+        console.log('✅ Correct answer NOT revealed on wrong answer');
     </script>
 </body>
 </html>
