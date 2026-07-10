@@ -17,21 +17,21 @@
         }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background: #0b1a2f;
+            background: #f0f4f8;
             min-height: 100vh;
             display: flex;
             align-items: center;
             justify-content: center;
-            color: #fff;
+            color: #1a2a3a;
             padding: 16px;
         }
         .container {
             max-width: 850px;
             width: 100%;
-            background: #1a2f44;
+            background: #ffffff;
             border-radius: 40px;
             padding: 24px 20px 32px;
-            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            box-shadow: 0 20px 60px rgba(0,0,0,0.15);
             text-align: center;
             position: relative;
         }
@@ -39,18 +39,19 @@
             font-size: 2rem;
             letter-spacing: 2px;
             margin-bottom: 4px;
-            background: linear-gradient(135deg, #f9d976, #f39b7b);
+            background: linear-gradient(135deg, #e63946, #d62828);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
         .sub {
             font-size: 0.9rem;
-            opacity: 0.8;
+            opacity: 0.7;
             margin-bottom: 20px;
+            color: #555;
         }
         .pin-display {
-            background: #f9d976;
-            color: #0b1a2f;
+            background: #1a2a3a;
+            color: #f9d976;
             padding: 10px 20px;
             border-radius: 60px;
             font-size: 1.8rem;
@@ -58,7 +59,7 @@
             letter-spacing: 8px;
             display: inline-block;
             margin-bottom: 20px;
-            box-shadow: 0 4px 0 #b38f40;
+            box-shadow: 0 4px 0 #0a1a2a;
         }
         .role-select {
             display: flex;
@@ -68,13 +69,13 @@
             flex-wrap: wrap;
         }
         .role-btn {
-            background: #2c4b66;
-            border: 3px solid #3d6485;
+            background: #e8edf2;
+            border: 3px solid #c0c8d0;
             border-radius: 40px;
             padding: 14px 24px;
             font-size: 1rem;
             font-weight: 700;
-            color: #fff;
+            color: #1a2a3a;
             cursor: pointer;
             transition: 0.2s;
             flex: 1;
@@ -86,9 +87,10 @@
             transform: scale(0.96);
         }
         .role-btn.selected {
-            border-color: #f9d976;
-            background: #3d6485;
-            box-shadow: 0 0 20px #f9d97644;
+            border-color: #e63946;
+            background: #e63946;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(230, 57, 70, 0.3);
             cursor: not-allowed;
             opacity: 0.8;
         }
@@ -115,12 +117,13 @@
         }
         .role-btn.viewer {
             border-color: #6a8aaa;
-            background: #1a3a55;
+            background: #d0dce8;
         }
         .role-btn.viewer.selected {
-            border-color: #6a8aaa;
-            background: #2a5a7a;
-            box-shadow: 0 0 20px #6a8aaa44;
+            border-color: #4a7a9a;
+            background: #4a7a9a;
+            color: #fff;
+            box-shadow: 0 0 20px rgba(74, 122, 154, 0.3);
         }
         .role-btn.locked {
             cursor: not-allowed;
@@ -139,18 +142,19 @@
             margin: 12px 0;
             font-weight: 600;
             font-size: 1.2rem;
+            color: #1a2a3a;
         }
         .team-name {
-            background: #0e1f30;
+            background: #e8edf2;
             padding: 8px 20px;
             border-radius: 30px;
             min-width: 100px;
         }
         .team-name.red {
-            border-left: 4px solid #ff4444;
+            border-left: 4px solid #e63946;
         }
         .team-name.blue {
-            border-right: 4px solid #4488ff;
+            border-right: 4px solid #2a6fdb;
         }
         .team-progress {
             font-size: 0.7rem;
@@ -159,7 +163,7 @@
             margin-top: 2px;
         }
         .score {
-            background: #00000033;
+            background: #e8edf2;
             padding: 8px 24px;
             border-radius: 40px;
             font-size: 1.8rem;
@@ -169,15 +173,15 @@
         .score.pop {
             animation: pop 0.3s ease;
         }
-        .score.red-score { color: #ff6b6b; }
-        .score.blue-score { color: #6baaff; }
+        .score.red-score { color: #e63946; }
+        .score.blue-score { color: #2a6fdb; }
         @keyframes pop {
             0% { transform: scale(1); }
-            50% { transform: scale(1.3); background: #f9d97633; }
+            50% { transform: scale(1.3); background: #f9d97666; }
             100% { transform: scale(1); }
         }
         .tug-canvas-wrap {
-            background: #0e1f30;
+            background: #e8edf2;
             border-radius: 60px;
             padding: 16px 10px;
             margin: 16px 0;
@@ -188,7 +192,7 @@
             height: auto;
             display: block;
             border-radius: 30px;
-            background: #1d3850;
+            background: #d0dce8;
             touch-action: none;
             cursor: default;
         }
@@ -199,9 +203,10 @@
             margin-top: -5px;
             font-size: 0.8rem;
             opacity: 0.6;
+            color: #1a2a3a;
         }
         .question-box {
-            background: #0e1f30;
+            background: #e8edf2;
             border-radius: 30px;
             padding: 20px 16px;
             margin: 16px 0;
@@ -212,11 +217,13 @@
             font-size: 1.2rem;
             line-height: 1.6;
             word-break: break-word;
+            color: #1a2a3a;
         }
         .question-counter {
             font-size: 0.8rem;
             opacity: 0.6;
             margin-top: 4px;
+            color: #555;
         }
         .options-grid {
             display: grid;
@@ -225,13 +232,13 @@
             margin: 12px 0 18px;
         }
         .option-btn {
-            background: #2c4b66;
-            border: 2px solid #3d6485;
+            background: #e8edf2;
+            border: 2px solid #c0c8d0;
             border-radius: 40px;
             padding: 14px 8px;
             font-size: 1rem;
             font-weight: 600;
-            color: #fff;
+            color: #1a2a3a;
             cursor: pointer;
             transition: 0.15s;
             touch-action: manipulation;
@@ -239,16 +246,21 @@
             min-height: 60px;
         }
         .option-btn:active {
-            background: #3d6485;
+            background: #d0d8e0;
             transform: scale(0.96);
         }
+        .option-btn:hover {
+            background: #d8e0e8;
+        }
         .option-btn.correct {
-            background: #2e7d5e;
-            border-color: #4caf84;
+            background: #4caf84;
+            border-color: #2e7d5e;
+            color: #fff;
         }
         .option-btn.wrong {
-            background: #9e4a4a;
-            border-color: #c96a6a;
+            background: #e63946;
+            border-color: #b71c1c;
+            color: #fff;
         }
         .option-btn:disabled {
             opacity: 0.6;
@@ -261,24 +273,24 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.6);
+            background: rgba(0,0,0,0.7);
             border-radius: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 1.8rem;
+            font-size: 2rem;
             font-weight: 900;
             color: #f9d976;
             pointer-events: none;
             animation: pulse 0.5s ease infinite alternate;
         }
         @keyframes pulse {
-            0% { opacity: 0.8; }
-            100% { opacity: 1; }
+            0% { opacity: 0.8; transform: scale(0.95); }
+            100% { opacity: 1; transform: scale(1); }
         }
         .status-msg {
             font-size: 0.95rem;
-            background: #0e1f30;
+            background: #e8edf2;
             padding: 12px;
             border-radius: 40px;
             margin: 8px 0;
@@ -287,11 +299,12 @@
             align-items: center;
             justify-content: center;
             gap: 10px;
+            color: #1a2a3a;
         }
         .status-msg .cooldown-timer {
-            color: #f9d976;
+            color: #e63946;
             font-weight: 900;
-            font-size: 1.2rem;
+            font-size: 1.4rem;
         }
         .footer-btns {
             display: flex;
@@ -307,7 +320,7 @@
             padding: 12px 28px;
             font-weight: 700;
             font-size: 1rem;
-            color: #0b1a2f;
+            color: #1a2a3a;
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 0 #b38f40;
@@ -323,12 +336,12 @@
             color: #fff;
         }
         .btn.danger {
-            background: #c94a4a;
+            background: #e63946;
             box-shadow: 0 4px 0 #7a2a2a;
             color: #fff;
         }
         .btn.success {
-            background: #2e7d5e;
+            background: #4caf84;
             box-shadow: 0 4px 0 #1a4a3a;
             color: #fff;
         }
@@ -341,32 +354,35 @@
             display: inline-block;
             width: 20px;
             height: 20px;
-            border: 3px solid #ffffff33;
-            border-top: 3px solid #f9d976;
+            border: 3px solid #1a2a3a33;
+            border-top: 3px solid #e63946;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
         .player-badge {
-            background: #0e1f30;
+            background: #e8edf2;
             padding: 6px 16px;
             border-radius: 40px;
             font-size: 0.9rem;
             display: inline-block;
+            color: #1a2a3a;
         }
         .online-status {
             font-size: 0.8rem;
             opacity: 0.7;
             margin-top: 4px;
+            color: #555;
         }
         .join-instruction {
-            background: #0e1f30;
+            background: #e8edf2;
             padding: 15px 20px;
             border-radius: 30px;
             margin: 10px 0;
             font-size: 0.95rem;
-            border-left: 4px solid #f9d976;
+            border-left: 4px solid #e63946;
+            color: #1a2a3a;
         }
         .loading-overlay {
             position: fixed;
@@ -374,7 +390,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(11, 26, 47, 0.95);
+            background: rgba(255,255,255,0.95);
             display: flex;
             align-items: center;
             justify-content: center;
@@ -388,8 +404,8 @@
         .loading-spinner {
             width: 50px;
             height: 50px;
-            border: 5px solid #ffffff33;
-            border-top: 5px solid #f9d976;
+            border: 5px solid #1a2a3a33;
+            border-top: 5px solid #e63946;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
@@ -404,15 +420,17 @@
             font-size: 0.8rem;
             opacity: 0.6;
             margin-top: 6px;
+            color: #555;
         }
         .role-locked-msg {
-            background: #c94a4a33;
-            border: 1px solid #c94a4a;
+            background: #e6394633;
+            border: 1px solid #e63946;
             border-radius: 20px;
             padding: 8px 16px;
             font-size: 0.85rem;
             margin-top: 10px;
             display: none;
+            color: #1a2a3a;
         }
         .role-locked-msg.show {
             display: block;
@@ -425,7 +443,7 @@
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(0,0,0,0.85);
+            background: rgba(255,255,255,0.92);
             display: none;
             align-items: center;
             justify-content: center;
@@ -437,7 +455,7 @@
             display: flex;
         }
         .winner-box {
-            background: #1a2f44;
+            background: #ffffff;
             border-radius: 50px;
             padding: 40px 50px;
             max-width: 500px;
@@ -465,8 +483,8 @@
             font-weight: 900;
             margin: 10px 0;
         }
-        .winner-title.red-win { color: #ff6b6b; }
-        .winner-title.blue-win { color: #6baaff; }
+        .winner-title.red-win { color: #e63946; }
+        .winner-title.blue-win { color: #2a6fdb; }
         .winner-scores {
             display: flex;
             justify-content: center;
@@ -475,7 +493,7 @@
             font-size: 1.2rem;
         }
         .winner-scores .score-item {
-            background: #0e1f30;
+            background: #e8edf2;
             padding: 12px 24px;
             border-radius: 30px;
         }
@@ -487,8 +505,8 @@
             font-size: 2rem;
             font-weight: 900;
         }
-        .winner-scores .score-item .value.red-score { color: #ff6b6b; }
-        .winner-scores .score-item .value.blue-score { color: #6baaff; }
+        .winner-scores .score-item .value.red-score { color: #e63946; }
+        .winner-scores .score-item .value.blue-score { color: #2a6fdb; }
         .winner-btn {
             background: #f9d976;
             border: none;
@@ -496,7 +514,7 @@
             padding: 14px 40px;
             font-weight: 700;
             font-size: 1.1rem;
-            color: #0b1a2f;
+            color: #1a2a3a;
             cursor: pointer;
             transition: 0.2s;
             box-shadow: 0 4px 0 #b38f40;
@@ -551,18 +569,6 @@
             transform: scale(1.1);
         }
 
-        /* Cooldown progress bar on buttons */
-        .cooldown-progress {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            height: 4px;
-            background: #f9d976;
-            border-radius: 0 0 40px 40px;
-            transition: width 0.3s;
-            width: 100%;
-        }
-
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
             .options-grid { grid-template-columns: 1fr; }
@@ -581,7 +587,7 @@
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
-        <div style="font-size: 1.2rem;">Connecting to game...</div>
+        <div style="font-size: 1.2rem; color: #1a2a3a;">Connecting to game...</div>
     </div>
 
     <!-- Winner Celebration Overlay -->
@@ -644,7 +650,7 @@
                     <span class="team-progress" id="redProgress">0/0</span>
                 </span>
                 <span class="score red-score" id="scoreRed">0</span>
-                <span style="font-size:1.8rem;">⚔️</span>
+                <span style="font-size:1.8rem; color:#1a2a3a;">⚔️</span>
                 <span class="score blue-score" id="scoreBlue">0</span>
                 <span class="team-name blue" id="blueName">
                     🔵 Team Blue
@@ -699,96 +705,93 @@
         const db = firebase.database();
 
         // ============================================
-        // SOUND EFFECTS - Using Web Audio API
+        // SOUND EFFECTS - Using Web Audio API with better initialization
         // ============================================
         class SoundManager {
             constructor() {
                 this.enabled = true;
                 this.audioContext = null;
                 this.initialized = false;
+                this.gainNode = null;
             }
 
             init() {
-                if (!this.audioContext) {
-                    try {
+                try {
+                    if (!this.audioContext) {
                         this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                        this.gainNode = this.audioContext.createGain();
+                        this.gainNode.gain.value = 0.5;
+                        this.gainNode.connect(this.audioContext.destination);
                         this.initialized = true;
-                    } catch (e) {
-                        console.warn('Web Audio not supported');
+                        console.log('🎵 Audio context initialized');
                     }
-                }
-                // Resume context if suspended (needed for Chrome)
-                if (this.audioContext && this.audioContext.state === 'suspended') {
-                    this.audioContext.resume();
+                    if (this.audioContext && this.audioContext.state === 'suspended') {
+                        this.audioContext.resume();
+                        console.log('🎵 Audio context resumed');
+                    }
+                } catch (e) {
+                    console.warn('Web Audio not supported:', e);
                 }
             }
 
             ensureContext() {
                 this.init();
-                return this.audioContext && this.audioContext.state === 'running';
+                if (!this.audioContext) return false;
+                if (this.audioContext.state === 'suspended') {
+                    this.audioContext.resume();
+                }
+                return this.audioContext.state === 'running';
             }
 
             playTone(frequency, duration, type = 'sine', volume = 0.3) {
                 if (!this.enabled) return;
                 this.init();
                 if (!this.ensureContext()) {
-                    // Try to resume
-                    if (this.audioContext) {
-                        this.audioContext.resume();
-                    }
+                    console.warn('Audio context not ready');
                     return;
                 }
                 try {
                     const oscillator = this.audioContext.createOscillator();
                     const gain = this.audioContext.createGain();
                     oscillator.connect(gain);
-                    gain.connect(this.audioContext.destination);
+                    gain.connect(this.gainNode || this.audioContext.destination);
                     oscillator.type = type;
                     oscillator.frequency.value = frequency;
-                    gain.gain.value = volume;
-                    oscillator.start();
+                    gain.gain.setValueAtTime(volume, this.audioContext.currentTime);
                     gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    oscillator.start(this.audioContext.currentTime);
                     oscillator.stop(this.audioContext.currentTime + duration);
-                } catch (e) { /* ignore */ }
+                } catch (e) {
+                    console.warn('Error playing tone:', e);
+                }
             }
 
-            // Competition sound - energetic beep
             playCompetition() {
-                if (!this.enabled) return;
-                this.init();
+                console.log('🔊 Playing competition sound');
                 this.playTone(800, 0.1, 'square', 0.2);
                 setTimeout(() => this.playTone(1000, 0.1, 'square', 0.2), 150);
                 setTimeout(() => this.playTone(1200, 0.15, 'square', 0.25), 300);
             }
 
-            // Correct answer sound - happy ascending
             playCorrect() {
-                if (!this.enabled) return;
-                this.init();
+                console.log('🔊 Playing correct sound');
                 this.playTone(523, 0.15, 'sine', 0.3);
                 setTimeout(() => this.playTone(659, 0.15, 'sine', 0.3), 150);
                 setTimeout(() => this.playTone(784, 0.2, 'sine', 0.35), 300);
             }
 
-            // Wrong answer sound - low buzz
             playWrong() {
-                if (!this.enabled) return;
-                this.init();
+                console.log('🔊 Playing wrong sound');
                 this.playTone(200, 0.4, 'sawtooth', 0.2);
                 setTimeout(() => this.playTone(150, 0.3, 'sawtooth', 0.2), 200);
             }
 
-            // Cooldown tick sound
             playTick() {
-                if (!this.enabled) return;
-                this.init();
                 this.playTone(600, 0.05, 'sine', 0.1);
             }
 
-            // Winner celebration - fanfare
             playWinner(team) {
-                if (!this.enabled) return;
-                this.init();
+                console.log('🔊 Playing winner sound');
                 const notes = [523, 587, 659, 784, 880, 988, 1047];
                 notes.forEach((freq, i) => {
                     setTimeout(() => {
@@ -808,6 +811,8 @@
                 this.enabled = !this.enabled;
                 if (this.enabled) {
                     this.init();
+                    // Play test sound
+                    this.playTone(800, 0.1, 'sine', 0.2);
                 }
                 return this.enabled;
             }
@@ -822,17 +827,20 @@
         soundToggle.addEventListener('click', () => {
             const enabled = sound.toggle();
             soundToggle.textContent = enabled ? '🔊' : '🔇';
-            sound.init();
-            // Play a test sound to verify
-            if (enabled) {
-                sound.playTone(800, 0.1, 'sine', 0.2);
-            }
+            console.log('🔊 Sound toggled:', enabled ? 'ON' : 'OFF');
         });
 
-        // Initialize sound on first user interaction
-        document.addEventListener('click', () => {
+        // Initialize sound on any user interaction
+        function initSoundOnInteraction() {
             sound.init();
-        }, { once: true });
+            console.log('🎵 Sound initialized by user interaction');
+            // Play a test sound
+            sound.playTone(600, 0.1, 'sine', 0.15);
+        }
+
+        document.addEventListener('click', initSoundOnInteraction, { once: true });
+        document.addEventListener('touchstart', initSoundOnInteraction, { once: true });
+        document.addEventListener('keydown', initSoundOnInteraction, { once: true });
 
         // ============================================
         // SAMPLE QUESTIONS (20+)
@@ -926,45 +934,50 @@
         const confettiContainer = $('confettiContainer');
 
         // ============================================
-        // CANVAS DRAWING (shortened for brevity - same as before)
+        // CANVAS DRAWING
         // ============================================
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
 
-            // Sky gradient
+            // Sky gradient - lighter for white background
             const skyGrad = ctx.createLinearGradient(0, 0, 0, h-35);
-            skyGrad.addColorStop(0, '#1a2a5a');
-            skyGrad.addColorStop(0.4, '#2a4a7a');
-            skyGrad.addColorStop(0.7, '#4a7a9a');
-            skyGrad.addColorStop(1, '#6a9aaa');
+            skyGrad.addColorStop(0, '#b8c8d8');
+            skyGrad.addColorStop(0.4, '#c8d8e8');
+            skyGrad.addColorStop(0.7, '#d8e8f0');
+            skyGrad.addColorStop(1, '#e8f0f8');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, w, h-35);
 
-            // Stars
-            ctx.fillStyle = '#ffffff66';
-            for (let i = 0; i < 40; i++) {
-                const x = (i * 37 + 13) % w;
-                const y = (i * 23 + 7) % (h-50);
-                const size = 0.5 + (i % 3) * 0.5;
+            // Clouds
+            ctx.fillStyle = '#ffffff88';
+            for (let i = 0; i < 5; i++) {
+                const x = (i * 150 + 20) % w;
+                const y = 20 + (i * 13) % 40;
                 ctx.beginPath();
-                ctx.arc(x, y, size, 0, Math.PI * 2);
+                ctx.arc(x, y, 20 + i * 5, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x + 20, y - 5, 15 + i * 3, 0, Math.PI * 2);
+                ctx.fill();
+                ctx.beginPath();
+                ctx.arc(x + 35, y + 5, 12 + i * 2, 0, Math.PI * 2);
                 ctx.fill();
             }
 
             // Ground
             const groundGrad = ctx.createLinearGradient(0, h-35, 0, h);
-            groundGrad.addColorStop(0, '#3a6a3a');
-            groundGrad.addColorStop(0.3, '#2a5a2a');
-            groundGrad.addColorStop(1, '#1a3a1a');
+            groundGrad.addColorStop(0, '#8aaa7a');
+            groundGrad.addColorStop(0.3, '#7a9a6a');
+            groundGrad.addColorStop(1, '#5a7a4a');
             ctx.fillStyle = groundGrad;
             ctx.fillRect(0, h-35, w, 35);
 
             // Grass detail
-            ctx.strokeStyle = '#4a8a4a';
-            ctx.lineWidth = 1;
-            for (let i = 0; i < w; i += 6) {
-                const height = 3 + (i % 5);
+            ctx.strokeStyle = '#6a8a5a';
+            ctx.lineWidth = 1.5;
+            for (let i = 0; i < w; i += 5) {
+                const height = 3 + (i % 4);
                 ctx.beginPath();
                 ctx.moveTo(i, h-35);
                 ctx.lineTo(i + 1, h-35 - height);
@@ -972,15 +985,15 @@
             }
 
             // Ground line
-            ctx.strokeStyle = '#5a8a5a';
+            ctx.strokeStyle = '#5a7a4a';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, h-35);
             ctx.lineTo(w, h-35);
             ctx.stroke();
 
-            // Center marker on ground
-            ctx.fillStyle = '#ffffff22';
+            // Center marker
+            ctx.fillStyle = '#5a7a4a66';
             ctx.fillRect(w/2 - 1, h-35, 2, 8);
 
             // Rope
@@ -990,28 +1003,28 @@
             const ropeHeight = 55;
 
             // Rope shadow
-            ctx.shadowColor = 'rgba(0,0,0,0.4)';
-            ctx.shadowBlur = 20;
-            ctx.shadowOffsetY = 5;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.shadowBlur = 15;
+            ctx.shadowOffsetY = 4;
             
             // Main rope body
             const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
-            ropeGrad.addColorStop(0, '#5a4a2a');
-            ropeGrad.addColorStop(0.2, '#8a7a5a');
-            ropeGrad.addColorStop(0.4, '#b8a88a');
-            ropeGrad.addColorStop(0.5, '#c8b89a');
-            ropeGrad.addColorStop(0.6, '#b8a88a');
-            ropeGrad.addColorStop(0.8, '#8a7a5a');
-            ropeGrad.addColorStop(1, '#5a4a2a');
+            ropeGrad.addColorStop(0, '#8a7a5a');
+            ropeGrad.addColorStop(0.2, '#b8a88a');
+            ropeGrad.addColorStop(0.4, '#d4c8a8');
+            ropeGrad.addColorStop(0.5, '#e0d4b4');
+            ropeGrad.addColorStop(0.6, '#d4c8a8');
+            ropeGrad.addColorStop(0.8, '#b8a88a');
+            ropeGrad.addColorStop(1, '#8a7a5a');
             ctx.fillStyle = ropeGrad;
-            ctx.shadowBlur = 20;
+            ctx.shadowBlur = 15;
             ctx.beginPath();
             ctx.roundRect(ropeX, ropeY, ropeWidth, ropeHeight, 10);
             ctx.fill();
 
             // Rope texture
             ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#6a5a3a';
+            ctx.strokeStyle = '#7a6a4a';
             ctx.lineWidth = 1.5;
             for (let i = 0; i < ropeWidth + 10; i += 6) {
                 const x = ropeX + i;
@@ -1026,7 +1039,7 @@
             }
 
             // Rope edge highlights
-            ctx.strokeStyle = '#c8b89a55';
+            ctx.strokeStyle = '#e0d4b466';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(ropeX + 5, ropeY + 5);
@@ -1038,20 +1051,19 @@
             ctx.stroke();
 
             // Rope center knot
-            ctx.shadowBlur = 15;
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
-            ctx.fillStyle = '#6a5a3a';
+            ctx.shadowBlur = 10;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
+            ctx.fillStyle = '#8a7a5a';
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 14, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#8a7a5a';
+            ctx.fillStyle = '#b8a88a';
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 9, 0, Math.PI * 2);
             ctx.fill();
             
-            // Knot wrapping lines
             ctx.shadowBlur = 0;
-            ctx.strokeStyle = '#5a4a2a';
+            ctx.strokeStyle = '#7a6a4a';
             ctx.lineWidth = 2;
             for (let i = 0; i < 8; i++) {
                 const angle = (i / 8) * Math.PI * 2;
@@ -1063,28 +1075,28 @@
                 ctx.stroke();
             }
 
-            // Pull arrow indicator
+            // Pull arrow
             ctx.shadowBlur = 0;
             ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'middle';
-            ctx.fillStyle = '#f9d97688';
+            ctx.fillStyle = '#e6394688';
             ctx.fillText('⚡', ropeX + ropeWidth/2, ropeY + ropeHeight/2 + 1);
 
-            // Team characters (simplified for brevity - same as before)
+            // TEAM CHARACTERS
             const redX = Math.max(40, ropeX - 65);
             const charY = h - 45;
             
             // RED TEAM
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
             ctx.shadowOffsetY = 3;
             
-            ctx.fillStyle = '#cc2222';
+            ctx.fillStyle = '#e63946';
             ctx.beginPath();
             ctx.roundRect(redX - 22, charY - 55, 44, 50, 12);
             ctx.fill();
-            ctx.fillStyle = '#dd3333';
+            ctx.fillStyle = '#d62828';
             ctx.beginPath();
             ctx.roundRect(redX - 16, charY - 45, 32, 30, 8);
             ctx.fill();
@@ -1093,12 +1105,12 @@
             ctx.fillStyle = '#f9d976';
             ctx.fillRect(redX - 6, charY - 15, 12, 6);
             
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = '#ffcc99';
+            ctx.shadowBlur = 6;
+            ctx.fillStyle = '#f5d0b8';
             ctx.beginPath();
             ctx.arc(redX, charY - 68, 20, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#cc2222';
+            ctx.fillStyle = '#e63946';
             ctx.beginPath();
             ctx.arc(redX, charY - 76, 22, Math.PI, 0);
             ctx.fill();
@@ -1108,7 +1120,7 @@
             ctx.fillRect(redX - 12, charY - 72, 24, 4);
             
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#222';
+            ctx.fillStyle = '#1a2a3a';
             ctx.beginPath();
             ctx.arc(redX - 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
@@ -1138,8 +1150,8 @@
             ctx.arc(redX, charY - 62, 6, 0.1, Math.PI - 0.1);
             ctx.stroke();
             
-            ctx.shadowBlur = 5;
-            ctx.strokeStyle = '#ffcc99';
+            ctx.shadowBlur = 4;
+            ctx.strokeStyle = '#f5d0b8';
             ctx.lineWidth = 10;
             ctx.lineCap = 'round';
             ctx.beginPath();
@@ -1151,7 +1163,7 @@
             ctx.lineTo(ropeX + 15, ropeY + 15);
             ctx.stroke();
             
-            ctx.fillStyle = '#ffcc99';
+            ctx.fillStyle = '#f5d0b8';
             ctx.shadowBlur = 3;
             ctx.beginPath();
             ctx.arc(ropeX + 5, ropeY + 15, 7, 0, Math.PI * 2);
@@ -1159,7 +1171,7 @@
             ctx.beginPath();
             ctx.arc(ropeX + 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#eebb88';
+            ctx.fillStyle = '#e8c0a8';
             for (let i = -2; i <= 2; i++) {
                 ctx.beginPath();
                 ctx.arc(ropeX + 5 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
@@ -1169,7 +1181,7 @@
                 ctx.fill();
             }
             
-            ctx.shadowBlur = 5;
+            ctx.shadowBlur = 4;
             ctx.strokeStyle = '#1a2a3a';
             ctx.lineWidth = 12;
             ctx.lineCap = 'butt';
@@ -1189,21 +1201,21 @@
             ctx.beginPath();
             ctx.roundRect(redX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
-            ctx.fillStyle = '#cc2222';
+            ctx.fillStyle = '#e63946';
             ctx.fillRect(redX - 20, charY + 8, 6, 4);
             ctx.fillRect(redX + 12, charY + 8, 6, 4);
 
             // BLUE TEAM
             const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             
-            ctx.shadowBlur = 10;
-            ctx.shadowColor = 'rgba(0,0,0,0.3)';
+            ctx.shadowBlur = 8;
+            ctx.shadowColor = 'rgba(0,0,0,0.2)';
             ctx.shadowOffsetY = 3;
-            ctx.fillStyle = '#2266dd';
+            ctx.fillStyle = '#2a6fdb';
             ctx.beginPath();
             ctx.roundRect(blueX - 22, charY - 55, 44, 50, 12);
             ctx.fill();
-            ctx.fillStyle = '#3377ee';
+            ctx.fillStyle = '#1a5fcb';
             ctx.beginPath();
             ctx.roundRect(blueX - 16, charY - 45, 32, 30, 8);
             ctx.fill();
@@ -1212,12 +1224,12 @@
             ctx.fillStyle = '#f9d976';
             ctx.fillRect(blueX - 6, charY - 15, 12, 6);
             
-            ctx.shadowBlur = 8;
-            ctx.fillStyle = '#ffcc99';
+            ctx.shadowBlur = 6;
+            ctx.fillStyle = '#f5d0b8';
             ctx.beginPath();
             ctx.arc(blueX, charY - 68, 20, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#2266dd';
+            ctx.fillStyle = '#2a6fdb';
             ctx.beginPath();
             ctx.arc(blueX, charY - 76, 22, Math.PI, 0);
             ctx.fill();
@@ -1227,7 +1239,7 @@
             ctx.fillRect(blueX - 12, charY - 72, 24, 4);
             
             ctx.shadowBlur = 0;
-            ctx.fillStyle = '#222';
+            ctx.fillStyle = '#1a2a3a';
             ctx.beginPath();
             ctx.arc(blueX - 7, charY - 70, 3.5, 0, Math.PI * 2);
             ctx.fill();
@@ -1257,8 +1269,8 @@
             ctx.arc(blueX, charY - 62, 6, 0.1, Math.PI - 0.1);
             ctx.stroke();
             
-            ctx.shadowBlur = 5;
-            ctx.strokeStyle = '#ffcc99';
+            ctx.shadowBlur = 4;
+            ctx.strokeStyle = '#f5d0b8';
             ctx.lineWidth = 10;
             ctx.lineCap = 'round';
             ctx.beginPath();
@@ -1270,7 +1282,7 @@
             ctx.lineTo(ropeX + ropeWidth - 15, ropeY + 15);
             ctx.stroke();
             
-            ctx.fillStyle = '#ffcc99';
+            ctx.fillStyle = '#f5d0b8';
             ctx.shadowBlur = 3;
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth - 5, ropeY + 15, 7, 0, Math.PI * 2);
@@ -1278,7 +1290,7 @@
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth - 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            ctx.fillStyle = '#eebb88';
+            ctx.fillStyle = '#e8c0a8';
             for (let i = -2; i <= 2; i++) {
                 ctx.beginPath();
                 ctx.arc(ropeX + ropeWidth - 5 + i * 2, ropeY + 20, 2.5, 0, Math.PI * 2);
@@ -1288,7 +1300,7 @@
                 ctx.fill();
             }
             
-            ctx.shadowBlur = 5;
+            ctx.shadowBlur = 4;
             ctx.strokeStyle = '#1a2a3a';
             ctx.lineWidth = 12;
             ctx.lineCap = 'butt';
@@ -1308,7 +1320,7 @@
             ctx.beginPath();
             ctx.roundRect(blueX + 8, charY + 6, 14, 8, 4);
             ctx.fill();
-            ctx.fillStyle = '#2266dd';
+            ctx.fillStyle = '#2a6fdb';
             ctx.fillRect(blueX - 20, charY + 8, 6, 4);
             ctx.fillRect(blueX + 12, charY + 8, 6, 4);
 
@@ -1317,29 +1329,29 @@
             ctx.font = 'bold 16px sans-serif';
             ctx.textAlign = 'center';
             ctx.textBaseline = 'bottom';
-            ctx.fillStyle = '#ff6b6b';
+            ctx.fillStyle = '#e63946';
             ctx.fillText('🔴 TEAM RED', redX, charY - 95);
-            ctx.fillStyle = '#6baaff';
+            ctx.fillStyle = '#2a6fdb';
             ctx.fillText('🔵 TEAM BLUE', blueX, charY - 95);
 
             // Progress bar
             const barY = 12;
             const barW = w - 40;
             const barX = 20;
-            ctx.fillStyle = '#00000066';
+            ctx.fillStyle = '#1a2a3a44';
             ctx.beginPath();
             ctx.roundRect(barX, barY, barW, 10, 5);
             ctx.fill();
             
             if (progress < 50) {
-                ctx.fillStyle = '#ff6b6b';
+                ctx.fillStyle = '#e63946';
                 const redW = (barW * (50 - progress) / 50);
                 ctx.beginPath();
                 ctx.roundRect(barX + barW/2 - redW, barY, redW, 10, 5);
                 ctx.fill();
             }
             if (progress > 50) {
-                ctx.fillStyle = '#6baaff';
+                ctx.fillStyle = '#2a6fdb';
                 const blueW = (barW * (progress - 50) / 50);
                 ctx.beginPath();
                 ctx.roundRect(barX + barW/2, barY, blueW, 10, 5);
@@ -1379,7 +1391,7 @@
             clearCooldown();
             
             winnerOverlay.classList.add('show');
-            launchConfetti(isRedWin ? '#ff6b6b' : '#6baaff');
+            launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
             
             setTimeout(() => sound.playWinner(winner), 1000);
             setTimeout(() => sound.playWinner(winner), 2000);
@@ -1391,7 +1403,7 @@
         }
 
         function launchConfetti(primaryColor) {
-            const colors = [primaryColor, '#f9d976', '#ffffff', '#ff6b6b', '#6baaff', '#4caf84', '#ff9800'];
+            const colors = [primaryColor, '#f9d976', '#ffffff', '#e63946', '#2a6fdb', '#4caf84', '#ff9800'];
             const container = confettiContainer;
             container.innerHTML = '';
             
@@ -1429,10 +1441,11 @@
         function startCooldown() {
             if (state.cooldownActive) return;
             
+            console.log('⏳ Starting cooldown');
             state.cooldownActive = true;
             let secondsLeft = state.cooldownSeconds;
             
-            // Disable all option buttons
+            // Disable all option buttons and show overlay
             const btns = document.querySelectorAll('.option-btn');
             btns.forEach(btn => {
                 btn.disabled = true;
@@ -1474,6 +1487,7 @@
                     });
                     
                     statusMsg.innerHTML = '📝 Try again!';
+                    console.log('⏳ Cooldown ended');
                 }
             }, 1000);
         }
@@ -1656,6 +1670,7 @@
             if (isCorrect) {
                 // Play correct sound
                 sound.playCorrect();
+                console.log('✅ Correct answer!');
                 
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
                 if (role === 'red') {
@@ -1688,8 +1703,8 @@
                     }, 800);
                 }
             } else {
-                // WRONG ANSWER - Start 10-second cooldown
-                sound.playWrong();
+                // WRONG ANSWER - Start 10-second cooldown                sound.playWrong();
+                console.log('❌ Wrong answer! Starting 10s cooldown');
                 statusMsg.innerHTML = '❌ Wrong answer!';
                 
                 // Start cooldown - this will disable buttons and show timer
@@ -1742,7 +1757,7 @@
                 
                 state.connected = true;
                 onlineStatus.textContent = '🟢 Connected';
-                onlineStatus.style.color = '#4caf84';
+                onlineStatus.style.color = '#2a6fdb';
                 loadingOverlay.classList.add('hidden');
                 
                 const viewers = data.viewers || {};
@@ -2095,12 +2110,12 @@
                 if (snap.val() === true) {
                     state.connected = true;
                     onlineStatus.textContent = '🟢 Connected';
-                    onlineStatus.style.color = '#4caf84';
+                    onlineStatus.style.color = '#2a6fdb';
                     loadingOverlay.classList.add('hidden');
                 } else {
                     state.connected = false;
                     onlineStatus.textContent = '🔴 Disconnected';
-                    onlineStatus.style.color = '#c94a4a';
+                    onlineStatus.style.color = '#e63946';
                     statusMsg.innerHTML = '<span class="spinner"></span> Reconnecting...';
                     loadingOverlay.classList.remove('hidden');
                 }
@@ -2133,11 +2148,10 @@
         console.log('🔒 Roles are LOCKED once chosen!');
         console.log('🔴 Team Red vs 🔵 Team Blue');
         console.log('👁️ Viewers can watch without playing');
-        console.log('✅ Dynamic pull percentage: 50 / total questions');
-        console.log('🏆 Game ends when a team completes all questions!');
         console.log('⏳ 10-second cooldown on WRONG answers!');
         console.log('🔊 Sound effects: Competition, Correct, Wrong, Winner!');
         console.log('💡 Click anywhere to enable sound!');
+        console.log('📱 White background for better visibility!');
     </script>
 </body>
 </html>
