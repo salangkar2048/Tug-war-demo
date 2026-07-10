@@ -254,6 +254,11 @@
             box-shadow: 0 4px 0 #7a2a2a;
             color: #fff;
         }
+        .btn.success {
+            background: #2e7d5e;
+            box-shadow: 0 4px 0 #1a4a3a;
+            color: #fff;
+        }
         .btn:disabled {
             opacity: 0.5;
             transform: none;
@@ -315,6 +320,13 @@
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
         }
+        .admin-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 10px;
+            flex-wrap: wrap;
+        }
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
             .options-grid { grid-template-columns: 1fr; }
@@ -345,6 +357,16 @@
             <button class="team-btn" id="teamBbtn">🟥 Team B</button>
         </div>
 
+        <!-- Admin Actions -->
+        <div class="admin-actions">
+            <button class="btn success" id="forceResetBtn" style="font-size:0.9rem; padding:8px 16px;">
+                🔄 Force Reset (Clear All)
+            </button>
+            <button class="btn secondary" id="leaveBtn" style="font-size:0.9rem; padding:8px 16px;">
+                🚪 Leave Game
+            </button>
+        </div>
+
         <!-- Game Area -->
         <div class="game-area" id="gameArea">
             <div class="team-row">
@@ -369,7 +391,6 @@
 
             <div class="footer-btns">
                 <button class="btn secondary" id="nextQuestionBtn" style="display:none;">⏩ Next Question</button>
-                <button class="btn danger" id="resetBtn">🔄 Reset Game</button>
                 <span class="player-badge" id="playerDisplay">👤 Team: —</span>
             </div>
             <div class="online-status" id="onlineStatus">🔄 Connecting...</div>
@@ -459,10 +480,11 @@
         const optionsContainer = $('optionsContainer');
         const statusMsg = $('statusMsg');
         const nextQuestionBtn = $('nextQuestionBtn');
-        const resetBtn = $('resetBtn');
         const playerDisplay = $('playerDisplay');
         const onlineStatus = $('onlineStatus');
         const loadingOverlay = $('loadingOverlay');
+        const forceResetBtn = $('forceResetBtn');
+        const leaveBtn = $('leaveBtn');
 
         // ============================================
         // CANVAS DRAWING
@@ -552,8 +574,8 @@
                 playerDisplay.textContent = '👤 Team: —';
                 teamAbtn.classList.remove('selected');
                 teamBbtn.classList.remove('selected');
-                teamAbtn.disabled = false;
-                teamBbtn.disabled = false;
+                // Don't enable if taken
+                // Will be handled by updateTeamButtons
             }
         }
 
@@ -685,7 +707,10 @@
             state.listeners.game = gameRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) {
+                    // Game doesn't exist - create it
                     initializeGame();
+                    // Reset UI to clean state
+                    resetUIState();
                     return;
                 }
                 
@@ -713,6 +738,7 @@
                 const hasA = players.A === true;
                 const hasB = players.B === true;
                 
+                // If both teams are taken but game didn't start, start it
                 if (hasA && hasB) {
                     state.gameStarted = true;
                     statusMsg.innerHTML = '🎮 Both teams ready! Answer to pull!';
@@ -737,7 +763,7 @@
             const hasA = players && players.A === true;
             const hasB = players && players.B === true;
             
-            // Don't disable if this player is already on that team
+            // Update Team A button
             if (state.playerId !== 'A') {
                 teamAbtn.classList.toggle('taken', hasA);
                 teamAbtn.disabled = hasA;
@@ -748,6 +774,7 @@
                 }
             }
             
+            // Update Team B button
             if (state.playerId !== 'B') {
                 teamBbtn.classList.toggle('taken', hasB);
                 teamBbtn.disabled = hasB;
@@ -757,6 +784,38 @@
                     teamBbtn.innerHTML = '🟥 Team B';
                 }
             }
+            
+            // If both teams are taken and we're not in a team, show message
+            if (hasA && hasB && !state.playerId) {
+                statusMsg.innerHTML = '⚠️ Both teams are taken! Use "Force Reset" to start a new game.';
+            }
+        }
+
+        function resetUIState() {
+            state.playerId = null;
+            state.gameStarted = false;
+            state.scoreA = 0;
+            state.scoreB = 0;
+            state.tugProgress = 50;
+            state.teamA_questionIdx = 0;
+            state.teamB_questionIdx = 0;
+            state.answering = false;
+            state.isJoining = false;
+            
+            gameArea.classList.remove('active');
+            updateUI();
+            questionDisplay.textContent = 'Select your team to start!';
+            optionsContainer.innerHTML = '';
+            statusMsg.innerHTML = '👥 Choose a team above';
+            nextQuestionBtn.style.display = 'none';
+            
+            // Reset button states
+            teamAbtn.classList.remove('selected', 'taken');
+            teamBbtn.classList.remove('selected', 'taken');
+            teamAbtn.innerHTML = '🟦 Team A';
+            teamBbtn.innerHTML = '🟥 Team B';
+            teamAbtn.disabled = false;
+            teamBbtn.disabled = false;
         }
 
         function initializeGame() {
@@ -786,11 +845,11 @@
         // ============================================
         function selectTeam(team) {
             if (state.playerId === team) {
-                return; // Already on this team
+                return;
             }
             
             if (state.isJoining) {
-                return; // Already joining
+                return;
             }
             
             state.isJoining = true;
@@ -798,10 +857,8 @@
             
             const gameRef = db.ref(GAME_PATH);
             
-            // Use transaction for atomic operation
             gameRef.transaction((currentData) => {
                 if (currentData === null) {
-                    // Game doesn't exist, create it
                     return {
                         players: { A: false, B: false },
                         scoreA: 0,
@@ -814,14 +871,11 @@
                     };
                 }
                 
-                // Check if team is already taken
                 const players = currentData.players || {};
                 if (players[team] === true) {
-                    // Team is already taken - abort transaction
                     return undefined;
                 }
                 
-                // Claim the team
                 players[team] = true;
                 currentData.players = players;
                 
@@ -836,16 +890,13 @@
                 }
                 
                 if (!committed) {
-                    // Transaction was aborted - team is taken
-                    alert(`❌ Team ${team} is already taken!\n\nChoose the other team.`);
+                    alert(`❌ Team ${team} is already taken!\n\nChoose the other team or click "Force Reset".`);
                     statusMsg.innerHTML = '👥 Team taken. Choose the other team.';
-                    // Refresh team buttons
-                    const data = snapshot.val();
+                    const data = snapshot ? snapshot.val() : null;
                     if (data) updateTeamButtons(data.players);
                     return;
                 }
                 
-                // Successfully claimed team!
                 const data = snapshot.val();
                 if (!data) return;
                 
@@ -857,7 +908,6 @@
                 state.teamB_questionIdx = data.teamB_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
                 
-                // Check if the other team is already taken
                 const players = data.players || {};
                 const otherTeam = team === 'A' ? 'B' : 'A';
                 const otherTaken = players[otherTeam] === true;
@@ -874,52 +924,48 @@
                 updateUI();
                 showQuestionForPlayer();
                 saveGameState();
-            }, false); // false = don't apply locally first, get fresh data
+            }, false);
         }
 
         // ============================================
-        // RESET GAME
+        // 🚪 LEAVE GAME
         // ============================================
-        function resetGame() {
-            if (confirm('⚠️ Reset the game for everyone?')) {
+        function leaveGame() {
+            if (!state.playerId) {
+                alert('You are not in a game.');
+                return;
+            }
+            
+            if (confirm(`Leave the game as Team ${state.playerId}?`)) {
                 const gameRef = db.ref(GAME_PATH);
-                gameRef.remove().then(() => {
+                const playerRef = db.ref(`${GAME_PATH}/players/${state.playerId}`);
+                playerRef.set(false).then(() => {
                     state.playerId = null;
-                    state.scoreA = 0;
-                    state.scoreB = 0;
-                    state.tugProgress = 50;
-                    state.teamA_questionIdx = 0;
-                    state.teamB_questionIdx = 0;
-                    state.questions = shuffleArray([...SAMPLE_QUESTIONS]);
-                    state.gameStarted = false;
-                    state.answering = false;
-                    state.isJoining = false;
-                    
                     gameArea.classList.remove('active');
+                    resetUIState();
+                    statusMsg.innerHTML = '👋 You left the game. Choose a team to rejoin.';
                     updateUI();
-                    questionDisplay.textContent = 'Select your team to start!';
-                    optionsContainer.innerHTML = '';
-                    statusMsg.innerHTML = '👥 Choose a team above';
-                    nextQuestionBtn.style.display = 'none';
-                    
-                    // Reset button states
-                    teamAbtn.classList.remove('selected', 'taken');
-                    teamBbtn.classList.remove('selected', 'taken');
-                    teamAbtn.innerHTML = '🟦 Team A';
-                    teamBbtn.innerHTML = '🟥 Team B';
-                    teamAbtn.disabled = false;
-                    teamBbtn.disabled = false;
-                    
-                    initializeGame();
                 });
             }
         }
 
-        function advanceToNextQuestion() {
-            showQuestionForPlayer();
-            nextQuestionBtn.style.display = 'none';
-            if (state.teamA_questionIdx >= state.questions.length && state.teamB_questionIdx >= state.questions.length) {
-                statusMsg.innerHTML = '🏁 Both teams finished! Final scores.';
+        // ============================================
+        // 🔄 FORCE RESET
+        // ============================================
+        function forceReset() {
+            if (confirm('⚠️ FORCE RESET: This will clear ALL game data for PIN 55555.\n\nBoth players will need to rejoin.\n\nAre you sure?')) {
+                const gameRef = db.ref(GAME_PATH);
+                gameRef.remove().then(() => {
+                    // Reset all local state
+                    resetUIState();
+                    statusMsg.innerHTML = '✅ Game reset! Both teams are now available.';
+                    // Re-initialize the game
+                    initializeGame();
+                    // Update UI
+                    updateUI();
+                }).catch((err) => {
+                    alert('Error resetting: ' + err.message);
+                });
             }
         }
 
@@ -949,8 +995,12 @@
         // ============================================
         teamAbtn.addEventListener('click', () => selectTeam('A'));
         teamBbtn.addEventListener('click', () => selectTeam('B'));
-        resetBtn.addEventListener('click', resetGame);
-        nextQuestionBtn.addEventListener('click', advanceToNextQuestion);
+        forceResetBtn.addEventListener('click', forceReset);
+        leaveBtn.addEventListener('click', leaveGame);
+        nextQuestionBtn.addEventListener('click', () => {
+            showQuestionForPlayer();
+            nextQuestionBtn.style.display = 'none';
+        });
 
         // ============================================
         // INIT
@@ -961,9 +1011,9 @@
         
         console.log('🎮 Tug of War loaded! PIN: 55555');
         console.log('📌 Share this page with friends on any device!');
-        console.log('⚠️ Make sure to replace firebaseConfig with YOUR Firebase config!');
-        console.log('👥 Player 1 = Team A, Player 2 = Team B');
-        console.log('🔒 Using Firebase Transactions to prevent race conditions!');
+        console.log('🔑 Fixed PIN: 55555');
+        console.log('🔄 Use "Force Reset" if teams are stuck in "TAKEN" state');
+        console.log('🚪 Use "Leave Game" to exit gracefully');
     </script>
 </body>
 </html>
