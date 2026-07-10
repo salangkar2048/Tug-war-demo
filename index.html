@@ -79,6 +79,7 @@
             flex: 1;
             min-width: 120px;
             max-width: 200px;
+            position: relative;
         }
         .team-btn:active {
             transform: scale(0.96);
@@ -94,8 +95,20 @@
             transform: none;
         }
         .team-btn.taken {
-            opacity: 0.4;
+            opacity: 0.3;
             cursor: not-allowed;
+            border-color: #c94a4a;
+        }
+        .team-btn .taken-badge {
+            position: absolute;
+            top: -10px;
+            right: -10px;
+            background: #c94a4a;
+            color: #fff;
+            border-radius: 50%;
+            padding: 4px 8px;
+            font-size: 0.7rem;
+            font-weight: 700;
         }
         .game-area {
             display: none;
@@ -264,16 +277,18 @@
             font-size: 0.9rem;
             display: inline-block;
         }
-        .waiting-overlay {
-            background: #0e1f30cc;
-            border-radius: 30px;
-            padding: 30px 20px;
-            margin: 10px 0;
-        }
         .online-status {
             font-size: 0.8rem;
             opacity: 0.7;
             margin-top: 4px;
+        }
+        .join-instruction {
+            background: #0e1f30;
+            padding: 15px 20px;
+            border-radius: 30px;
+            margin: 10px 0;
+            font-size: 0.95rem;
+            border-left: 4px solid #f9d976;
         }
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
@@ -291,6 +306,9 @@
         <div class="pin-display">🔑 55555</div>
         
         <!-- Team Selection -->
+        <div class="join-instruction">
+            👥 Two players needed: One chooses <strong>Team A</strong>, the other chooses <strong>Team B</strong>
+        </div>
         <div class="team-select" id="teamSelect">
             <button class="team-btn" id="teamAbtn">🟦 Team A</button>
             <button class="team-btn" id="teamBbtn">🟥 Team B</button>
@@ -310,12 +328,12 @@
                 <canvas id="tugCanvas" width="600" height="120"></canvas>
             </div>
 
-            <div class="question-box" id="questionDisplay">Select your team to start!</div>
+            <div class="question-box" id="questionDisplay">Waiting for game to start...</div>
 
             <div class="options-grid" id="optionsContainer"></div>
 
             <div class="status-msg" id="statusMsg">
-                <span class="spinner"></span> Connecting...
+                <span class="spinner"></span> Waiting for players...
             </div>
 
             <div class="footer-btns">
@@ -323,15 +341,14 @@
                 <button class="btn danger" id="resetBtn">🔄 Reset Game</button>
                 <span class="player-badge" id="playerDisplay">👤 Team: —</span>
             </div>
-            <div class="online-status" id="onlineStatus">🔴 Disconnected</div>
+            <div class="online-status" id="onlineStatus">🔄 Connecting...</div>
         </div>
     </div>
 
     <script>
         // ============================================
         // 🔥 FIREBASE CONFIGURATION
-        // You MUST replace this with YOUR Firebase config
-        // Go to: https://console.firebase.google.com
+        // REPLACE THIS WITH YOUR FIREBASE CONFIG
         // ============================================
         const firebaseConfig = {
   apiKey: "AIzaSyAFHRCadWPB0O-ucYg8OFLato0pfuJfxSU",
@@ -379,7 +396,7 @@
         // GAME STATE
         // ============================================
         const state = {
-            playerId: null, // 'A' or 'B'
+            playerId: null,
             questions: [],
             scoreA: 0,
             scoreB: 0,
@@ -389,7 +406,8 @@
             answering: false,
             gameStarted: false,
             connected: false,
-            listeners: {}
+            listeners: {},
+            playerRef: null // Firebase reference for this player
         };
 
         // ============================================
@@ -486,18 +504,24 @@
                 playerDisplay.textContent = '👤 Team: A';
                 teamAbtn.classList.add('selected');
                 teamBbtn.classList.remove('selected');
+                teamAbtn.disabled = true;
+                teamBbtn.disabled = false;
             } else if (state.playerId === 'B') {
                 teamAName.textContent = '🟦 Opponent (A)';
                 teamBName.textContent = '🟥 You (B)';
                 playerDisplay.textContent = '👤 Team: B';
                 teamBbtn.classList.add('selected');
                 teamAbtn.classList.remove('selected');
+                teamBbtn.disabled = true;
+                teamAbtn.disabled = false;
             } else {
                 teamAName.textContent = '🟦 Team A';
                 teamBName.textContent = '🟥 Team B';
                 playerDisplay.textContent = '👤 Team: —';
                 teamAbtn.classList.remove('selected');
                 teamBbtn.classList.remove('selected');
+                teamAbtn.disabled = false;
+                teamBbtn.disabled = false;
             }
         }
 
@@ -514,7 +538,7 @@
         function showQuestionForPlayer() {
             const pid = state.playerId;
             if (!pid || !state.gameStarted) {
-                questionDisplay.textContent = pid ? '⏳ Waiting for opponent...' : 'Select your team to start!';
+                questionDisplay.textContent = pid ? '⏳ Waiting for opponent to join...' : 'Select your team to start!';
                 optionsContainer.innerHTML = '';
                 return;
             }
@@ -605,9 +629,10 @@
         // ============================================
         // FIREBASE OPERATIONS
         // ============================================
+        const GAME_PATH = 'games/55555';
+
         function saveGameState() {
-            if (!state.pin) return;
-            const gameRef = db.ref(`games/55555`);
+            const gameRef = db.ref(GAME_PATH);
             gameRef.update({
                 scoreA: state.scoreA,
                 scoreB: state.scoreB,
@@ -619,7 +644,7 @@
         }
 
         function listenToGame() {
-            const gameRef = db.ref(`games/55555`);
+            const gameRef = db.ref(GAME_PATH);
             
             if (state.listeners.game) {
                 state.listeners.game();
@@ -628,7 +653,6 @@
             state.listeners.game = gameRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) {
-                    // Game doesn't exist yet, create it
                     initializeGame();
                     return;
                 }
@@ -637,7 +661,10 @@
                 onlineStatus.textContent = '🟢 Connected';
                 onlineStatus.style.color = '#4caf84';
                 
-                // Update state from Firebase
+                // Update team button states
+                updateTeamButtons(data.players);
+                
+                // Update game state from Firebase
                 const oldScoreA = state.scoreA;
                 const oldScoreB = state.scoreB;
                 
@@ -647,31 +674,60 @@
                 state.teamA_questionIdx = data.teamA_questionIdx || 0;
                 state.teamB_questionIdx = data.teamB_questionIdx || 0;
                 state.questions = data.questions || SAMPLE_QUESTIONS;
-                state.gameStarted = true;
+                
+                // Check if both players are here
+                const players = data.players || {};
+                const hasA = players.A === true;
+                const hasB = players.B === true;
+                
+                if (hasA && hasB) {
+                    state.gameStarted = true;
+                    statusMsg.innerHTML = '🎮 Both teams ready! Answer to pull!';
+                } else if (hasA || hasB) {
+                    state.gameStarted = false;
+                    statusMsg.innerHTML = '⏳ Waiting for other player to join...';
+                } else {
+                    state.gameStarted = false;
+                    statusMsg.innerHTML = '👥 Waiting for players to join...';
+                }
                 
                 updateUI();
                 
-                // Animate scores if they changed
                 if (state.scoreA !== oldScoreA) animateScore('A');
                 if (state.scoreB !== oldScoreB) animateScore('B');
                 
                 showQuestionForPlayer();
-                
-                // Update team buttons based on who's taken
-                if (data.players) {
-                    if (data.players.A && data.players.B) {
-                        statusMsg.innerHTML = '🎮 Both teams ready! Answer to pull!';
-                    } else if (data.players.A) {
-                        statusMsg.innerHTML = '⏳ Waiting for Team B to join...';
-                    } else if (data.players.B) {
-                        statusMsg.innerHTML = '⏳ Waiting for Team A to join...';
-                    }
-                }
             });
         }
 
+        function updateTeamButtons(players) {
+            const hasA = players && players.A === true;
+            const hasB = players && players.B === true;
+            
+            // Don't disable if this player is already on that team
+            if (state.playerId !== 'A') {
+                teamAbtn.classList.toggle('taken', hasA);
+                teamAbtn.disabled = hasA;
+                if (hasA) {
+                    teamAbtn.innerHTML = '🟦 Team A <span class="taken-badge">TAKEN</span>';
+                } else {
+                    teamAbtn.innerHTML = '🟦 Team A';
+                }
+            }
+            
+            if (state.playerId !== 'B') {
+                teamBbtn.classList.toggle('taken', hasB);
+                teamBbtn.disabled = hasB;
+                if (hasB) {
+                    teamBbtn.innerHTML = '🟥 Team B <span class="taken-badge">TAKEN</span>';
+                } else {
+                    teamBbtn.innerHTML = '🟥 Team B';
+                }
+            }
+        }
+
         function initializeGame() {
-            const gameRef = db.ref(`games/55555`);
+            const gameRef = db.ref(GAME_PATH);
             gameRef.set({
                 players: { A: false, B: false },
                 scoreA: 0,
@@ -693,46 +749,63 @@
         }
 
         // ============================================
-        // TEAM SELECTION
+        // TEAM SELECTION - FIXED VERSION
         // ============================================
         function selectTeam(team) {
-            if (state.playerId === team) return;
+            if (state.playerId === team) {
+                // Already on this team
+                return;
+            }
             
-            // Check if team is already taken in Firebase
-            const gameRef = db.ref(`games/55555/players`);
+            // Check if team is already taken (real-time check)
+            const gameRef = db.ref(GAME_PATH);
             gameRef.once('value', (snapshot) => {
-                const players = snapshot.val();
-                if (players && players[team] === true) {
-                    alert(`Team ${team} is already taken! Please choose the other team.`);
+                const data = snapshot.val();
+                if (!data) {
+                    initializeGame();
+                    // Try again after init
+                    setTimeout(() => selectTeam(team), 500);
                     return;
                 }
                 
+                const players = data.players || {};
+                if (players[team] === true) {
+                    alert(`❌ Team ${team} is already taken!\n\nChoose the other team or wait for a new game.`);
+                    return;
+                }
+                
+                // Check if the other team has a player
+                const otherTeam = team === 'A' ? 'B' : 'A';
+                const otherTaken = players[otherTeam] === true;
+                
                 // Assign team
                 state.playerId = team;
-                gameRef.update({ [team]: true });
                 
-                // Load or initialize game
-                const gameDataRef = db.ref(`games/55555`);
-                gameDataRef.once('value', (snap) => {
-                    const data = snap.val();
-                    if (data) {
-                        state.scoreA = data.scoreA || 0;
-                        state.scoreB = data.scoreB || 0;
-                        state.tugProgress = data.tugProgress || 50;
-                        state.teamA_questionIdx = data.teamA_questionIdx || 0;
-                        state.teamB_questionIdx = data.teamB_questionIdx || 0;
-                        state.questions = data.questions || SAMPLE_QUESTIONS;
-                        state.gameStarted = true;
-                    } else {
-                        initializeGame();
-                    }
-                    
-                    gameArea.classList.add('active');
-                    updateUI();
-                    showQuestionForPlayer();
-                    statusMsg.innerHTML = `🎮 You are Team ${team}! Answer to pull the rope!`;
-                    saveGameState();
-                });
+                // Update players in Firebase
+                const updates = {};
+                updates[`players/${team}`] = true;
+                gameRef.update(updates);
+                
+                // Load game data
+                state.scoreA = data.scoreA || 0;
+                state.scoreB = data.scoreB || 0;
+                state.tugProgress = data.tugProgress || 50;
+                state.teamA_questionIdx = data.teamA_questionIdx || 0;
+                state.teamB_questionIdx = data.teamB_questionIdx || 0;
+                state.questions = data.questions || SAMPLE_QUESTIONS;
+                
+                if (otherTaken) {
+                    state.gameStarted = true;
+                    statusMsg.innerHTML = `🎮 You are Team ${team}! Game is on!`;
+                } else {
+                    state.gameStarted = false;
+                    statusMsg.innerHTML = `🎮 You are Team ${team}! Waiting for opponent...`;
+                }
+                
+                gameArea.classList.add('active');
+                updateUI();
+                showQuestionForPlayer();
+                saveGameState();
             });
         }
 
@@ -740,8 +813,8 @@
         // RESET GAME
         // ============================================
         function resetGame() {
-            if (confirm('Reset the game for everyone?')) {
-                const gameRef = db.ref(`games/55555`);
+            if (confirm('⚠️ Reset the game for everyone?')) {
+                const gameRef = db.ref(GAME_PATH);
                 gameRef.remove().then(() => {
                     state.playerId = null;
                     state.scoreA = 0;
@@ -757,10 +830,16 @@
                     updateUI();
                     questionDisplay.textContent = 'Select your team to start!';
                     optionsContainer.innerHTML = '';
-                    statusMsg.innerHTML = '👉 Choose Team A or B above';
+                    statusMsg.innerHTML = '👥 Choose a team above';
                     nextQuestionBtn.style.display = 'none';
-                    teamAbtn.classList.remove('selected');
-                    teamBbtn.classList.remove('selected');
+                    
+                    // Reset button states
+                    teamAbtn.classList.remove('selected', 'taken');
+                    teamBbtn.classList.remove('selected', 'taken');
+                    teamAbtn.innerHTML = '🟦 Team A';
+                    teamBbtn.innerHTML = '🟥 Team B';
+                    teamAbtn.disabled = false;
+                    teamBbtn.disabled = false;
                     
                     initializeGame();
                 });
@@ -812,6 +891,7 @@
         console.log('🎮 Tug of War loaded! PIN: 55555');
         console.log('📌 Share this page with friends on any device!');
         console.log('⚠️ Make sure to replace firebaseConfig with YOUR Firebase config!');
+        console.log('👥 Player 1 = Team A, Player 2 = Team B');
     </script>
 </body>
 </html>
