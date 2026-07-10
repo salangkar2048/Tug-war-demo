@@ -1,0 +1,743 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
+    <title>Multiplayer Tug-of-War</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #0b1a2f;
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #fff;
+            padding: 16px;
+        }
+        .container {
+            max-width: 800px;
+            width: 100%;
+            background: #1a2f44;
+            border-radius: 40px;
+            padding: 24px 20px 32px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.6);
+            text-align: center;
+        }
+        h1 {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            margin-bottom: 8px;
+            background: linear-gradient(135deg, #f9d976, #f39b7b);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+        }
+        .sub {
+            font-size: 0.9rem;
+            opacity: 0.8;
+            margin-bottom: 24px;
+        }
+        .pin-section {
+            background: #0e1f30;
+            border-radius: 60px;
+            padding: 20px 16px;
+            margin-bottom: 28px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+        }
+        .pin-section label {
+            font-weight: 600;
+            font-size: 1.1rem;
+        }
+        .pin-input {
+            background: #fff;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 20px;
+            font-size: 1.2rem;
+            width: 160px;
+            text-align: center;
+            font-weight: 700;
+            letter-spacing: 4px;
+            color: #0b1a2f;
+        }
+        .btn {
+            background: #f9d976;
+            border: none;
+            border-radius: 40px;
+            padding: 12px 28px;
+            font-weight: 700;
+            font-size: 1rem;
+            color: #0b1a2f;
+            cursor: pointer;
+            transition: all 0.2s;
+            box-shadow: 0 4px 0 #b38f40;
+            touch-action: manipulation;
+        }
+        .btn:active {
+            transform: translateY(4px);
+            box-shadow: none;
+        }
+        .btn.secondary {
+            background: #4a6a85;
+            box-shadow: 0 4px 0 #1f3a52;
+            color: #fff;
+        }
+        .btn.danger {
+            background: #c94a4a;
+            box-shadow: 0 4px 0 #7a2a2a;
+            color: #fff;
+        }
+        .game-area {
+            display: none;
+            margin-top: 10px;
+        }
+        .game-area.active {
+            display: block;
+        }
+        .team-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin: 12px 0;
+            font-weight: 600;
+            font-size: 1.2rem;
+        }
+        .team-name {
+            background: #0e1f30;
+            padding: 8px 20px;
+            border-radius: 30px;
+            min-width: 100px;
+        }
+        .score {
+            background: #00000033;
+            padding: 8px 24px;
+            border-radius: 40px;
+            font-size: 1.8rem;
+            min-width: 70px;
+        }
+        .tug-canvas-wrap {
+            background: #0e1f30;
+            border-radius: 60px;
+            padding: 16px 10px;
+            margin: 16px 0;
+        }
+        canvas {
+            width: 100%;
+            height: auto;
+            display: block;
+            border-radius: 30px;
+            background: #1d3850;
+            touch-action: none;
+        }
+        .question-box {
+            background: #0e1f30;
+            border-radius: 30px;
+            padding: 20px 16px;
+            margin: 16px 0;
+            min-height: 100px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.2rem;
+            line-height: 1.6;
+            word-break: break-word;
+        }
+        .options-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+            margin: 12px 0 18px;
+        }
+        .option-btn {
+            background: #2c4b66;
+            border: 2px solid #3d6485;
+            border-radius: 40px;
+            padding: 14px 8px;
+            font-size: 1rem;
+            font-weight: 600;
+            color: #fff;
+            cursor: pointer;
+            transition: 0.15s;
+            touch-action: manipulation;
+        }
+        .option-btn:active {
+            background: #3d6485;
+            transform: scale(0.96);
+        }
+        .option-btn.correct {
+            background: #2e7d5e;
+            border-color: #4caf84;
+        }
+        .option-btn.wrong {
+            background: #9e4a4a;
+            border-color: #c96a6a;
+        }
+        .option-btn:disabled {
+            opacity: 0.6;
+            transform: none;
+        }
+        .status-msg {
+            font-size: 0.95rem;
+            background: #0e1f30;
+            padding: 12px;
+            border-radius: 40px;
+            margin: 8px 0;
+        }
+        .footer-btns {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 12px;
+            justify-content: center;
+            margin-top: 18px;
+        }
+        .hidden {
+            display: none;
+        }
+        .waiting-spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 4px solid #ffffff33;
+            border-top: 4px solid #f9d976;
+            border-radius: 50%;
+            animation: spin 0.8s linear infinite;
+            margin-right: 10px;
+            vertical-align: middle;
+        }
+        @keyframes spin { to { transform: rotate(360deg); } }
+        .qr-info {
+            font-size: 0.85rem;
+            background: #0e1f30;
+            padding: 8px 16px;
+            border-radius: 40px;
+            display: inline-block;
+            margin-top: 6px;
+        }
+        @media (max-width: 550px) {
+            .container { padding: 16px 12px; }
+            .pin-input { width: 130px; }
+            .options-grid { grid-template-columns: 1fr; }
+        }
+    </style>
+</head>
+<body>
+    <div class="container" id="app">
+        <h1>⚡ TUG OF WAR</h1>
+        <div class="sub">multiplayer · live quiz</div>
+
+        <!-- PIN + join/create -->
+        <div class="pin-section" id="pinSection">
+            <label for="pinInput">🔑 GAME PIN</label>
+            <input type="text" class="pin-input" id="pinInput" placeholder="1234" maxlength="6" inputmode="numeric" />
+            <button class="btn" id="createBtn">➕ CREATE</button>
+            <button class="btn secondary" id="joinBtn">🔗 JOIN</button>
+            <button class="btn danger" id="resetBtn" style="padding:12px 16px;">✕</button>
+        </div>
+
+        <!-- Game area -->
+        <div class="game-area" id="gameArea">
+            <div class="team-row">
+                <span class="team-name" id="teamAName">🟦 Team A</span>
+                <span class="score" id="scoreA">0</span>
+                <span style="font-size:1.8rem;">⚔️</span>
+                <span class="score" id="scoreB">0</span>
+                <span class="team-name" id="teamBName">🟥 Team B</span>
+            </div>
+
+            <div class="tug-canvas-wrap">
+                <canvas id="tugCanvas" width="600" height="120"></canvas>
+            </div>
+
+            <div class="question-box" id="questionDisplay">Waiting for question...</div>
+
+            <div class="options-grid" id="optionsContainer"></div>
+
+            <div class="status-msg" id="statusMsg">👉 Answer to pull the rope!</div>
+
+            <div class="footer-btns">
+                <button class="btn secondary" id="nextQuestionBtn" style="display:none;">⏩ Next Question</button>
+                <span class="qr-info" id="playerIdDisplay">👤 You: —</span>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        (function() {
+            // ---- core state ----
+            const state = {
+                pin: '',
+                playerId: null,         // 'A' or 'B'
+                isHost: false,
+                connected: false,
+                // game data
+                questions: [],
+                currentQIndex: 0,
+                scoreA: 0,
+                scoreB: 0,
+                tugProgress: 50,        // 0 = A wins, 100 = B wins
+                // per-team question tracking
+                teamA_answered: false,   // true if A answered current question correctly
+                teamB_answered: false,
+                teamA_questionIdx: 0,    // which question index each team is on
+                teamB_questionIdx: 0,
+                // UI lock
+                answering: false,
+            };
+
+            // ---- DOM refs ----
+            const $ = id => document.getElementById(id);
+            const pinInput = $('pinInput');
+            const createBtn = $('createBtn');
+            const joinBtn = $('joinBtn');
+            const resetBtn = $('resetBtn');
+            const gameArea = $('gameArea');
+            const teamAName = $('teamAName');
+            const teamBName = $('teamBName');
+            const scoreA = $('scoreA');
+            const scoreB = $('scoreB');
+            const tugCanvas = $('tugCanvas');
+            const ctx = tugCanvas.getContext('2d');
+            const questionDisplay = $('questionDisplay');
+            const optionsContainer = $('optionsContainer');
+            const statusMsg = $('statusMsg');
+            const nextQuestionBtn = $('nextQuestionBtn');
+            const playerIdDisplay = $('playerIdDisplay');
+
+            // ---- sample questions (20+) ----
+            const SAMPLE_QUESTIONS = [
+                { q: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], correct: 0 },
+                { q: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct: 1 },
+                { q: "What is 7 × 8?", options: ["48", "56", "64", "72"], correct: 1 },
+                { q: "Who painted the Mona Lisa?", options: ["Michelangelo", "Leonardo da Vinci", "Raphael", "Donatello"], correct: 1 },
+                { q: "What is the smallest prime number?", options: ["0", "1", "2", "3"], correct: 2 },
+                { q: "Which ocean is the largest?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct: 3 },
+                { q: "What is the chemical symbol for water?", options: ["H2O", "CO2", "NaCl", "HCl"], correct: 0 },
+                { q: "Who wrote 'Hamlet'?", options: ["Shakespeare", "Dickens", "Hemingway", "Tolkien"], correct: 0 },
+                { q: "What is the speed of light approx? (km/s)", options: ["300,000", "150,000", "500,000", "1,000,000"], correct: 0 },
+                { q: "Which country has the most people?", options: ["India", "China", "USA", "Indonesia"], correct: 0 },
+                { q: "What is the freezing point of water in Celsius?", options: ["0", "32", "100", "-1"], correct: 0 },
+                { q: "Which animal is the fastest on land?", options: ["Lion", "Cheetah", "Horse", "Gazelle"], correct: 1 },
+                { q: "What is the square root of 144?", options: ["10", "11", "12", "13"], correct: 2 },
+                { q: "Which gas do plants absorb?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correct: 2 },
+                { q: "What is the longest river in the world?", options: ["Nile", "Amazon", "Yangtze", "Mississippi"], correct: 0 },
+                { q: "How many continents are there?", options: ["5", "6", "7", "8"], correct: 2 },
+                { q: "Which element has the symbol 'Au'?", options: ["Silver", "Gold", "Iron", "Copper"], correct: 1 },
+                { q: "What year did WWII end?", options: ["1944", "1945", "1946", "1947"], correct: 1 },
+                { q: "Which is the smallest country?", options: ["Monaco", "Vatican", "San Marino", "Liechtenstein"], correct: 1 },
+                { q: "What is the main ingredient in guacamole?", options: ["Tomato", "Avocado", "Onion", "Pepper"], correct: 1 },
+                { q: "How many teeth does an adult human have?", options: ["28", "30", "32", "34"], correct: 2 },
+                { q: "Which blood type is the rarest?", options: ["AB negative", "A positive", "B negative", "O positive"], correct: 0 },
+            ];
+
+            // ---- helper functions ----
+            function shuffleArray(arr) {
+                for (let i = arr.length - 1; i > 0; i--) {
+                    const j = Math.floor(Math.random() * (i + 1));
+                    [arr[i], arr[j]] = [arr[j], arr[i]];
+                }
+                return arr;
+            }
+
+            // ---- draw tug canvas ----
+            function drawTug(progress) {
+                const w = tugCanvas.width, h = tugCanvas.height;
+                ctx.clearRect(0, 0, w, h);
+                // background
+                const grad = ctx.createLinearGradient(0, 0, w, 0);
+                grad.addColorStop(0, '#2a6f8f');
+                grad.addColorStop(0.5, '#4a8aaa');
+                grad.addColorStop(1, '#2a6f8f');
+                ctx.fillStyle = grad;
+                ctx.beginPath();
+                ctx.roundRect(10, 30, w-20, 50, 25);
+                ctx.fill();
+
+                // rope
+                const ropeX = 10 + (progress / 100) * (w - 20 - 40);
+                ctx.fillStyle = '#c9a87c';
+                ctx.beginPath();
+                ctx.roundRect(ropeX, 30, 40, 50, 12);
+                ctx.fill();
+                ctx.fillStyle = '#8b6b40';
+                ctx.font = 'bold 28px sans-serif';
+                ctx.textAlign = 'center';
+                ctx.textBaseline = 'middle';
+                ctx.fillText('⚡', ropeX+20, 55);
+
+                // team labels
+                ctx.font = 'bold 16px sans-serif';
+                ctx.fillStyle = '#fff';
+                ctx.textAlign = 'left';
+                ctx.fillText('A', 20, 110);
+                ctx.textAlign = 'right';
+                ctx.fillText('B', w-20, 110);
+
+                // markers
+                ctx.fillStyle = '#ffffff66';
+                for (let i = 0; i <= 10; i++) {
+                    const x = 10 + (i / 10) * (w - 20);
+                    ctx.fillRect(x-1, 20, 2, 12);
+                }
+            }
+            // roundRect polyfill for canvas if needed
+            if (!CanvasRenderingContext2D.prototype.roundRect) {
+                CanvasRenderingContext2D.prototype.roundRect = function(x, y, w, h, r) {
+                    if (r > w/2) r = w/2;
+                    if (r > h/2) r = h/2;
+                    this.moveTo(x+r, y);
+                    this.lineTo(x+w-r, y);
+                    this.quadraticCurveTo(x+w, y, x+w, y+r);
+                    this.lineTo(x+w, y+h-r);
+                    this.quadraticCurveTo(x+w, y+h, x+w-r, y+h);
+                    this.lineTo(x+r, y+h);
+                    this.quadraticCurveTo(x, y+h, x, y+h-r);
+                    this.lineTo(x, y+r);
+                    this.quadraticCurveTo(x, y, x+r, y);
+                    this.closePath();
+                    return this;
+                };
+            }
+
+            // ---- update UI from state ----
+            function updateUI() {
+                scoreA.textContent = state.scoreA;
+                scoreB.textContent = state.scoreB;
+                drawTug(state.tugProgress);
+                playerIdDisplay.textContent = `👤 You: ${state.playerId || '—'}`;
+
+                // update team names with roles
+                if (state.playerId === 'A') {
+                    teamAName.textContent = '🟦 You (A)';
+                    teamBName.textContent = '🟥 Opponent (B)';
+                } else if (state.playerId === 'B') {
+                    teamAName.textContent = '🟦 Opponent (A)';
+                    teamBName.textContent = '🟥 You (B)';
+                } else {
+                    teamAName.textContent = '🟦 Team A';
+                    teamBName.textContent = '🟥 Team B';
+                }
+            }
+
+            // ---- show question for current player ----
+            function showQuestionForPlayer() {
+                const pid = state.playerId;
+                if (!pid) return;
+                const idx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+                if (idx >= state.questions.length) {
+                    questionDisplay.textContent = '🏆 All questions answered!';
+                    optionsContainer.innerHTML = '';
+                    statusMsg.textContent = 'Game over! Check scores.';
+                    return;
+                }
+                const qData = state.questions[idx];
+                questionDisplay.textContent = qData.q;
+                // build options
+                optionsContainer.innerHTML = '';
+                qData.options.forEach((opt, i) => {
+                    const btn = document.createElement('button');
+                    btn.className = 'option-btn';
+                    btn.textContent = opt;
+                    btn.dataset.index = i;
+                    btn.addEventListener('click', () => handleOptionClick(i));
+                    optionsContainer.appendChild(btn);
+                });
+                statusMsg.textContent = '📝 Choose your answer!';
+                state.answering = false;
+                // enable all option buttons
+                document.querySelectorAll('.option-btn').forEach(b => b.disabled = false);
+                // hide next btn
+                nextQuestionBtn.style.display = 'none';
+            }
+
+            // ---- handle option click ----
+            function handleOptionClick(selectedIdx) {
+                if (state.answering) return;
+                const pid = state.playerId;
+                if (!pid) return;
+                const idx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+                if (idx >= state.questions.length) return;
+                const qData = state.questions[idx];
+                const correct = qData.correct;
+                const isCorrect = (selectedIdx === correct);
+                state.answering = true;
+
+                // visual feedback
+                const btns = document.querySelectorAll('.option-btn');
+                btns.forEach((b, i) => {
+                    b.disabled = true;
+                    if (i === correct) b.classList.add('correct');
+                    else if (i === selectedIdx && !isCorrect) b.classList.add('wrong');
+                });
+
+                if (isCorrect) {
+                    statusMsg.textContent = '✅ Correct! Pulling the rope!';
+                    // update score and tug
+                    if (pid === 'A') {
+                        state.scoreA += 1;
+                        state.tugProgress = Math.min(100, state.tugProgress + 2);
+                        state.teamA_questionIdx += 1;
+                    } else {
+                        state.scoreB += 1;
+                        state.tugProgress = Math.max(0, state.tugProgress - 2);
+                        state.teamB_questionIdx += 1;
+                    }
+                    updateUI();
+                    // show next button
+                    nextQuestionBtn.style.display = 'inline-block';
+                    // check if all questions done for this team
+                    const nextIdx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+                    if (nextIdx >= state.questions.length) {
+                        statusMsg.textContent = `🎉 Team ${pid} completed all questions!`;
+                    }
+                } else {
+                    statusMsg.textContent = '❌ Wrong answer. Try again next turn.';
+                    // for wrong answer, we just let them retry after some time or next question?
+                    // we allow them to click next after a short delay to retry?
+                    // but per spec: "another team will only be presented new question once that team provides the correct answer"
+                    // so we give them a new question only on correct. Wrong = stay on same question.
+                    // we'll enable a "Retry" button or wait.
+                    setTimeout(() => {
+                        // re-enable options, but keep same question
+                        if (state.teamA_questionIdx === idx || state.teamB_questionIdx === idx) {
+                            // if still on same question, re-enable
+                            document.querySelectorAll('.option-btn').forEach(b => {
+                                b.disabled = false;
+                                b.classList.remove('correct', 'wrong');
+                            });
+                            statusMsg.textContent = '📝 Try again!';
+                            state.answering = false;
+                        }
+                    }, 1200);
+                }
+                updateUI();
+            }
+
+            // ---- next question (triggered manually or automatically) ----
+            function advanceToNextQuestion() {
+                const pid = state.playerId;
+                if (!pid) return;
+                // if the team has already answered correctly and moved on, just show next
+                showQuestionForPlayer();
+                nextQuestionBtn.style.display = 'none';
+                // if game over check
+                if (state.teamA_questionIdx >= state.questions.length && state.teamB_questionIdx >= state.questions.length) {
+                    statusMsg.textContent = '🏁 Both teams finished! Final scores.';
+                }
+            }
+
+            // ---- reset / init game ----
+            function initGame(questions) {
+                state.questions = shuffleArray([...questions]);
+                state.currentQIndex = 0;
+                state.scoreA = 0;
+                state.scoreB = 0;
+                state.tugProgress = 50;
+                state.teamA_questionIdx = 0;
+                state.teamB_questionIdx = 0;
+                state.teamA_answered = false;
+                state.teamB_answered = false;
+                state.answering = false;
+                updateUI();
+                if (state.playerId) {
+                    showQuestionForPlayer();
+                }
+                gameArea.classList.add('active');
+            }
+
+            // ---- generate PIN ----
+            function generatePin() {
+                return Math.floor(1000 + Math.random() * 9000).toString();
+            }
+
+            // ---- connect / create game (simulated with localStorage) ----
+            function connectToGame(pin, asHost) {
+                state.pin = pin;
+                state.isHost = asHost;
+                // In real implementation, this would be a server.
+                // For demo, we use localStorage to simulate shared state.
+                // but we need two devices: we'll use BroadcastChannel for same browser, or localStorage + polling.
+                // For simplicity, we'll use localStorage with a 'game_' prefix and storage event.
+                // For cross-device, this demo works only on same browser with multiple tabs.
+                // But we'll simulate with localStorage and manual sync.
+                try {
+                    const gameKey = `tug_game_${pin}`;
+                    if (asHost) {
+                        // create new game
+                        const gameData = {
+                            players: { A: null, B: null },
+                            scoreA: 0,
+                            scoreB: 0,
+                            tugProgress: 50,
+                            teamA_questionIdx: 0,
+                            teamB_questionIdx: 0,
+                            questions: SAMPLE_QUESTIONS,
+                            createdAt: Date.now()
+                        };
+                        localStorage.setItem(gameKey, JSON.stringify(gameData));
+                        // assign player A to host
+                        state.playerId = 'A';
+                        // store player session
+                        localStorage.setItem(`tug_player_${pin}`, JSON.stringify({ playerId: 'A', pin }));
+                        initGame(SAMPLE_QUESTIONS);
+                        statusMsg.textContent = '🎮 Game created! You are Team A. Share PIN with a friend.';
+                    } else {
+                        // join existing
+                        const raw = localStorage.getItem(gameKey);
+                        if (!raw) {
+                            alert('Game not found. Check PIN or create a new game.');
+                            return;
+                        }
+                        const gameData = JSON.parse(raw);
+                        // assign player B
+                        state.playerId = 'B';
+                        localStorage.setItem(`tug_player_${pin}`, JSON.stringify({ playerId: 'B', pin }));
+                        // use questions from host
+                        initGame(gameData.questions || SAMPLE_QUESTIONS);
+                        // sync scores from host
+                        state.scoreA = gameData.scoreA || 0;
+                        state.scoreB = gameData.scoreB || 0;
+                        state.tugProgress = gameData.tugProgress || 50;
+                        state.teamA_questionIdx = gameData.teamA_questionIdx || 0;
+                        state.teamB_questionIdx = gameData.teamB_questionIdx || 0;
+                        updateUI();
+                        statusMsg.textContent = '🔗 Joined! You are Team B. Answer to pull!';
+                        showQuestionForPlayer();
+                    }
+                    // listen for changes from other tab
+                    window.addEventListener('storage', handleStorageChange);
+                    // also poll for sync every 2s
+                    if (window._syncInterval) clearInterval(window._syncInterval);
+                    window._syncInterval = setInterval(syncGameState, 2000);
+                } catch (e) {
+                    alert('Error: ' + e.message);
+                }
+            }
+
+            // ---- sync game state from localStorage ----
+            function syncGameState() {
+                if (!state.pin) return;
+                const gameKey = `tug_game_${state.pin}`;
+                const raw = localStorage.getItem(gameKey);
+                if (!raw) return;
+                try {
+                    const gameData = JSON.parse(raw);
+                    // only update if we are not the host (or host can also sync but we avoid loops)
+                    // host updates the state, others read
+                    if (!state.isHost) {
+                        // update scores and tug from host
+                        state.scoreA = gameData.scoreA || 0;
+                        state.scoreB = gameData.scoreB || 0;
+                        state.tugProgress = gameData.tugProgress || 50;
+                        state.teamA_questionIdx = gameData.teamA_questionIdx || 0;
+                        state.teamB_questionIdx = gameData.teamB_questionIdx || 0;
+                        updateUI();
+                        // if our question index changed, show new question
+                        const pid = state.playerId;
+                        if (pid) {
+                            const myIdx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
+                            // if we have a question display and it's not showing the right one
+                            // just call showQuestionForPlayer
+                            showQuestionForPlayer();
+                        }
+                    } else {
+                        // host: push local state to storage
+                        // but avoid infinite loop: only push if changed
+                        const current = {
+                            scoreA: state.scoreA,
+                            scoreB: state.scoreB,
+                            tugProgress: state.tugProgress,
+                            teamA_questionIdx: state.teamA_questionIdx,
+                            teamB_questionIdx: state.teamB_questionIdx,
+                            questions: state.questions
+                        };
+                        // check if changed
+                        if (JSON.stringify(current) !== JSON.stringify({
+                            scoreA: gameData.scoreA,
+                            scoreB: gameData.scoreB,
+                            tugProgress: gameData.tugProgress,
+                            teamA_questionIdx: gameData.teamA_questionIdx,
+                            teamB_questionIdx: gameData.teamB_questionIdx,
+                            questions: gameData.questions
+                        })) {
+                            localStorage.setItem(gameKey, JSON.stringify({
+                                ...gameData,
+                                scoreA: state.scoreA,
+                                scoreB: state.scoreB,
+                                tugProgress: state.tugProgress,
+                                teamA_questionIdx: state.teamA_questionIdx,
+                                teamB_questionIdx: state.teamB_questionIdx,
+                            }));
+                        }
+                    }
+                } catch (e) { /* ignore */ }
+            }
+
+            // ---- storage change handler ----
+            function handleStorageChange(e) {
+                if (e.key === `tug_game_${state.pin}`) {
+                    syncGameState();
+                }
+            }
+
+            // ---- reset ----
+            function resetGame() {
+                if (window._syncInterval) clearInterval(window._syncInterval);
+                window.removeEventListener('storage', handleStorageChange);
+                state.pin = '';
+                state.playerId = null;
+                state.isHost = false;
+                state.connected = false;
+                gameArea.classList.remove('active');
+                statusMsg.textContent = '👉 Create or join a game.';
+                pinInput.value = '';
+                // clear any stored player
+                localStorage.removeItem(`tug_player_${state.pin}`);
+                // we could also clear game data but leave for rejoin
+                document.querySelectorAll('.option-btn').forEach(b => b.remove());
+                questionDisplay.textContent = 'Waiting...';
+                scoreA.textContent = '0';
+                scoreB.textContent = '0';
+                drawTug(50);
+                playerIdDisplay.textContent = '👤 You: —';
+            }
+
+            // ---- event listeners ----
+            createBtn.addEventListener('click', () => {
+                const pin = pinInput.value.trim() || generatePin();
+                pinInput.value = pin;
+                resetGame();
+                connectToGame(pin, true);
+            });
+
+            joinBtn.addEventListener('click', () => {
+                const pin = pinInput.value.trim();
+                if (!pin) { alert('Please enter a PIN.'); return; }
+                resetGame();
+                connectToGame(pin, false);
+            });
+
+            resetBtn.addEventListener('click', resetGame);
+
+            nextQuestionBtn.addEventListener('click', advanceToNextQuestion);
+
+            // ---- init ----
+            drawTug(50);
+            statusMsg.textContent = '👉 Create or join a game.';
+            // check if there's a stored session
+            // not implemented for simplicity
+
+            // ---- auto-detect if running in iframe or standalone ----
+            console.log('Multiplayer Tug-of-War loaded. Use PIN to connect.');
+        })();
+    </script>
+</body>
+</html>
