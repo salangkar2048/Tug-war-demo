@@ -522,6 +522,29 @@
             100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
         }
 
+        /* Sound toggle button */
+        .sound-toggle {
+            position: fixed;
+            bottom: 20px;
+            right: 20px;
+            background: #1a2f44;
+            border: 2px solid #f9d976;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            font-size: 1.5rem;
+            cursor: pointer;
+            z-index: 100;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: 0.2s;
+            color: #fff;
+        }
+        .sound-toggle:hover {
+            transform: scale(1.1);
+        }
+
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
             .options-grid { grid-template-columns: 1fr; }
@@ -529,10 +552,14 @@
             .winner-box { padding: 30px 20px; }
             .winner-scores { gap: 20px; flex-wrap: wrap; }
             .winner-title { font-size: 1.6rem; }
+            .sound-toggle { bottom: 10px; right: 10px; width: 40px; height: 40px; font-size: 1.2rem; }
         }
     </style>
 </head>
 <body>
+    <!-- Sound Toggle -->
+    <button class="sound-toggle" id="soundToggle" title="Toggle Sound">🔊</button>
+
     <!-- Loading Overlay -->
     <div class="loading-overlay" id="loadingOverlay">
         <div class="loading-spinner"></div>
@@ -654,6 +681,113 @@
         const db = firebase.database();
 
         // ============================================
+        // SOUND EFFECTS - Using Web Audio API
+        // ============================================
+        class SoundManager {
+            constructor() {
+                this.enabled = true;
+                this.audioContext = null;
+            }
+
+            init() {
+                if (!this.audioContext) {
+                    try {
+                        this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    } catch (e) {
+                        console.warn('Web Audio not supported');
+                    }
+                }
+            }
+
+            playTone(frequency, duration, type = 'sine', volume = 0.3) {
+                if (!this.enabled || !this.audioContext) return;
+                try {
+                    const oscillator = this.audioContext.createOscillator();
+                    const gain = this.audioContext.createGain();
+                    oscillator.connect(gain);
+                    gain.connect(this.audioContext.destination);
+                    oscillator.type = type;
+                    oscillator.frequency.value = frequency;
+                    gain.gain.value = volume;
+                    oscillator.start();
+                    gain.gain.exponentialRampToValueAtTime(0.001, this.audioContext.currentTime + duration);
+                    oscillator.stop(this.audioContext.currentTime + duration);
+                } catch (e) { /* ignore */ }
+            }
+
+            // Competition sound - energetic beep
+            playCompetition() {
+                if (!this.enabled) return;
+                this.init();
+                // Quick rising beep
+                this.playTone(800, 0.1, 'square', 0.2);
+                setTimeout(() => this.playTone(1000, 0.1, 'square', 0.2), 150);
+                setTimeout(() => this.playTone(1200, 0.15, 'square', 0.25), 300);
+            }
+
+            // Correct answer sound - happy ascending
+            playCorrect() {
+                if (!this.enabled) return;
+                this.init();
+                this.playTone(523, 0.15, 'sine', 0.3);
+                setTimeout(() => this.playTone(659, 0.15, 'sine', 0.3), 150);
+                setTimeout(() => this.playTone(784, 0.2, 'sine', 0.35), 300);
+            }
+
+            // Wrong answer sound - low buzz
+            playWrong() {
+                if (!this.enabled) return;
+                this.init();
+                this.playTone(200, 0.4, 'sawtooth', 0.2);
+                setTimeout(() => this.playTone(150, 0.3, 'sawtooth', 0.2), 200);
+            }
+
+            // Cooldown tick sound
+            playTick() {
+                if (!this.enabled) return;
+                this.init();
+                this.playTone(600, 0.05, 'sine', 0.1);
+            }
+
+            // Winner celebration - fanfare
+            playWinner(team) {
+                if (!this.enabled) return;
+                this.init();
+                const notes = [523, 587, 659, 784, 880, 988, 1047];
+                notes.forEach((freq, i) => {
+                    setTimeout(() => {
+                        this.playTone(freq, 0.15, 'square', 0.25);
+                    }, i * 100);
+                });
+                // Add some extra celebration notes
+                setTimeout(() => {
+                    this.playTone(1047, 0.3, 'square', 0.3);
+                }, 800);
+                setTimeout(() => {
+                    this.playTone(880, 0.2, 'square', 0.25);
+                    setTimeout(() => this.playTone(1047, 0.3, 'square', 0.3), 150);
+                }, 1000);
+            }
+
+            toggle() {
+                this.enabled = !this.enabled;
+                return this.enabled;
+            }
+        }
+
+        const sound = new SoundManager();
+
+        // ============================================
+        // SOUND TOGGLE
+        // ============================================
+        const soundToggle = document.getElementById('soundToggle');
+        soundToggle.addEventListener('click', () => {
+            const enabled = sound.toggle();
+            soundToggle.textContent = enabled ? '🔊' : '🔇';
+            sound.init();
+        });
+
+        // ============================================
         // SAMPLE QUESTIONS (20+)
         // ============================================
         const SAMPLE_QUESTIONS = [
@@ -704,7 +838,7 @@
             gameEnded: false,
             cooldownActive: false,
             cooldownTimer: null,
-            cooldownSeconds: 5,
+            cooldownSeconds: 10, // Changed from 5 to 10
             redCompleted: false,
             blueCompleted: false
         };
@@ -1188,6 +1322,9 @@
             if (state.gameEnded) return;
             state.gameEnded = true;
             
+            // Play winner sound
+            sound.playWinner(winner);
+            
             const isRedWin = winner === 'red';
             winnerEmoji.textContent = isRedWin ? '🔴🏆' : '🔵🏆';
             winnerTitle.textContent = isRedWin ? '🎉 RED TEAM WINS! 🎉' : '🎉 BLUE TEAM WINS! 🎉';
@@ -1195,8 +1332,15 @@
             finalScoreRed.textContent = state.scoreRed;
             finalScoreBlue.textContent = state.scoreBlue;
             
+            // Disable all game interactions
+            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+            
             winnerOverlay.classList.add('show');
             launchConfetti(isRedWin ? '#ff6b6b' : '#6baaff');
+            
+            // Play celebration sound again after a moment
+            setTimeout(() => sound.playWinner(winner), 1000);
+            setTimeout(() => sound.playWinner(winner), 2000);
         }
 
         function closeWinner() {
@@ -1238,13 +1382,13 @@
         }
 
         // ============================================
-        // COOLDOWN SYSTEM
+        // COOLDOWN SYSTEM - 10 Seconds
         // ============================================
         function startCooldown() {
             if (state.cooldownActive) return;
             
             state.cooldownActive = true;
-            let secondsLeft = state.cooldownSeconds;
+            let secondsLeft = state.cooldownSeconds; // 10 seconds
             
             document.querySelectorAll('.option-btn').forEach(btn => {
                 btn.disabled = true;
@@ -1268,6 +1412,9 @@
                 document.querySelectorAll('.cooldown-overlay').forEach(el => {
                     el.textContent = secondsLeft;
                 });
+                
+                // Play tick sound on each second
+                sound.playTick();
                 
                 if (secondsLeft <= 0) {
                     clearInterval(state.cooldownTimer);
@@ -1293,7 +1440,7 @@
             
             document.querySelectorAll('.cooldown-overlay').forEach(el => el.remove());
             
-            if (!state.answering) {
+            if (!state.answering && !state.gameEnded) {
                 document.querySelectorAll('.option-btn').forEach(btn => {
                     btn.disabled = false;
                 });
@@ -1307,7 +1454,6 @@
             scoreRed.textContent = state.scoreRed;
             scoreBlue.textContent = state.scoreBlue;
             
-            // Update progress
             const total = state.totalQuestions || 1;
             redProgress.textContent = `${Math.min(state.red_questionIdx, total)}/${total}`;
             blueProgress.textContent = `${Math.min(state.blue_questionIdx, total)}/${total}`;
@@ -1361,31 +1507,35 @@
             
             // Check for winner when a team completes all questions
             const totalQ = state.totalQuestions;
-            if (state.red_questionIdx >= totalQ && !state.redCompleted) {
+            if (state.red_questionIdx >= totalQ && !state.redCompleted && !state.gameEnded) {
                 state.redCompleted = true;
-                // Check if blue also completed
-                if (state.blue_questionIdx >= totalQ) {
-                    // Both completed - compare scores
-                    if (state.scoreRed > state.scoreBlue) showWinner('red');
-                    else if (state.scoreBlue > state.scoreRed) showWinner('blue');
-                    else {
-                        // Tie - show tie message
-                        winnerEmoji.textContent = '🤝';
-                        winnerTitle.textContent = "🤝 IT'S A TIE! 🤝";
-                        winnerTitle.className = 'winner-title';
-                        finalScoreRed.textContent = state.scoreRed;
-                        finalScoreBlue.textContent = state.scoreBlue;
-                        winnerOverlay.classList.add('show');
-                        launchConfetti('#f9d976');
-                    }
-                } else {
-                    // Red completed first - Red wins!
-                    showWinner('red');
-                }
-            } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted) {
+                // Red completed first - Red wins!
+                showWinner('red');
+            } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted && !state.gameEnded) {
                 state.blueCompleted = true;
                 // Blue completed first - Blue wins!
                 showWinner('blue');
+            }
+            
+            // If both completed (tie scenario)
+            if (state.red_questionIdx >= totalQ && state.blue_questionIdx >= totalQ && !state.gameEnded) {
+                if (state.scoreRed > state.scoreBlue) {
+                    showWinner('red');
+                } else if (state.scoreBlue > state.scoreRed) {
+                    showWinner('blue');
+                } else {
+                    // Tie
+                    state.gameEnded = true;
+                    sound.playWinner('tie');
+                    winnerEmoji.textContent = '🤝';
+                    winnerTitle.textContent = "🤝 IT'S A TIE! 🤝";
+                    winnerTitle.className = 'winner-title';
+                    finalScoreRed.textContent = state.scoreRed;
+                    finalScoreBlue.textContent = state.scoreBlue;
+                    winnerOverlay.classList.add('show');
+                    launchConfetti('#f9d976');
+                    document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
+                }
             }
         }
 
@@ -1402,6 +1552,13 @@
         function showQuestionForPlayer() {
             const role = state.role;
             const total = state.totalQuestions;
+            
+            if (state.gameEnded) {
+                questionDisplay.textContent = '🏆 Game Over! Winner announced!';
+                questionCounter.textContent = '';
+                optionsContainer.innerHTML = '';
+                return;
+            }
             
             if (role === 'viewer') {
                 questionDisplay.textContent = '👁️ Watching the game...';
@@ -1472,6 +1629,9 @@
             });
 
             if (isCorrect) {
+                // Play correct sound
+                sound.playCorrect();
+                
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
                 if (role === 'red') {
                     state.scoreRed += 1;
@@ -1500,6 +1660,9 @@
                     }, 800);
                 }
             } else {
+                // Wrong answer - play wrong sound
+                sound.playWrong();
+                
                 statusMsg.innerHTML = '❌ Wrong answer!';
                 startCooldown();
                 
@@ -1597,13 +1760,16 @@
                 if (state.scoreRed !== oldScoreRed) animateScore('red');
                 if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
                 
-                if (!state.cooldownActive) {
+                if (!state.cooldownActive && !state.gameEnded) {
                     showQuestionForPlayer();
                 }
                 
                 if (state.gameEnded) {
                     const winner = state.tugProgress >= 100 ? 'blue' : 'red';
-                    showWinner(winner);
+                    // Only show if not already shown
+                    if (!winnerOverlay.classList.contains('show')) {
+                        showWinner(winner);
+                    }
                 }
             });
         }
@@ -1773,6 +1939,8 @@
                         updateUI();
                         showQuestionForPlayer();
                         statusMsg.innerHTML = '👁️ You are watching the game!';
+                        // Play competition sound
+                        sound.playCompetition();
                         return;
                     }
                     alert(`❌ Team ${role === 'red' ? 'Red' : 'Blue'} is already taken!\n\nChoose the other team or become a viewer.`);
@@ -1793,6 +1961,7 @@
                     updateUI();
                     showQuestionForPlayer();
                     statusMsg.innerHTML = '👁️ You are watching the game!';
+                    sound.playCompetition();
                     return;
                 }
                 
@@ -1818,6 +1987,8 @@
                 if (otherTaken) {
                     state.gameStarted = true;
                     statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Game is on!`;
+                    // Play competition sound
+                    sound.playCompetition();
                 } else {
                     state.gameStarted = false;
                     statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Waiting for opponent...`;
@@ -1930,6 +2101,7 @@
         drawTug(50);
         checkConnection();
         listenToGame();
+        sound.init();
         
         console.log('🎮 Tug of War loaded! PIN: 55555');
         console.log('🔒 Roles are LOCKED once chosen!');
@@ -1937,7 +2109,8 @@
         console.log('👁️ Viewers can watch without playing');
         console.log('✅ Dynamic pull percentage: 50 / total questions');
         console.log('🏆 Game ends when a team completes all questions!');
-        console.log('⏳ 5-second cooldown on WRONG answers!');
+        console.log('⏳ 10-second cooldown on WRONG answers!');
+        console.log('🔊 Sound effects: Competition, Correct, Wrong, Winner!');
     </script>
 </body>
 </html>
