@@ -4,6 +4,11 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no" />
     <title>Tug of War - PIN: 55555</title>
+    
+    <!-- Firebase SDKs -->
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
+    
     <style>
         * {
             box-sizing: border-box;
@@ -88,6 +93,10 @@
             cursor: not-allowed;
             transform: none;
         }
+        .team-btn.taken {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
         .game-area {
             display: none;
         }
@@ -114,6 +123,15 @@
             border-radius: 40px;
             font-size: 1.8rem;
             min-width: 70px;
+            transition: all 0.3s;
+        }
+        .score.pop {
+            animation: pop 0.3s ease;
+        }
+        @keyframes pop {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); background: #f9d97633; }
+            100% { transform: scale(1); }
         }
         .tug-canvas-wrap {
             background: #0e1f30;
@@ -183,6 +201,11 @@
             padding: 12px;
             border-radius: 40px;
             margin: 8px 0;
+            min-height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
         }
         .footer-btns {
             display: flex;
@@ -222,24 +245,15 @@
             opacity: 0.5;
             transform: none;
             cursor: not-allowed;
-            box-shadow: 0 4px 0 #b38f40;
-        }
-        .waiting-msg {
-            background: #0e1f30;
-            padding: 20px;
-            border-radius: 30px;
-            margin: 10px 0;
-            font-size: 1.1rem;
         }
         .spinner {
             display: inline-block;
-            width: 24px;
-            height: 24px;
-            border: 4px solid #ffffff33;
-            border-top: 4px solid #f9d976;
+            width: 20px;
+            height: 20px;
+            border: 3px solid #ffffff33;
+            border-top: 3px solid #f9d976;
             border-radius: 50%;
             animation: spin 0.8s linear infinite;
-            margin-right: 12px;
             vertical-align: middle;
         }
         @keyframes spin { to { transform: rotate(360deg); } }
@@ -249,6 +263,17 @@
             border-radius: 40px;
             font-size: 0.9rem;
             display: inline-block;
+        }
+        .waiting-overlay {
+            background: #0e1f30cc;
+            border-radius: 30px;
+            padding: 30px 20px;
+            margin: 10px 0;
+        }
+        .online-status {
+            font-size: 0.8rem;
+            opacity: 0.7;
+            margin-top: 4px;
         }
         @media (max-width: 550px) {
             .container { padding: 16px 12px; }
@@ -260,7 +285,7 @@
 <body>
     <div class="container">
         <h1>⚡ TUG OF WAR</h1>
-        <div class="sub">multiplayer · same device or cross-tab</div>
+        <div class="sub">🌐 live multiplayer · any device</div>
         
         <!-- Fixed PIN Display -->
         <div class="pin-display">🔑 55555</div>
@@ -289,25 +314,38 @@
 
             <div class="options-grid" id="optionsContainer"></div>
 
-            <div class="status-msg" id="statusMsg">👉 Choose Team A or B above</div>
+            <div class="status-msg" id="statusMsg">
+                <span class="spinner"></span> Connecting...
+            </div>
 
             <div class="footer-btns">
                 <button class="btn secondary" id="nextQuestionBtn" style="display:none;">⏩ Next Question</button>
                 <button class="btn danger" id="resetBtn">🔄 Reset Game</button>
                 <span class="player-badge" id="playerDisplay">👤 Team: —</span>
             </div>
+            <div class="online-status" id="onlineStatus">🔴 Disconnected</div>
         </div>
     </div>
 
     <script>
         // ============================================
-        // SIMPLE MULTIPLAYER USING localStorage + BroadcastChannel
-        // Works across tabs on the same device/browser
-        // Fixed PIN: 55555
+        // 🔥 FIREBASE CONFIGURATION
+        // You MUST replace this with YOUR Firebase config
+        // Go to: https://console.firebase.google.com
         // ============================================
+        const firebaseConfig = {
+            apiKey: "AIzaSyDemoKeyReplaceMe",
+            authDomain: "your-project.firebaseapp.com",
+            databaseURL: "https://your-project-default-rtdb.firebaseio.com",
+            projectId: "your-project",
+            storageBucket: "your-project.appspot.com",
+            messagingSenderId: "123456789",
+            appId: "1:123456789:web:abc123"
+        };
 
-        const STORAGE_KEY = 'tug_game_55555';
-        const CHANNEL_NAME = 'tug_channel_55555';
+        // Initialize Firebase
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
         // ============================================
         // SAMPLE QUESTIONS (20+)
@@ -350,6 +388,8 @@
             teamB_questionIdx: 0,
             answering: false,
             gameStarted: false,
+            connected: false,
+            listeners: {}
         };
 
         // ============================================
@@ -372,16 +412,7 @@
         const nextQuestionBtn = $('nextQuestionBtn');
         const resetBtn = $('resetBtn');
         const playerDisplay = $('playerDisplay');
-
-        // ============================================
-        // BROADCAST CHANNEL (for cross-tab sync)
-        // ============================================
-        let channel = null;
-        try {
-            channel = new BroadcastChannel(CHANNEL_NAME);
-        } catch(e) {
-            console.warn('BroadcastChannel not supported, using storage events only.');
-        }
+        const onlineStatus = $('onlineStatus');
 
         // ============================================
         // CANVAS DRAWING
@@ -442,46 +473,6 @@
         }
 
         // ============================================
-        // SAVE / LOAD GAME STATE
-        // ============================================
-        function saveGameState() {
-            const data = {
-                scoreA: state.scoreA,
-                scoreB: state.scoreB,
-                tugProgress: state.tugProgress,
-                teamA_questionIdx: state.teamA_questionIdx,
-                teamB_questionIdx: state.teamB_questionIdx,
-                questions: state.questions,
-                timestamp: Date.now()
-            };
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-            
-            // Broadcast to other tabs
-            if (channel) {
-                try {
-                    channel.postMessage({ type: 'update', data: data });
-                } catch(e) { /* ignore */ }
-            }
-        }
-
-        function loadGameState() {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return false;
-            try {
-                const data = JSON.parse(raw);
-                state.scoreA = data.scoreA || 0;
-                state.scoreB = data.scoreB || 0;
-                state.tugProgress = data.tugProgress || 50;
-                state.teamA_questionIdx = data.teamA_questionIdx || 0;
-                state.teamB_questionIdx = data.teamB_questionIdx || 0;
-                state.questions = data.questions || SAMPLE_QUESTIONS;
-                return true;
-            } catch(e) {
-                return false;
-            }
-        }
-
-        // ============================================
         // UPDATE UI
         // ============================================
         function updateUI() {
@@ -495,25 +486,26 @@
                 playerDisplay.textContent = '👤 Team: A';
                 teamAbtn.classList.add('selected');
                 teamBbtn.classList.remove('selected');
-                teamAbtn.disabled = true;
-                teamBbtn.disabled = false;
             } else if (state.playerId === 'B') {
                 teamAName.textContent = '🟦 Opponent (A)';
                 teamBName.textContent = '🟥 You (B)';
                 playerDisplay.textContent = '👤 Team: B';
                 teamBbtn.classList.add('selected');
                 teamAbtn.classList.remove('selected');
-                teamBbtn.disabled = true;
-                teamAbtn.disabled = false;
             } else {
                 teamAName.textContent = '🟦 Team A';
                 teamBName.textContent = '🟥 Team B';
                 playerDisplay.textContent = '👤 Team: —';
                 teamAbtn.classList.remove('selected');
                 teamBbtn.classList.remove('selected');
-                teamAbtn.disabled = false;
-                teamBbtn.disabled = false;
             }
+        }
+
+        function animateScore(team) {
+            const el = team === 'A' ? scoreA : scoreB;
+            el.classList.remove('pop');
+            void el.offsetWidth;
+            el.classList.add('pop');
         }
 
         // ============================================
@@ -521,8 +513,8 @@
         // ============================================
         function showQuestionForPlayer() {
             const pid = state.playerId;
-            if (!pid) {
-                questionDisplay.textContent = 'Select your team to start!';
+            if (!pid || !state.gameStarted) {
+                questionDisplay.textContent = pid ? '⏳ Waiting for opponent...' : 'Select your team to start!';
                 optionsContainer.innerHTML = '';
                 return;
             }
@@ -531,7 +523,7 @@
             if (idx >= state.questions.length) {
                 questionDisplay.textContent = '🏆 All questions answered!';
                 optionsContainer.innerHTML = '';
-                statusMsg.textContent = 'Game over! Check scores.';
+                statusMsg.innerHTML = '🎉 Game over! Check scores.';
                 return;
             }
             
@@ -546,7 +538,7 @@
                 btn.addEventListener('click', () => handleOptionClick(i));
                 optionsContainer.appendChild(btn);
             });
-            statusMsg.textContent = '📝 Choose your answer!';
+            statusMsg.innerHTML = '📝 Choose your answer!';
             state.answering = false;
             document.querySelectorAll('.option-btn').forEach(b => b.disabled = false);
             nextQuestionBtn.style.display = 'none';
@@ -556,7 +548,7 @@
         // HANDLE ANSWER
         // ============================================
         function handleOptionClick(selectedIdx) {
-            if (state.answering || !state.playerId) return;
+            if (state.answering || !state.playerId || !state.gameStarted) return;
             const pid = state.playerId;
             
             const idx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
@@ -574,15 +566,17 @@
             });
 
             if (isCorrect) {
-                statusMsg.textContent = '✅ Correct! Pulling the rope!';
+                statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
                 if (pid === 'A') {
                     state.scoreA += 1;
                     state.tugProgress = Math.min(100, state.tugProgress + 2);
                     state.teamA_questionIdx += 1;
+                    animateScore('A');
                 } else {
                     state.scoreB += 1;
                     state.tugProgress = Math.max(0, state.tugProgress - 2);
                     state.teamB_questionIdx += 1;
+                    animateScore('B');
                 }
                 updateUI();
                 saveGameState();
@@ -590,162 +584,106 @@
                 
                 const nextIdx = (pid === 'A') ? state.teamA_questionIdx : state.teamB_questionIdx;
                 if (nextIdx >= state.questions.length) {
-                    statusMsg.textContent = `🎉 Team ${pid} completed all questions!`;
+                    statusMsg.innerHTML = `🎉 Team ${pid} completed all questions!`;
                 }
             } else {
-                statusMsg.textContent = '❌ Wrong answer. Try again!';
+                statusMsg.innerHTML = '❌ Wrong answer. Try again!';
                 setTimeout(() => {
-                    document.querySelectorAll('.option-btn').forEach(b => {
-                        b.disabled = false;
-                        b.classList.remove('correct', 'wrong');
-                    });
-                    state.answering = false;
-                    statusMsg.textContent = '📝 Try again!';
+                    if (state.gameStarted) {
+                        document.querySelectorAll('.option-btn').forEach(b => {
+                            b.disabled = false;
+                            b.classList.remove('correct', 'wrong');
+                        });
+                        state.answering = false;
+                        statusMsg.innerHTML = '📝 Try again!';
+                    }
                 }, 1200);
             }
             updateUI();
         }
 
         // ============================================
-        // SYNC FROM OTHER TABS
+        // FIREBASE OPERATIONS
         // ============================================
-        function syncFromStorage() {
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (!raw) return;
-            try {
-                const data = JSON.parse(raw);
-                // Only update if data is newer (optional)
+        function saveGameState() {
+            if (!state.pin) return;
+            const gameRef = db.ref(`games/55555`);
+            gameRef.update({
+                scoreA: state.scoreA,
+                scoreB: state.scoreB,
+                tugProgress: state.tugProgress,
+                teamA_questionIdx: state.teamA_questionIdx,
+                teamB_questionIdx: state.teamB_questionIdx,
+                lastUpdated: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
+        function listenToGame() {
+            const gameRef = db.ref(`games/55555`);
+            
+            if (state.listeners.game) {
+                state.listeners.game();
+            }
+            
+            state.listeners.game = gameRef.on('value', (snapshot) => {
+                const data = snapshot.val();
+                if (!data) {
+                    // Game doesn't exist yet, create it
+                    initializeGame();
+                    return;
+                }
+                
+                state.connected = true;
+                onlineStatus.textContent = '🟢 Connected';
+                onlineStatus.style.color = '#4caf84';
+                
+                // Update state from Firebase
+                const oldScoreA = state.scoreA;
+                const oldScoreB = state.scoreB;
+                
                 state.scoreA = data.scoreA || 0;
                 state.scoreB = data.scoreB || 0;
                 state.tugProgress = data.tugProgress || 50;
                 state.teamA_questionIdx = data.teamA_questionIdx || 0;
                 state.teamB_questionIdx = data.teamB_questionIdx || 0;
-                if (data.questions) state.questions = data.questions;
+                state.questions = data.questions || SAMPLE_QUESTIONS;
+                state.gameStarted = true;
+                
                 updateUI();
+                
+                // Animate scores if they changed
+                if (state.scoreA !== oldScoreA) animateScore('A');
+                if (state.scoreB !== oldScoreB) animateScore('B');
+                
                 showQuestionForPlayer();
-            } catch(e) { /* ignore */ }
-        }
-
-        // Listen for storage events (other tabs)
-        window.addEventListener('storage', (e) => {
-            if (e.key === STORAGE_KEY) {
-                syncFromStorage();
-            }
-        });
-
-        // Listen for broadcast channel messages
-        if (channel) {
-            channel.onmessage = (event) => {
-                if (event.data && event.data.type === 'update') {
-                    syncFromStorage();
-                }
-            };
-        }
-
-        // ============================================
-        // TEAM SELECTION
-        // ============================================
-        function selectTeam(team) {
-            if (state.playerId === team) return;
-            
-            // Check if team is already taken
-            const raw = localStorage.getItem(STORAGE_KEY);
-            if (raw) {
-                try {
-                    const data = JSON.parse(raw);
-                    // Check if this team is already assigned to another player
-                    // We'll use a simple flag in localStorage
-                    const teamKey = `tug_team_55555_${team}`;
-                    if (localStorage.getItem(teamKey) === 'taken') {
-                        alert(`Team ${team} is already taken! Please choose the other team.`);
-                        return;
-                    }
-                } catch(e) { /* ignore */ }
-            }
-            
-            // Load existing game state or initialize
-            const hasExisting = loadGameState();
-            if (!hasExisting) {
-                state.questions = shuffleArray([...SAMPLE_QUESTIONS]);
-                state.scoreA = 0;
-                state.scoreB = 0;
-                state.tugProgress = 50;
-                state.teamA_questionIdx = 0;
-                state.teamB_questionIdx = 0;
-            }
-            
-            state.playerId = team;
-            
-            // Mark team as taken
-            const teamKey = `tug_team_55555_${team}`;
-            localStorage.setItem(teamKey, 'taken');
-            // Also mark the other team as available (in case of reset)
-            const otherTeam = (team === 'A') ? 'B' : 'A';
-            localStorage.removeItem(`tug_team_55555_${otherTeam}`);
-            
-            gameArea.classList.add('active');
-            updateUI();
-            showQuestionForPlayer();
-            statusMsg.textContent = `🎮 You are Team ${team}! Answer to pull the rope!`;
-            saveGameState();
-        }
-
-        // ============================================
-        // RESET GAME
-        // ============================================
-        function resetGame() {
-            if (confirm('Reset the game for everyone?')) {
-                localStorage.removeItem(STORAGE_KEY);
-                localStorage.removeItem('tug_team_55555_A');
-                localStorage.removeItem('tug_team_55555_B');
                 
-                state.playerId = null;
-                state.scoreA = 0;
-                state.scoreB = 0;
-                state.tugProgress = 50;
-                state.teamA_questionIdx = 0;
-                state.teamB_questionIdx = 0;
-                state.questions = shuffleArray([...SAMPLE_QUESTIONS]);
-                state.answering = false;
-                
-                gameArea.classList.remove('active');
-                updateUI();
-                questionDisplay.textContent = 'Select your team to start!';
-                optionsContainer.innerHTML = '';
-                statusMsg.textContent = '👉 Choose Team A or B above';
-                nextQuestionBtn.style.display = 'none';
-                
-                if (channel) {
-                    try {
-                        channel.postMessage({ type: 'reset' });
-                    } catch(e) { /* ignore */ }
-                }
-                saveGameState();
-            }
-        }
-
-        // Listen for reset messages
-        if (channel) {
-            const origHandler = channel.onmessage;
-            channel.onmessage = (event) => {
-                if (event.data && event.data.type === 'reset') {
-                    // Just reload state
-                    loadGameState();
-                    if (state.playerId) {
-                        gameArea.classList.add('active');
-                        updateUI();
-                        showQuestionForPlayer();
+                // Update team buttons based on who's taken
+                if (data.players) {
+                    if (data.players.A && data.players.B) {
+                        statusMsg.innerHTML = '🎮 Both teams ready! Answer to pull!';
+                    } else if (data.players.A) {
+                        statusMsg.innerHTML = '⏳ Waiting for Team B to join...';
+                    } else if (data.players.B) {
+                        statusMsg.innerHTML = '⏳ Waiting for Team A to join...';
                     }
                 }
-                if (event.data && event.data.type === 'update') {
-                    syncFromStorage();
-                }
-            };
+            });
         }
 
-        // ============================================
-        // UTILITY
-        // ============================================
+        function initializeGame() {
+            const gameRef = db.ref(`games/55555`);
+            gameRef.set({
+                players: { A: false, B: false },
+                scoreA: 0,
+                scoreB: 0,
+                tugProgress: 50,
+                teamA_questionIdx: 0,
+                teamB_questionIdx: 0,
+                questions: shuffleArray([...SAMPLE_QUESTIONS]),
+                created: firebase.database.ServerValue.TIMESTAMP
+            });
+        }
+
         function shuffleArray(arr) {
             for (let i = arr.length - 1; i > 0; i--) {
                 const j = Math.floor(Math.random() * (i + 1));
@@ -754,12 +692,106 @@
             return arr;
         }
 
+        // ============================================
+        // TEAM SELECTION
+        // ============================================
+        function selectTeam(team) {
+            if (state.playerId === team) return;
+            
+            // Check if team is already taken in Firebase
+            const gameRef = db.ref(`games/55555/players`);
+            gameRef.once('value', (snapshot) => {
+                const players = snapshot.val();
+                if (players && players[team] === true) {
+                    alert(`Team ${team} is already taken! Please choose the other team.`);
+                    return;
+                }
+                
+                // Assign team
+                state.playerId = team;
+                gameRef.update({ [team]: true });
+                
+                // Load or initialize game
+                const gameDataRef = db.ref(`games/55555`);
+                gameDataRef.once('value', (snap) => {
+                    const data = snap.val();
+                    if (data) {
+                        state.scoreA = data.scoreA || 0;
+                        state.scoreB = data.scoreB || 0;
+                        state.tugProgress = data.tugProgress || 50;
+                        state.teamA_questionIdx = data.teamA_questionIdx || 0;
+                        state.teamB_questionIdx = data.teamB_questionIdx || 0;
+                        state.questions = data.questions || SAMPLE_QUESTIONS;
+                        state.gameStarted = true;
+                    } else {
+                        initializeGame();
+                    }
+                    
+                    gameArea.classList.add('active');
+                    updateUI();
+                    showQuestionForPlayer();
+                    statusMsg.innerHTML = `🎮 You are Team ${team}! Answer to pull the rope!`;
+                    saveGameState();
+                });
+            });
+        }
+
+        // ============================================
+        // RESET GAME
+        // ============================================
+        function resetGame() {
+            if (confirm('Reset the game for everyone?')) {
+                const gameRef = db.ref(`games/55555`);
+                gameRef.remove().then(() => {
+                    state.playerId = null;
+                    state.scoreA = 0;
+                    state.scoreB = 0;
+                    state.tugProgress = 50;
+                    state.teamA_questionIdx = 0;
+                    state.teamB_questionIdx = 0;
+                    state.questions = shuffleArray([...SAMPLE_QUESTIONS]);
+                    state.gameStarted = false;
+                    state.answering = false;
+                    
+                    gameArea.classList.remove('active');
+                    updateUI();
+                    questionDisplay.textContent = 'Select your team to start!';
+                    optionsContainer.innerHTML = '';
+                    statusMsg.innerHTML = '👉 Choose Team A or B above';
+                    nextQuestionBtn.style.display = 'none';
+                    teamAbtn.classList.remove('selected');
+                    teamBbtn.classList.remove('selected');
+                    
+                    initializeGame();
+                });
+            }
+        }
+
         function advanceToNextQuestion() {
             showQuestionForPlayer();
             nextQuestionBtn.style.display = 'none';
             if (state.teamA_questionIdx >= state.questions.length && state.teamB_questionIdx >= state.questions.length) {
-                statusMsg.textContent = '🏁 Both teams finished! Final scores.';
+                statusMsg.innerHTML = '🏁 Both teams finished! Final scores.';
             }
+        }
+
+        // ============================================
+        // CONNECTION STATUS
+        // ============================================
+        function checkConnection() {
+            const connectedRef = db.ref('.info/connected');
+            connectedRef.on('value', (snap) => {
+                if (snap.val() === true) {
+                    state.connected = true;
+                    onlineStatus.textContent = '🟢 Connected';
+                    onlineStatus.style.color = '#4caf84';
+                } else {
+                    state.connected = false;
+                    onlineStatus.textContent = '🔴 Disconnected';
+                    onlineStatus.style.color = '#c94a4a';
+                    statusMsg.innerHTML = '<span class="spinner"></span> Reconnecting...';
+                }
+            });
         }
 
         // ============================================
@@ -771,34 +803,15 @@
         nextQuestionBtn.addEventListener('click', advanceToNextQuestion);
 
         // ============================================
-        // AUTO-RECOVER SESSION
-        // ============================================
-        // Check if there's a saved game and team assignment
-        (function autoRecover() {
-            // Check if we have a team assigned
-            let assignedTeam = null;
-            if (localStorage.getItem('tug_team_55555_A') === 'taken') assignedTeam = 'A';
-            else if (localStorage.getItem('tug_team_55555_B') === 'taken') assignedTeam = 'B';
-            
-            if (assignedTeam) {
-                const hasData = loadGameState();
-                if (hasData) {
-                    state.playerId = assignedTeam;
-                    gameArea.classList.add('active');
-                    updateUI();
-                    showQuestionForPlayer();
-                    statusMsg.textContent = `🔄 Rejoined as Team ${assignedTeam}`;
-                }
-            }
-        })();
-
-        // ============================================
         // INIT
         // ============================================
         drawTug(50);
+        checkConnection();
+        listenToGame();
+        
         console.log('🎮 Tug of War loaded! PIN: 55555');
-        console.log('📌 Open this page in two tabs to play against yourself,');
-        console.log('   or share the link with a friend on the same device.');
+        console.log('📌 Share this page with friends on any device!');
+        console.log('⚠️ Make sure to replace firebaseConfig with YOUR Firebase config!');
     </script>
 </body>
 </html>
