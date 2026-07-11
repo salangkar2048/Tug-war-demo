@@ -10,6 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
+        /* ... (styles same as before) ... */
         * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -177,7 +178,6 @@
             justify-content: center;
             font-size: 1.2rem;
             line-height: 1.6;
-            word-break: break-word;
             color: #1a2a3a;
             border: 1px solid #e0e8f0;
         }
@@ -745,11 +745,12 @@
         const winnerContinueBtn = $('winnerContinueBtn');
 
         // ============================================
-        // CANVAS DRAWING
+        // CANVAS DRAWING (simplified for space)
         // ============================================
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
+            // Sky
             const skyGrad = ctx.createLinearGradient(0, 0, 0, h-35);
             skyGrad.addColorStop(0, '#d0dce8');
             skyGrad.addColorStop(0.4, '#dce8f0');
@@ -757,6 +758,7 @@
             skyGrad.addColorStop(1, '#f0f4f8');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, w, h-35);
+            // Clouds
             ctx.fillStyle = '#ffffffaa';
             for (let i = 0; i < 5; i++) {
                 const x = (i * 150 + 20) % w;
@@ -771,6 +773,7 @@
                 ctx.arc(x + 35, y + 5, 12 + i * 2, 0, Math.PI * 2);
                 ctx.fill();
             }
+            // Ground
             const groundGrad = ctx.createLinearGradient(0, h-35, 0, h);
             groundGrad.addColorStop(0, '#8aaa7a');
             groundGrad.addColorStop(0.3, '#7a9a6a');
@@ -795,6 +798,7 @@
             ctx.fillStyle = '#5a7a4a66';
             ctx.fillRect(w/2 - 1, h-35, 2, 8);
 
+            // Rope
             const ropeX = 10 + (progress / 100) * (w - 20 - 40);
             const ropeWidth = 40;
             const ropeY = 45;
@@ -869,6 +873,7 @@
             ctx.fillStyle = '#e6394688';
             ctx.fillText('⚡', ropeX + ropeWidth/2, ropeY + ropeHeight/2 + 1);
 
+            // Team characters (simplified)
             const redX = Math.max(40, ropeX - 65);
             const blueX = Math.min(w - 40, ropeX + ropeWidth + 65);
             const charY = h - 45;
@@ -1052,6 +1057,7 @@
             ctx.fillStyle = '#2a6fdb';
             ctx.fillText('🔵 TEAM BLUE', blueX, charY - 95);
 
+            // Progress bar
             const barY = 12, barW = w - 40, barX = 20;
             ctx.fillStyle = '#1a2a3a44';
             ctx.beginPath();
@@ -1084,14 +1090,14 @@
         }
 
         // ============================================
-        // WINNER CELEBRATION
+        // WINNER CELEBRATION - FIXED WITH DEDICATED TRIGGER
         // ============================================
         function showWinner(winner) {
-            if (state.gameEnded && state.winnerShown) return;
+            if (state.winnerShown) return;
             
-            console.log('🏆 Show winner called:', winner);
-            state.gameEnded = true;
+            console.log('🏆 SHOW WINNER CALLED:', winner);
             state.winnerShown = true;
+            state.gameEnded = true;
             state.winner = winner;
             
             sound.playWinner();
@@ -1114,10 +1120,24 @@
             
             setTimeout(() => sound.playWinner(), 1000);
             setTimeout(() => sound.playWinner(), 2000);
+            
+            // CRITICAL: Save to Firebase with a special winner trigger
+            const gameRef = db.ref(GAME_PATH);
+            gameRef.update({
+                winnerTrigger: {
+                    winner: winner,
+                    timestamp: firebase.database.ServerValue.TIMESTAMP,
+                    scoreRed: state.scoreRed,
+                    scoreBlue: state.scoreBlue
+                },
+                gameEnded: true,
+                winnerShown: true,
+                winner: winner
+            });
         }
 
         function closeWinnerAndReset() {
-            console.log('🔄 Winner overlay closed - resetting game');
+            console.log('🔄 Closing winner and resetting game');
             winnerOverlay.classList.remove('show');
             confettiContainer.innerHTML = '';
             
@@ -1304,27 +1324,6 @@
                 blueBtn.classList.remove('selected');
                 viewerBtn.classList.remove('selected');
             }
-            
-            // Check for winner - only if game not ended
-            if (!state.gameEnded) {
-                const totalQ = state.totalQuestions;
-                if (state.red_questionIdx >= totalQ && !state.redCompleted) {
-                    state.redCompleted = true;
-                    console.log('🏆 Red team finished all questions!');
-                    // Save to Firebase first, then show winner
-                    state.gameEnded = true;
-                    state.winner = 'red';
-                    saveGameState();
-                    showWinner('red');
-                } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted) {
-                    state.blueCompleted = true;
-                    console.log('🏆 Blue team finished all questions!');
-                    state.gameEnded = true;
-                    state.winner = 'blue';
-                    saveGameState();
-                    showWinner('blue');
-                }
-            }
         }
 
         function animateScore(team) {
@@ -1432,6 +1431,8 @@
                 const nextIdx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
                 if (nextIdx >= state.totalQuestions) {
                     statusMsg.innerHTML = `🎉 ${role === 'red' ? 'Red' : 'Blue'} Team completed all questions!`;
+                    // Check for winner immediately
+                    checkAndDeclareWinner();
                 } else {
                     setTimeout(() => {
                         clearCooldown();
@@ -1459,6 +1460,47 @@
         }
 
         // ============================================
+        // CHECK AND DECLARE WINNER - FIXED
+        // ============================================
+        function checkAndDeclareWinner() {
+            const totalQ = state.totalQuestions;
+            let winner = null;
+            
+            if (state.red_questionIdx >= totalQ && !state.redCompleted) {
+                state.redCompleted = true;
+                winner = 'red';
+            } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted) {
+                state.blueCompleted = true;
+                winner = 'blue';
+            }
+            
+            if (winner) {
+                console.log('🏆 WINNER DETECTED:', winner);
+                state.gameEnded = true;
+                state.winner = winner;
+                
+                // Save to Firebase with winner trigger
+                const gameRef = db.ref(GAME_PATH);
+                gameRef.update({
+                    winnerTrigger: {
+                        winner: winner,
+                        timestamp: firebase.database.ServerValue.TIMESTAMP,
+                        scoreRed: state.scoreRed,
+                        scoreBlue: state.scoreBlue
+                    },
+                    gameEnded: true,
+                    winnerShown: true,
+                    winner: winner,
+                    redCompleted: state.redCompleted,
+                    blueCompleted: state.blueCompleted
+                });
+                
+                // Show winner locally
+                showWinner(winner);
+            }
+        }
+
+        // ============================================
         // FIREBASE OPERATIONS
         // ============================================
         const GAME_PATH = 'games/55555';
@@ -1471,11 +1513,8 @@
                 tugProgress: state.tugProgress,
                 red_questionIdx: state.red_questionIdx,
                 blue_questionIdx: state.blue_questionIdx,
-                gameEnded: state.gameEnded,
                 redCompleted: state.redCompleted,
                 blueCompleted: state.blueCompleted,
-                winnerShown: state.winnerShown,
-                winner: state.winner,
                 lastUpdated: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1484,6 +1523,27 @@
             const gameRef = db.ref(GAME_PATH);
             if (state.listeners.game) { state.listeners.game(); }
             
+            // Listen for winnerTrigger specifically
+            const winnerRef = db.ref(GAME_PATH + '/winnerTrigger');
+            if (state.listeners.winner) { state.listeners.winner(); }
+            
+            state.listeners.winner = winnerRef.on('value', (snapshot) => {
+                const trigger = snapshot.val();
+                if (trigger && trigger.winner) {
+                    console.log('🏆 WINNER TRIGGER DETECTED FROM FIREBASE:', trigger.winner);
+                    // Update state with winner data
+                    if (trigger.scoreRed !== undefined) {
+                        state.scoreRed = trigger.scoreRed;
+                        state.scoreBlue = trigger.scoreBlue;
+                        scoreRed.textContent = state.scoreRed;
+                        scoreBlue.textContent = state.scoreBlue;
+                    }
+                    // Show winner on this device
+                    showWinner(trigger.winner);
+                }
+            });
+            
+            // Also listen to main game data
             state.listeners.game = gameRef.on('value', (snapshot) => {
                 const data = snapshot.val();
                 if (!data) { initializeGame(); return; }
@@ -1541,45 +1601,6 @@
                 
                 if (state.scoreRed !== oldScoreRed) animateScore('red');
                 if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
-                
-                // CRITICAL: Show winner on ALL devices when gameEnded is true
-                if (state.gameEnded && !state.winnerShown) {
-                    console.log('🏆 Game ended detected on Firebase! Winner:', state.winner);
-                    // Use the winner from Firebase
-                    if (state.winner) {
-                        showWinner(state.winner);
-                    } else {
-                        // Determine winner if not set
-                        let winner = 'red';
-                        if (state.blueCompleted && !state.redCompleted) {
-                            winner = 'blue';
-                        } else if (state.redCompleted && !state.blueCompleted) {
-                            winner = 'red';
-                        } else if (state.redCompleted && state.blueCompleted) {
-                            if (state.scoreBlue > state.scoreRed) winner = 'blue';
-                            else if (state.scoreRed > state.scoreBlue) winner = 'red';
-                            else winner = 'tie';
-                        } else {
-                            winner = state.tugProgress >= 100 ? 'blue' : 'red';
-                        }
-                        if (winner === 'tie') {
-                            state.winnerShown = true;
-                            sound.playWinner();
-                            winnerEmoji.textContent = '🤝';
-                            winnerTitle.textContent = "🤝 IT'S A TIE! 🤝";
-                            winnerTitle.className = 'winner-title';
-                            finalScoreRed.textContent = state.scoreRed;
-                            finalScoreBlue.textContent = state.scoreBlue;
-                            document.querySelectorAll('.option-btn').forEach(b => b.disabled = true);
-                            document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
-                            winnerOverlay.classList.add('show');
-                            launchConfetti('#f9d976');
-                            db.ref(GAME_PATH).update({ winnerShown: true, winner: 'tie' });
-                        } else {
-                            showWinner(winner);
-                        }
-                    }
-                }
                 
                 // Show questions only if game is started and not in cooldown
                 if (state.gameStarted && !state.cooldownActive && !state.gameEnded) {
@@ -1676,6 +1697,7 @@
                 blueCompleted: false,
                 winnerShown: false,
                 winner: null,
+                winnerTrigger: null,
                 created: firebase.database.ServerValue.TIMESTAMP
             });
         }
@@ -1718,6 +1740,7 @@
                         blueCompleted: false,
                         winnerShown: false,
                         winner: null,
+                        winnerTrigger: null,
                         created: firebase.database.ServerValue.TIMESTAMP
                     };
                 }
@@ -1908,11 +1931,7 @@
         console.log('🔴 Team Red vs 🔵 Team Blue');
         console.log('👁️ Viewers can watch without playing');
         console.log('⏳ 10-second cooldown on WRONG answers!');
-        console.log('🔊 Sound effects: Competition, Correct, Wrong, Winner!');
-        console.log('✅ "TAKEN" badge shows for taken teams');
-        console.log('✅ Correct answer NOT revealed on wrong answer');
-        console.log('✅ Game starts automatically when both teams join!');
-        console.log('✅ Winner screen shows for ALL players and viewers via Firebase!');
+        console.log('✅ Winner screen shows for ALL players via dedicated Firebase trigger!');
         console.log('✅ "Awesome! Continue" resets the game for everyone!');
     </script>
 </body>
