@@ -10,11 +10,7 @@
     <script src="https://www.gstatic.com/firebasejs/9.22.0/firebase-database-compat.js"></script>
     
     <style>
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; }
         body {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             background: #f5f7fa;
@@ -33,7 +29,6 @@
             padding: 24px 20px 32px;
             box-shadow: 0 4px 20px rgba(0,0,0,0.06);
             text-align: center;
-            position: relative;
             border: 1px solid #e8edf2;
         }
         h1 {
@@ -44,12 +39,7 @@
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
         }
-        .sub {
-            font-size: 0.9rem;
-            opacity: 0.6;
-            margin-bottom: 20px;
-            color: #666;
-        }
+        .sub { font-size: 0.9rem; opacity: 0.6; margin-bottom: 20px; color: #666; }
         .pin-display {
             background: #1a2a3a;
             color: #f9d976;
@@ -94,11 +84,7 @@
             cursor: not-allowed;
             opacity: 0.8;
         }
-        .role-btn:disabled {
-            opacity: 0.5;
-            cursor: not-allowed;
-            transform: none;
-        }
+        .role-btn:disabled { opacity: 0.5; cursor: not-allowed; transform: none; }
         .role-btn.taken {
             opacity: 0.3;
             cursor: not-allowed;
@@ -117,11 +103,7 @@
             font-weight: 700;
             animation: badgePop 0.3s ease;
         }
-        @keyframes badgePop {
-            0% { transform: scale(0); }
-            70% { transform: scale(1.2); }
-            100% { transform: scale(1); }
-        }
+        @keyframes badgePop { 0% { transform: scale(0); } 70% { transform: scale(1.2); } 100% { transform: scale(1); } }
         .role-btn.viewer {
             border-color: #b0c8d8;
             background: #f0f4f8;
@@ -132,13 +114,8 @@
             color: #fff;
             box-shadow: 0 0 20px rgba(74,122,154,0.2);
         }
-        .role-btn.locked {
-            cursor: not-allowed;
-            opacity: 0.7;
-        }
-        .game-area {
-            display: none;
-        }
+        .role-btn.locked { cursor: not-allowed; opacity: 0.7; }
+        .game-area { display: none; }
         .game-area.active { display: block; }
         .team-row {
             display: flex;
@@ -158,12 +135,7 @@
         }
         .team-name.red { border-left: 4px solid #e63946; }
         .team-name.blue { border-right: 4px solid #2a6fdb; }
-        .team-progress {
-            font-size: 0.7rem;
-            opacity: 0.6;
-            display: block;
-            margin-top: 2px;
-        }
+        .team-progress { font-size: 0.7rem; opacity: 0.6; display: block; margin-top: 2px; }
         .score {
             background: #f0f4f8;
             padding: 8px 24px;
@@ -173,33 +145,18 @@
             transition: all 0.3s;
             border: 1px solid #e0e8f0;
         }
-        .score.pop {
-            animation: pop 0.3s ease;
-        }
+        .score.pop { animation: pop 0.3s ease; }
         .score.red-score { color: #e63946; }
         .score.blue-score { color: #2a6fdb; }
-        @keyframes pop {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.3); background: #f9d97666; }
-            100% { transform: scale(1); }
-        }
+        @keyframes pop { 0% { transform: scale(1); } 50% { transform: scale(1.3); background: #f9d97666; } 100% { transform: scale(1); } }
         .tug-canvas-wrap {
             background: #f0f4f8;
             border-radius: 60px;
             padding: 16px 10px;
             margin: 16px 0;
-            position: relative;
             border: 1px solid #e0e8f0;
         }
-        canvas {
-            width: 100%;
-            height: auto;
-            display: block;
-            border-radius: 30px;
-            background: #e8edf2;
-            touch-action: none;
-            cursor: default;
-        }
+        canvas { width: 100%; height: auto; display: block; border-radius: 30px; background: #e8edf2; }
         .tug-labels {
             display: flex;
             justify-content: space-between;
@@ -224,12 +181,7 @@
             color: #1a2a3a;
             border: 1px solid #e0e8f0;
         }
-        .question-counter {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            margin-top: 4px;
-            color: #666;
-        }
+        .question-counter { font-size: 0.8rem; opacity: 0.6; margin-top: 4px; color: #666; }
         .options-grid {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -246,27 +198,14 @@
             color: #1a2a3a;
             cursor: pointer;
             transition: 0.15s;
-            touch-action: manipulation;
             position: relative;
             min-height: 60px;
         }
         .option-btn:active { background: #e0e8f0; transform: scale(0.96); }
         .option-btn:hover { background: #e8edf2; }
-        .option-btn.correct {
-            background: #4caf84;
-            border-color: #2e7d5e;
-            color: #fff;
-        }
-        .option-btn.wrong {
-            background: #e63946;
-            border-color: #b71c1c;
-            color: #fff;
-        }
-        .option-btn:disabled {
-            opacity: 0.6;
-            transform: none;
-            cursor: not-allowed;
-        }
+        .option-btn.correct { background: #4caf84; border-color: #2e7d5e; color: #fff; }
+        .option-btn.wrong { background: #e63946; border-color: #b71c1c; color: #fff; }
+        .option-btn:disabled { opacity: 0.6; transform: none; cursor: not-allowed; }
         .option-btn .cooldown-overlay {
             position: absolute;
             top: 0;
@@ -284,10 +223,7 @@
             pointer-events: none;
             animation: pulse 0.5s ease infinite alternate;
         }
-        @keyframes pulse {
-            0% { opacity: 0.8; transform: scale(0.95); }
-            100% { opacity: 1; transform: scale(1); }
-        }
+        @keyframes pulse { 0% { opacity: 0.8; transform: scale(0.95); } 100% { opacity: 1; transform: scale(1); } }
         .status-msg {
             font-size: 0.95rem;
             background: #f0f4f8;
@@ -302,11 +238,7 @@
             color: #1a2a3a;
             border: 1px solid #e0e8f0;
         }
-        .status-msg .cooldown-timer {
-            color: #e63946;
-            font-weight: 900;
-            font-size: 1.4rem;
-        }
+        .status-msg .cooldown-timer { color: #e63946; font-weight: 900; font-size: 1.4rem; }
         .footer-btns {
             display: flex;
             flex-wrap: wrap;
@@ -325,32 +257,12 @@
             cursor: pointer;
             transition: all 0.2s;
             box-shadow: 0 4px 0 #b38f40;
-            touch-action: manipulation;
         }
-        .btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
-        .btn.secondary {
-            background: #4a6a85;
-            box-shadow: 0 4px 0 #1f3a52;
-            color: #fff;
-        }
-        .btn.danger {
-            background: #e63946;
-            box-shadow: 0 4px 0 #7a2a2a;
-            color: #fff;
-        }
-        .btn.success {
-            background: #4caf84;
-            box-shadow: 0 4px 0 #1a4a3a;
-            color: #fff;
-        }
-        .btn:disabled {
-            opacity: 0.5;
-            transform: none;
-            cursor: not-allowed;
-        }
+        .btn:active { transform: translateY(4px); box-shadow: none; }
+        .btn.secondary { background: #4a6a85; box-shadow: 0 4px 0 #1f3a52; color: #fff; }
+        .btn.danger { background: #e63946; box-shadow: 0 4px 0 #7a2a2a; color: #fff; }
+        .btn.success { background: #4caf84; box-shadow: 0 4px 0 #1a4a3a; color: #fff; }
+        .btn:disabled { opacity: 0.5; transform: none; cursor: not-allowed; }
         .spinner {
             display: inline-block;
             width: 20px;
@@ -371,12 +283,7 @@
             color: #1a2a3a;
             border: 1px solid #e0e8f0;
         }
-        .online-status {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            margin-top: 4px;
-            color: #666;
-        }
+        .online-status { font-size: 0.8rem; opacity: 0.6; margin-top: 4px; color: #666; }
         .join-instruction {
             background: #f0f4f8;
             padding: 15px 20px;
@@ -418,12 +325,7 @@
             margin-top: 10px;
             flex-wrap: wrap;
         }
-        .viewer-count {
-            font-size: 0.8rem;
-            opacity: 0.6;
-            margin-top: 6px;
-            color: #666;
-        }
+        .viewer-count { font-size: 0.8rem; opacity: 0.6; margin-top: 6px; color: #666; }
         .role-locked-msg {
             background: #e6394633;
             border: 1px solid #e63946;
@@ -455,10 +357,7 @@
             display: flex;
             animation: fadeIn 0.5s ease;
         }
-        @keyframes fadeIn {
-            0% { opacity: 0; }
-            100% { opacity: 1; }
-        }
+        @keyframes fadeIn { 0% { opacity: 0; } 100% { opacity: 1; } }
         .winner-box {
             background: #ffffff;
             border-radius: 50px;
@@ -470,24 +369,10 @@
             border: 3px solid #f9d976;
             box-shadow: 0 0 60px rgba(249,217,118,0.3);
         }
-        @keyframes celebrateIn {
-            0% { transform: scale(0.5); opacity: 0; }
-            70% { transform: scale(1.05); }
-            100% { transform: scale(1); opacity: 1; }
-        }
-        .winner-emoji {
-            font-size: 4rem;
-            animation: bounce 0.8s ease infinite;
-        }
-        @keyframes bounce {
-            0%,100% { transform: translateY(0); }
-            50% { transform: translateY(-20px); }
-        }
-        .winner-title {
-            font-size: 2.2rem;
-            font-weight: 900;
-            margin: 10px 0;
-        }
+        @keyframes celebrateIn { 0% { transform: scale(0.5); opacity: 0; } 70% { transform: scale(1.05); } 100% { transform: scale(1); opacity: 1; } }
+        .winner-emoji { font-size: 4rem; animation: bounce 0.8s ease infinite; }
+        @keyframes bounce { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-20px); } }
+        .winner-title { font-size: 2.2rem; font-weight: 900; margin: 10px 0; }
         .winner-title.red-win { color: #e63946; }
         .winner-title.blue-win { color: #2a6fdb; }
         .winner-scores {
@@ -503,14 +388,8 @@
             border-radius: 30px;
             border: 1px solid #e0e8f0;
         }
-        .winner-scores .score-item .label {
-            font-size: 0.8rem;
-            opacity: 0.7;
-        }
-        .winner-scores .score-item .value {
-            font-size: 2rem;
-            font-weight: 900;
-        }
+        .winner-scores .score-item .label { font-size: 0.8rem; opacity: 0.7; }
+        .winner-scores .score-item .value { font-size: 2rem; font-weight: 900; }
         .winner-scores .score-item .value.red-score { color: #e63946; }
         .winner-scores .score-item .value.blue-score { color: #2a6fdb; }
         .winner-btn {
@@ -526,10 +405,7 @@
             box-shadow: 0 4px 0 #b38f40;
             margin-top: 10px;
         }
-        .winner-btn:active {
-            transform: translateY(4px);
-            box-shadow: none;
-        }
+        .winner-btn:active { transform: translateY(4px); box-shadow: none; }
         .confetti-container {
             position: fixed;
             top: 0;
@@ -547,10 +423,7 @@
             top: -20px;
             animation: confettiFall linear forwards;
         }
-        @keyframes confettiFall {
-            0% { transform: translateY(0) rotate(0deg); opacity: 1; }
-            100% { transform: translateY(110vh) rotate(720deg); opacity: 0; }
-        }
+        @keyframes confettiFall { 0% { transform: translateY(0) rotate(0deg); opacity: 1; } 100% { transform: translateY(110vh) rotate(720deg); opacity: 0; } }
 
         .sound-toggle {
             position: fixed;
@@ -706,11 +579,7 @@
         // SOUND MANAGER
         // ============================================
         class SoundManager {
-            constructor() {
-                this.enabled = true;
-                this.audioContext = null;
-            }
-
+            constructor() { this.enabled = true; this.audioContext = null; }
             init() {
                 try {
                     if (!this.audioContext) {
@@ -721,7 +590,6 @@
                     }
                 } catch (e) { /* ignore */ }
             }
-
             playTone(freq, dur, type = 'sine', vol = 0.3) {
                 if (!this.enabled) return;
                 this.init();
@@ -739,28 +607,21 @@
                     osc.stop(this.audioContext.currentTime + dur);
                 } catch (e) { /* ignore */ }
             }
-
             playCompetition() {
                 this.playTone(800, 0.1, 'square', 0.2);
                 setTimeout(() => this.playTone(1000, 0.1, 'square', 0.2), 150);
                 setTimeout(() => this.playTone(1200, 0.15, 'square', 0.25), 300);
             }
-
             playCorrect() {
                 this.playTone(523, 0.15, 'sine', 0.3);
                 setTimeout(() => this.playTone(659, 0.15, 'sine', 0.3), 150);
                 setTimeout(() => this.playTone(784, 0.2, 'sine', 0.35), 300);
             }
-
             playWrong() {
                 this.playTone(200, 0.4, 'sawtooth', 0.2);
                 setTimeout(() => this.playTone(150, 0.3, 'sawtooth', 0.2), 200);
             }
-
-            playTick() {
-                this.playTone(600, 0.05, 'sine', 0.1);
-            }
-
+            playTick() { this.playTone(600, 0.05, 'sine', 0.1); }
             playWinner() {
                 const notes = [523,587,659,784,880,988,1047];
                 notes.forEach((freq, i) => {
@@ -772,25 +633,18 @@
                     setTimeout(() => this.playTone(1047, 0.3, 'square', 0.3), 150);
                 }, 1000);
             }
-
             toggle() {
                 this.enabled = !this.enabled;
-                if (this.enabled) {
-                    this.init();
-                    this.playTone(800, 0.1, 'sine', 0.2);
-                }
+                if (this.enabled) { this.init(); this.playTone(800, 0.1, 'sine', 0.2); }
                 return this.enabled;
             }
         }
-
         const sound = new SoundManager();
-
         const soundToggle = document.getElementById('soundToggle');
         soundToggle.addEventListener('click', () => {
             const enabled = sound.toggle();
             soundToggle.textContent = enabled ? '🔊' : '🔇';
         });
-
         document.addEventListener('click', () => sound.init(), { once: true });
         document.addEventListener('touchstart', () => sound.init(), { once: true });
 
@@ -896,7 +750,6 @@
         function drawTug(progress) {
             const w = tugCanvas.width, h = tugCanvas.height;
             ctx.clearRect(0, 0, w, h);
-
             const skyGrad = ctx.createLinearGradient(0, 0, 0, h-35);
             skyGrad.addColorStop(0, '#d0dce8');
             skyGrad.addColorStop(0.4, '#dce8f0');
@@ -904,7 +757,6 @@
             skyGrad.addColorStop(1, '#f0f4f8');
             ctx.fillStyle = skyGrad;
             ctx.fillRect(0, 0, w, h-35);
-
             ctx.fillStyle = '#ffffffaa';
             for (let i = 0; i < 5; i++) {
                 const x = (i * 150 + 20) % w;
@@ -919,14 +771,12 @@
                 ctx.arc(x + 35, y + 5, 12 + i * 2, 0, Math.PI * 2);
                 ctx.fill();
             }
-
             const groundGrad = ctx.createLinearGradient(0, h-35, 0, h);
             groundGrad.addColorStop(0, '#8aaa7a');
             groundGrad.addColorStop(0.3, '#7a9a6a');
             groundGrad.addColorStop(1, '#5a7a4a');
             ctx.fillStyle = groundGrad;
             ctx.fillRect(0, h-35, w, 35);
-
             ctx.strokeStyle = '#6a8a5a';
             ctx.lineWidth = 1.5;
             for (let i = 0; i < w; i += 5) {
@@ -936,14 +786,12 @@
                 ctx.lineTo(i + 1, h-35 - height);
                 ctx.stroke();
             }
-
             ctx.strokeStyle = '#5a7a4a';
             ctx.lineWidth = 2;
             ctx.beginPath();
             ctx.moveTo(0, h-35);
             ctx.lineTo(w, h-35);
             ctx.stroke();
-
             ctx.fillStyle = '#5a7a4a66';
             ctx.fillRect(w/2 - 1, h-35, 2, 8);
 
@@ -955,7 +803,6 @@
             ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.shadowBlur = 15;
             ctx.shadowOffsetY = 4;
-            
             const ropeGrad = ctx.createLinearGradient(ropeX, 0, ropeX + ropeWidth, 0);
             ropeGrad.addColorStop(0, '#8a7a5a');
             ropeGrad.addColorStop(0.2, '#b8a88a');
@@ -969,7 +816,6 @@
             ctx.beginPath();
             ctx.roundRect(ropeX, ropeY, ropeWidth, ropeHeight, 10);
             ctx.fill();
-
             ctx.shadowBlur = 0;
             ctx.strokeStyle = '#7a6a4a';
             ctx.lineWidth = 1.5;
@@ -984,7 +830,6 @@
                 ctx.lineTo(x - 4, ropeY + ropeHeight - 2);
                 ctx.stroke();
             }
-
             ctx.strokeStyle = '#e0d4b466';
             ctx.lineWidth = 2;
             ctx.beginPath();
@@ -995,7 +840,6 @@
             ctx.moveTo(ropeX + 5, ropeY + ropeHeight - 5);
             ctx.lineTo(ropeX + ropeWidth - 5, ropeY + ropeHeight - 5);
             ctx.stroke();
-
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(0,0,0,0.15)';
             ctx.fillStyle = '#8a7a5a';
@@ -1006,7 +850,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth/2, ropeY + ropeHeight/2, 9, 0, Math.PI * 2);
             ctx.fill();
-            
             ctx.shadowBlur = 0;
             ctx.strokeStyle = '#7a6a4a';
             ctx.lineWidth = 2;
@@ -1019,7 +862,6 @@
                 ctx.lineTo(x, y);
                 ctx.stroke();
             }
-
             ctx.shadowBlur = 0;
             ctx.font = 'bold 20px sans-serif';
             ctx.textAlign = 'center';
@@ -1047,7 +889,6 @@
             ctx.fillRect(redX - 20, charY - 15, 40, 6);
             ctx.fillStyle = '#f9d976';
             ctx.fillRect(redX - 6, charY - 15, 12, 6);
-            
             ctx.shadowBlur = 6;
             ctx.fillStyle = '#f5d0b8';
             ctx.beginPath();
@@ -1061,7 +902,6 @@
             ctx.fillRect(redX - 14, charY - 80, 28, 5);
             ctx.fillStyle = '#4a8aaa';
             ctx.fillRect(redX - 12, charY - 72, 24, 4);
-            
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#1a2a3a';
             ctx.beginPath();
@@ -1077,7 +917,6 @@
             ctx.beginPath();
             ctx.arc(redX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
-
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#f5d0b8';
             ctx.lineWidth = 10;
@@ -1090,7 +929,6 @@
             ctx.moveTo(redX + 20, charY - 38);
             ctx.lineTo(ropeX + 15, ropeY + 15);
             ctx.stroke();
-            
             ctx.fillStyle = '#f5d0b8';
             ctx.shadowBlur = 3;
             ctx.beginPath();
@@ -1099,7 +937,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#1a2a3a';
             ctx.lineWidth = 12;
@@ -1137,7 +974,6 @@
             ctx.fillRect(blueX - 20, charY - 15, 40, 6);
             ctx.fillStyle = '#f9d976';
             ctx.fillRect(blueX - 6, charY - 15, 12, 6);
-            
             ctx.shadowBlur = 6;
             ctx.fillStyle = '#f5d0b8';
             ctx.beginPath();
@@ -1151,7 +987,6 @@
             ctx.fillRect(blueX - 14, charY - 80, 28, 5);
             ctx.fillStyle = '#4a8aaa';
             ctx.fillRect(blueX - 12, charY - 72, 24, 4);
-            
             ctx.shadowBlur = 0;
             ctx.fillStyle = '#1a2a3a';
             ctx.beginPath();
@@ -1167,7 +1002,6 @@
             ctx.beginPath();
             ctx.arc(blueX + 9, charY - 72, 1.5, 0, Math.PI * 2);
             ctx.fill();
-
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#f5d0b8';
             ctx.lineWidth = 10;
@@ -1180,7 +1014,6 @@
             ctx.moveTo(blueX + 20, charY - 38);
             ctx.lineTo(ropeX + ropeWidth - 15, ropeY + 15);
             ctx.stroke();
-            
             ctx.fillStyle = '#f5d0b8';
             ctx.shadowBlur = 3;
             ctx.beginPath();
@@ -1189,7 +1022,6 @@
             ctx.beginPath();
             ctx.arc(ropeX + ropeWidth - 15, ropeY + 15, 7, 0, Math.PI * 2);
             ctx.fill();
-            
             ctx.shadowBlur = 4;
             ctx.strokeStyle = '#1a2a3a';
             ctx.lineWidth = 12;
@@ -1225,7 +1057,6 @@
             ctx.beginPath();
             ctx.roundRect(barX, barY, barW, 10, 5);
             ctx.fill();
-            
             if (progress < 50) {
                 ctx.fillStyle = '#e63946';
                 const redW = (barW * (50 - progress) / 50);
@@ -1240,7 +1071,6 @@
                 ctx.roundRect(barX + barW/2, barY, blueW, 10, 5);
                 ctx.fill();
             }
-            
             ctx.fillStyle = '#ffffff';
             ctx.shadowBlur = 10;
             ctx.shadowColor = 'rgba(255,255,255,0.3)';
@@ -1257,7 +1087,9 @@
         // WINNER CELEBRATION
         // ============================================
         function showWinner(winner) {
-            if (state.gameEnded || state.winnerShown) return;
+            if (state.gameEnded && state.winnerShown) return;
+            
+            console.log('🏆 Show winner called:', winner);
             state.gameEnded = true;
             state.winnerShown = true;
             state.winner = winner;
@@ -1276,9 +1108,6 @@
             document.querySelectorAll('.role-btn').forEach(b => b.disabled = true);
             clearCooldown();
             
-            // Save to Firebase
-            saveGameState();
-            
             // Show winner overlay
             winnerOverlay.classList.add('show');
             launchConfetti(isRedWin ? '#e63946' : '#2a6fdb');
@@ -1288,6 +1117,7 @@
         }
 
         function closeWinnerAndReset() {
+            console.log('🔄 Winner overlay closed - resetting game');
             winnerOverlay.classList.remove('show');
             confettiContainer.innerHTML = '';
             
@@ -1299,7 +1129,6 @@
             const colors = [primaryColor, '#f9d976', '#ffffff', '#e63946', '#2a6fdb', '#4caf84', '#ff9800'];
             const container = confettiContainer;
             container.innerHTML = '';
-            
             for (let i = 0; i < 120; i++) {
                 const piece = document.createElement('div');
                 piece.className = 'confetti-piece';
@@ -1309,7 +1138,6 @@
                 const duration = 2 + Math.random() * 3;
                 const delay = Math.random() * 2;
                 const shape = Math.random() > 0.5 ? '50%' : '2px';
-                
                 piece.style.cssText = `
                     left: ${left}%;
                     width: ${size}px;
@@ -1322,32 +1150,23 @@
                 `;
                 container.appendChild(piece);
             }
-            
-            setTimeout(() => {
-                container.innerHTML = '';
-            }, 6000);
+            setTimeout(() => { container.innerHTML = ''; }, 6000);
         }
 
         // ============================================
         // RESET GAME
         // ============================================
         function resetGame() {
-            // Clear Firebase game data
+            console.log('🔄 Resetting game...');
             const gameRef = db.ref(GAME_PATH);
             gameRef.remove().then(() => {
-                // Reset all state
                 clearCooldown();
                 resetUIState();
                 statusMsg.innerHTML = '✅ Game reset! Starting new game...';
-                
-                // Re-initialize the game
                 initializeGame();
-                
-                // Close winner overlay if open
                 winnerOverlay.classList.remove('show');
                 confettiContainer.innerHTML = '';
                 
-                // Reset role buttons to available
                 redBtn.classList.remove('selected', 'taken', 'locked');
                 blueBtn.classList.remove('selected', 'taken', 'locked');
                 viewerBtn.classList.remove('selected', 'locked');
@@ -1357,13 +1176,11 @@
                 blueBtn.disabled = false;
                 viewerBtn.disabled = false;
                 
-                // Reset game area
                 gameArea.classList.remove('active');
                 questionDisplay.textContent = 'Select your role to start!';
                 questionCounter.textContent = '';
                 optionsContainer.innerHTML = '';
                 
-                // Reset state
                 state.role = null;
                 state.gameStarted = false;
                 state.gameEnded = false;
@@ -1375,8 +1192,7 @@
                 state.winner = null;
                 
                 updateUI();
-                
-                console.log('🔄 Game reset successfully!');
+                console.log('🔄 Game reset complete!');
             }).catch((err) => {
                 console.error('Error resetting game:', err);
                 alert('Error resetting game. Please use "Force Reset" button.');
@@ -1388,10 +1204,8 @@
         // ============================================
         function startCooldown() {
             if (state.cooldownActive) return;
-            
             state.cooldownActive = true;
             let secondsLeft = state.cooldownSeconds;
-            
             const btns = document.querySelectorAll('.option-btn');
             btns.forEach(btn => {
                 btn.disabled = true;
@@ -1402,31 +1216,22 @@
                 overlay.textContent = secondsLeft;
                 btn.appendChild(overlay);
             });
-            
             statusMsg.innerHTML = `⏳ Wrong! Wait <span class="cooldown-timer">${secondsLeft}s</span> before trying again...`;
             sound.playTick();
-            
             state.cooldownTimer = setInterval(() => {
                 secondsLeft--;
                 statusMsg.innerHTML = `⏳ Wrong! Wait <span class="cooldown-timer">${secondsLeft}s</span> before trying again...`;
-                
-                document.querySelectorAll('.cooldown-overlay').forEach(el => {
-                    el.textContent = secondsLeft;
-                });
-                
+                document.querySelectorAll('.cooldown-overlay').forEach(el => { el.textContent = secondsLeft; });
                 sound.playTick();
-                
                 if (secondsLeft <= 0) {
                     clearInterval(state.cooldownTimer);
                     state.cooldownTimer = null;
                     state.cooldownActive = false;
-                    
                     document.querySelectorAll('.option-btn').forEach(btn => {
                         btn.disabled = false;
                         const overlay = btn.querySelector('.cooldown-overlay');
                         if (overlay) overlay.remove();
                     });
-                    
                     statusMsg.innerHTML = '📝 Try again!';
                 }
             }, 1000);
@@ -1438,13 +1243,9 @@
                 state.cooldownTimer = null;
             }
             state.cooldownActive = false;
-            
             document.querySelectorAll('.cooldown-overlay').forEach(el => el.remove());
-            
             if (!state.gameEnded) {
-                document.querySelectorAll('.option-btn').forEach(btn => {
-                    btn.disabled = false;
-                });
+                document.querySelectorAll('.option-btn').forEach(btn => { btn.disabled = false; });
             }
         }
 
@@ -1454,11 +1255,9 @@
         function updateUI() {
             scoreRed.textContent = state.scoreRed;
             scoreBlue.textContent = state.scoreBlue;
-            
             const total = state.totalQuestions || 1;
             redProgress.textContent = `${Math.min(state.red_questionIdx, total)}/${total}`;
             blueProgress.textContent = `${Math.min(state.blue_questionIdx, total)}/${total}`;
-            
             drawTug(state.tugProgress);
             
             if (state.roleLocked) {
@@ -1511,9 +1310,18 @@
                 const totalQ = state.totalQuestions;
                 if (state.red_questionIdx >= totalQ && !state.redCompleted) {
                     state.redCompleted = true;
+                    console.log('🏆 Red team finished all questions!');
+                    // Save to Firebase first, then show winner
+                    state.gameEnded = true;
+                    state.winner = 'red';
+                    saveGameState();
                     showWinner('red');
                 } else if (state.blue_questionIdx >= totalQ && !state.blueCompleted) {
                     state.blueCompleted = true;
+                    console.log('🏆 Blue team finished all questions!');
+                    state.gameEnded = true;
+                    state.winner = 'blue';
+                    saveGameState();
                     showWinner('blue');
                 }
             }
@@ -1590,17 +1398,13 @@
                 statusMsg.innerHTML = `⏳ Please wait for cooldown to end!`;
                 return;
             }
-            
             if (state.answering || !state.role || !state.gameStarted || state.role === 'viewer' || state.gameEnded) return;
             const role = state.role;
-            
             const idx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
             if (idx >= state.totalQuestions) return;
-            
             const qData = state.questions[idx];
             const isCorrect = (selectedIdx === qData.correct);
             state.answering = true;
-
             const btns = document.querySelectorAll('.option-btn');
             
             if (isCorrect) {
@@ -1608,11 +1412,8 @@
                 statusMsg.innerHTML = '✅ Correct! Pulling the rope!';
                 btns.forEach((b, i) => {
                     b.disabled = true;
-                    if (i === selectedIdx) {
-                        b.classList.add('correct');
-                    }
+                    if (i === selectedIdx) { b.classList.add('correct'); }
                 });
-                
                 if (role === 'red') {
                     state.scoreRed += 1;
                     state.tugProgress = Math.max(0, state.tugProgress - state.pullPercentage);
@@ -1626,10 +1427,8 @@
                 }
                 updateUI();
                 saveGameState();
-                
                 state.answering = false;
                 nextQuestionBtn.style.display = 'inline-block';
-                
                 const nextIdx = (role === 'red') ? state.red_questionIdx : state.blue_questionIdx;
                 if (nextIdx >= state.totalQuestions) {
                     statusMsg.innerHTML = `🎉 ${role === 'red' ? 'Red' : 'Blue'} Team completed all questions!`;
@@ -1645,13 +1444,9 @@
                 statusMsg.innerHTML = '❌ Wrong answer!';
                 btns.forEach((b, i) => {
                     b.disabled = true;
-                    if (i === selectedIdx) {
-                        b.classList.add('wrong');
-                    }
+                    if (i === selectedIdx) { b.classList.add('wrong'); }
                 });
-                
                 startCooldown();
-                
                 setTimeout(() => {
                     state.answering = false;
                     btns.forEach((b) => {
@@ -1687,40 +1482,29 @@
 
         function listenToGame() {
             const gameRef = db.ref(GAME_PATH);
-            
-            if (state.listeners.game) {
-                state.listeners.game();
-            }
+            if (state.listeners.game) { state.listeners.game(); }
             
             state.listeners.game = gameRef.on('value', (snapshot) => {
                 const data = snapshot.val();
-                if (!data) {
-                    initializeGame();
-                    return;
-                }
+                if (!data) { initializeGame(); return; }
                 
                 state.connected = true;
                 onlineStatus.textContent = '🟢 Connected';
                 onlineStatus.style.color = '#2a6fdb';
                 loadingOverlay.classList.add('hidden');
                 
-                // Update viewer count
                 const viewers = data.viewers || {};
                 const viewerCountNum = Object.keys(viewers).length;
                 viewerCount.textContent = `👁️ Viewers: ${viewerCountNum}`;
                 
-                // Update player detection
                 const players = data.players || {};
                 const hasRed = players.red === true;
                 const hasBlue = players.blue === true;
-                
                 state.hasRed = hasRed;
                 state.hasBlue = hasBlue;
                 
-                // Update role buttons with TAKEN badges
                 updateRoleButtons(players);
                 
-                // Update game data
                 const oldScoreRed = state.scoreRed;
                 const oldScoreBlue = state.scoreBlue;
                 
@@ -1738,7 +1522,6 @@
                 state.winnerShown = data.winnerShown || false;
                 state.winner = data.winner || null;
                 
-                // Check if both teams are present
                 if (hasRed && hasBlue) {
                     state.gameStarted = true;
                     if (state.role !== 'viewer') {
@@ -1759,18 +1542,14 @@
                 if (state.scoreRed !== oldScoreRed) animateScore('red');
                 if (state.scoreBlue !== oldScoreBlue) animateScore('blue');
                 
-                // Show questions only if game is started
-                if (state.gameStarted && !state.cooldownActive && !state.gameEnded) {
-                    showQuestionForPlayer();
-                }
-                
-                // CRITICAL: Sync winner across ALL devices
+                // CRITICAL: Show winner on ALL devices when gameEnded is true
                 if (state.gameEnded && !state.winnerShown) {
-                    // If winner is already determined from Firebase, use it
+                    console.log('🏆 Game ended detected on Firebase! Winner:', state.winner);
+                    // Use the winner from Firebase
                     if (state.winner) {
                         showWinner(state.winner);
                     } else {
-                        // Determine winner
+                        // Determine winner if not set
                         let winner = 'red';
                         if (state.blueCompleted && !state.redCompleted) {
                             winner = 'blue';
@@ -1783,7 +1562,6 @@
                         } else {
                             winner = state.tugProgress >= 100 ? 'blue' : 'red';
                         }
-                        
                         if (winner === 'tie') {
                             state.winnerShown = true;
                             sound.playWinner();
@@ -1802,6 +1580,11 @@
                         }
                     }
                 }
+                
+                // Show questions only if game is started and not in cooldown
+                if (state.gameStarted && !state.cooldownActive && !state.gameEnded) {
+                    showQuestionForPlayer();
+                }
             });
         }
 
@@ -1809,7 +1592,6 @@
             const hasRed = players && players.red === true;
             const hasBlue = players && players.blue === true;
             
-            // Update Red button
             if (state.role !== 'red' && !state.roleLocked) {
                 if (hasRed) {
                     redBtn.classList.add('taken');
@@ -1821,8 +1603,6 @@
                     redBtn.innerHTML = '🔴 Team Red';
                 }
             }
-            
-            // Update Blue button
             if (state.role !== 'blue' && !state.roleLocked) {
                 if (hasBlue) {
                     blueBtn.classList.add('taken');
@@ -1856,9 +1636,7 @@
             state.hasRed = false;
             state.hasBlue = false;
             state.winner = null;
-            
             clearCooldown();
-            
             gameArea.classList.remove('active');
             updateUI();
             questionDisplay.textContent = 'Select your role to start!';
@@ -1866,7 +1644,6 @@
             optionsContainer.innerHTML = '';
             statusMsg.innerHTML = '👥 Choose a role above';
             nextQuestionBtn.style.display = 'none';
-            
             redBtn.classList.remove('selected', 'taken', 'locked');
             blueBtn.classList.remove('selected', 'taken', 'locked');
             viewerBtn.classList.remove('selected', 'locked');
@@ -1876,7 +1653,6 @@
             blueBtn.disabled = false;
             viewerBtn.disabled = false;
             roleLockedMsg.classList.remove('show');
-            
             winnerOverlay.classList.remove('show');
             confettiContainer.innerHTML = '';
         }
@@ -1885,7 +1661,6 @@
             const shuffled = shuffleArray([...SAMPLE_QUESTIONS]);
             state.totalQuestions = shuffled.length;
             state.pullPercentage = 50 / state.totalQuestions;
-            
             const gameRef = db.ref(GAME_PATH);
             gameRef.set({
                 players: { red: false, blue: false },
@@ -1923,12 +1698,9 @@
                 alert('🔒 Your role is locked for this game. Use "Force Reset" to start a new game.');
                 return;
             }
-            
             state.isJoining = true;
             statusMsg.innerHTML = '<span class="spinner"></span> Joining...';
-            
             const gameRef = db.ref(GAME_PATH);
-            
             gameRef.transaction((currentData) => {
                 if (currentData === null) {
                     const shuffled = shuffleArray([...SAMPLE_QUESTIONS]);
@@ -1949,7 +1721,6 @@
                         created: firebase.database.ServerValue.TIMESTAMP
                     };
                 }
-                
                 if (role === 'viewer') {
                     if (!currentData.viewers) currentData.viewers = {};
                     const viewerId = Date.now().toString(36) + Math.random().toString(36).substr(2, 5);
@@ -1957,25 +1728,18 @@
                     currentData._viewerId = viewerId;
                     return currentData;
                 }
-                
                 const players = currentData.players || {};
-                if (players[role] === true) {
-                    return undefined;
-                }
-                
+                if (players[role] === true) { return undefined; }
                 players[role] = true;
                 currentData.players = players;
-                
                 return currentData;
             }, (error, committed, snapshot) => {
                 state.isJoining = false;
-                
                 if (error) {
                     console.error('Transaction error:', error);
                     statusMsg.innerHTML = '❌ Error joining. Please try again.';
                     return;
                 }
-                
                 if (!committed) {
                     if (role === 'viewer') {
                         state.role = 'viewer';
@@ -1994,10 +1758,8 @@
                     if (data) updateRoleButtons(data.players);
                     return;
                 }
-                
                 const data = snapshot.val();
                 if (!data) return;
-                
                 if (role === 'viewer') {
                     state.role = 'viewer';
                     state.isViewer = true;
@@ -2009,7 +1771,6 @@
                     sound.playCompetition();
                     return;
                 }
-                
                 state.role = role;
                 state.isViewer = false;
                 state.roleLocked = true;
@@ -2026,11 +1787,9 @@
                 state.blueCompleted = data.blueCompleted || false;
                 state.winnerShown = data.winnerShown || false;
                 state.winner = data.winner || null;
-                
                 const players = data.players || {};
                 state.hasRed = players.red === true;
                 state.hasBlue = players.blue === true;
-                
                 if (state.hasRed && state.hasBlue) {
                     state.gameStarted = true;
                     statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Game is on!`;
@@ -2039,19 +1798,10 @@
                     state.gameStarted = false;
                     statusMsg.innerHTML = `🎮 You are ${role === 'red' ? 'Red' : 'Blue'} Team! Waiting for opponent...`;
                 }
-                
                 gameArea.classList.add('active');
                 updateUI();
-                
-                if (state.gameStarted) {
-                    showQuestionForPlayer();
-                }
-                
-                // If game already ended on Firebase, sync winner
-                if (state.gameEnded && !state.winnerShown) {
-                    showWinner(state.winner || 'red');
-                }
-                
+                if (state.gameStarted) { showQuestionForPlayer(); }
+                if (state.gameEnded && !state.winnerShown) { showWinner(state.winner || 'red'); }
                 saveGameState();
             }, false);
         }
@@ -2060,20 +1810,13 @@
         // LEAVE GAME
         // ============================================
         function leaveGame() {
-            if (!state.role) {
-                alert('You are not in the game.');
-                return;
-            }
-            
+            if (!state.role) { alert('You are not in the game.'); return; }
             if (confirm(`Leave the game as ${state.role === 'viewer' ? 'Viewer' : state.role === 'red' ? 'Red Team' : 'Blue Team'}?\n\nYour role will be unlocked for others.`)) {
                 const gameRef = db.ref(GAME_PATH);
-                
                 if (state.role === 'viewer') {
                     gameRef.once('value', (snapshot) => {
                         const data = snapshot.val();
-                        if (data && data.viewers) {
-                            gameRef.child('viewers').set({});
-                        }
+                        if (data && data.viewers) { gameRef.child('viewers').set({}); }
                         state.role = null;
                         state.isViewer = false;
                         state.roleLocked = false;
@@ -2150,8 +1893,6 @@
             showQuestionForPlayer();
             nextQuestionBtn.style.display = 'none';
         });
-        
-        // Winner Continue button - resets the game for ALL players
         winnerContinueBtn.addEventListener('click', closeWinnerAndReset);
 
         // ============================================
@@ -2171,7 +1912,7 @@
         console.log('✅ "TAKEN" badge shows for taken teams');
         console.log('✅ Correct answer NOT revealed on wrong answer');
         console.log('✅ Game starts automatically when both teams join!');
-        console.log('✅ Winner screen shows for ALL players and viewers!');
+        console.log('✅ Winner screen shows for ALL players and viewers via Firebase!');
         console.log('✅ "Awesome! Continue" resets the game for everyone!');
     </script>
 </body>
