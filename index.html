@@ -651,30 +651,121 @@
         // ============================================
         // SAMPLE QUESTIONS
         // ============================================
-        const SAMPLE_QUESTIONS = [
-            { q: "What is the capital of France?", options: ["Paris", "London", "Berlin", "Madrid"], correct: 0 },
-            { q: "Which planet is known as the Red Planet?", options: ["Venus", "Mars", "Jupiter", "Saturn"], correct: 1 },
-            { q: "What is 7 × 8?", options: ["48", "56", "64", "72"], correct: 1 },
-            { q: "Who painted the Mona Lisa?", options: ["Michelangelo", "Leonardo da Vinci", "Raphael", "Donatello"], correct: 1 },
-            { q: "What is the smallest prime number?", options: ["0", "1", "2", "3"], correct: 2 },
-            { q: "Which ocean is the largest?", options: ["Atlantic", "Indian", "Arctic", "Pacific"], correct: 3 },
-            { q: "What is the chemical symbol for water?", options: ["H2O", "CO2", "NaCl", "HCl"], correct: 0 },
-            { q: "Who wrote 'Hamlet'?", options: ["Shakespeare", "Dickens", "Hemingway", "Tolkien"], correct: 0 },
-            { q: "What is the speed of light approx? (km/s)", options: ["300,000", "150,000", "500,000", "1,000,000"], correct: 0 },
-            { q: "Which country has the most people?", options: ["India", "China", "USA", "Indonesia"], correct: 0 },
-            { q: "What is the freezing point of water in Celsius?", options: ["0", "32", "100", "-1"], correct: 0 },
-            { q: "Which animal is the fastest on land?", options: ["Lion", "Cheetah", "Horse", "Gazelle"], correct: 1 },
-            { q: "What is the square root of 144?", options: ["10", "11", "12", "13"], correct: 2 },
-            { q: "Which gas do plants absorb?", options: ["Oxygen", "Nitrogen", "Carbon Dioxide", "Hydrogen"], correct: 2 },
-            { q: "What is the longest river in the world?", options: ["Nile", "Amazon", "Yangtze", "Mississippi"], correct: 0 },
-            { q: "How many continents are there?", options: ["5", "6", "7", "8"], correct: 2 },
-            { q: "Which element has the symbol 'Au'?", options: ["Silver", "Gold", "Iron", "Copper"], correct: 1 },
-            { q: "What year did WWII end?", options: ["1944", "1945", "1946", "1947"], correct: 1 },
-            { q: "Which is the smallest country?", options: ["Monaco", "Vatican", "San Marino", "Liechtenstein"], correct: 1 },
-            { q: "What is the main ingredient in guacamole?", options: ["Tomato", "Avocado", "Onion", "Pepper"], correct: 1 },
-            { q: "How many teeth does an adult human have?", options: ["28", "30", "32", "34"], correct: 2 },
-            { q: "Which blood type is the rarest?", options: ["AB negative", "A positive", "B negative", "O positive"], correct: 0 },
-        ];
+        // ============================================
+// SAMPLE QUESTIONS - Canadian Model of Occupational Participation
+// ============================================
+const SAMPLE_QUESTIONS = [
+    { 
+        q: "What does CanMOP stand for?", 
+        options: ["Canadian Model of Occupational Performance", "Canadian Model of Occupational Participation", "Canadian Model of Occupational Practice", "Canadian Model of Occupational Process"], 
+        correct: 1 
+    },
+    { 
+        q: "The CanMOP was developed by which organization?", 
+        options: ["World Health Organization", "Canadian Association of Occupational Therapists", "American Occupational Therapy Association", "International Federation of Occupational Therapists"], 
+        correct: 1 
+    },
+    { 
+        q: "In CanMOP, participation is defined as:", 
+        options: ["Engagement in daily occupations", "The ability to perform tasks", "Involvement in life situations", "Physical activity and exercise"], 
+        correct: 2 
+    },
+    { 
+        q: "Which of the following is NOT a component of the CanMOP?", 
+        options: ["Person", "Environment", "Occupation", "Diagnosis"], 
+        correct: 3 
+    },
+    { 
+        q: "The CanMOP emphasizes the relationship between:", 
+        options: ["Person, occupation, and environment", "Health, wellness, and disease", "Activity, participation, and function", "Social, physical, and cultural factors"], 
+        correct: 0 
+    },
+    { 
+        q: "In CanMOP, 'occupational participation' refers to:", 
+        options: ["Performing specific tasks", "Engagement in meaningful activities", "Involvement in life roles and situations", "Completing daily routines"], 
+        correct: 2 
+    },
+    { 
+        q: "Which of the following is considered an environmental factor in CanMOP?", 
+        options: ["Physical abilities", "Cognitive skills", "Social support systems", "Personal values"], 
+        correct: 2 
+    },
+    { 
+        q: "The CanMOP was developed to guide:", 
+        options: ["Medical diagnosis", "Occupational therapy practice", "Physical rehabilitation", "Mental health assessment"], 
+        correct: 1 
+    },
+    { 
+        q: "According to CanMOP, occupational participation is influenced by:", 
+        options: ["Individual factors only", "Environmental factors only", "Both individual and environmental factors", "Neither individual nor environmental factors"], 
+        correct: 2 
+    },
+    { 
+        q: "What is the primary focus of the CanMOP?", 
+        options: ["Disease prevention", "Enabling participation in meaningful occupations", "Physical rehabilitation", "Cognitive assessment"], 
+        correct: 1 
+    },
+    { 
+        q: "Which of these is a dimension of occupational participation in CanMOP?", 
+        options: ["Productivity", "Leisure", "Self-care", "All of the above"], 
+        correct: 3 
+    },
+    { 
+        q: "In CanMOP, 'environment' includes:", 
+        options: ["Physical, social, and cultural contexts", "Only physical surroundings", "Only social relationships", "Only cultural beliefs"], 
+        correct: 0 
+    },
+    { 
+        q: "The CanMOP supports which approach to occupational therapy?", 
+        options: ["Medical model", "Client-centered practice", "Biomedical approach", "Behavioral model"], 
+        correct: 1 
+    },
+    { 
+        q: "According to CanMOP, 'participation' is different from 'performance' because:", 
+        options: ["Participation is broader and includes involvement in life situations", "Performance is broader and includes physical tasks", "They are the same concept", "Participation focuses on individual skills"], 
+        correct: 0 
+    },
+    { 
+        q: "Which of the following factors is considered a personal factor in CanMOP?", 
+        options: ["Physical environment", "Cultural norms", "Personal values and beliefs", "Social policies"], 
+        correct: 2 
+    },
+    { 
+        q: "The CanMOP can be used to assess:", 
+        options: ["Only physical abilities", "Occupational participation and engagement", "Only cognitive skills", "Only emotional well-being"], 
+        correct: 1 
+    },
+    { 
+        q: "What year was the CanMOP developed?", 
+        options: ["1997", "2002", "2010", "2015"], 
+        correct: 0 
+    },
+    { 
+        q: "Which of the following is a key principle of CanMOP?", 
+        options: ["Focus on disability only", "Emphasis on the person-occupation-environment interaction", "Focus on disease management", "Emphasis on medical treatment"], 
+        correct: 1 
+    },
+    { 
+        q: "In CanMOP, 'occupational engagement' refers to:", 
+        options: ["The experience of participating in occupations", "The ability to complete tasks", "The physical act of doing", "The outcome of participation"], 
+        correct: 0 
+    },
+    { 
+        q: "The CanMOP recognizes that participation is:", 
+        options: ["A one-time event", "An ongoing process", "A fixed outcome", "A medical condition"], 
+        correct: 1 
+    },
+    { 
+        q: "Which of the following is an example of a social environmental factor in CanMOP?", 
+        options: ["Building accessibility", "Family support", "Weather conditions", "Personal finances"], 
+        correct: 1 
+    },
+    { 
+        q: "The CanMOP is most commonly used in:", 
+        options: ["Occupational therapy practice", "Physical therapy", "Nursing", "Psychology"], 
+        correct: 0 
+    }
+];
 
         // ============================================
         // GAME STATE
